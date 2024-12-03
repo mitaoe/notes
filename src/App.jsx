@@ -4,7 +4,8 @@ import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Folder } from './pages/Folder';
 import { Search } from './pages/Search';
-import { uiConfig } from './config';
+import { NotFound } from './pages/NotFound';
+import { config, uiConfig } from './config';
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
       withGlobalStyles
       withNormalizeCSS
       theme={{
-        colorScheme: 'dark',
+        colorScheme: uiConfig.theme === 'darkly' ? 'dark' : 'light',
         primaryColor: 'blue',
         colors: {
           dark: [
@@ -46,11 +47,16 @@ function App() {
         },
         components: {
           Button: {
-            styles: {
+            styles: (theme) => ({
               root: {
                 fontWeight: 500,
+                backgroundColor: uiConfig.header_style_class.includes('bg-primary') ? '#1a73e8' : '#343a40',
+                color: 'white',
+                '&:hover': {
+                  backgroundColor: uiConfig.header_style_class.includes('bg-primary') ? '#1557B0' : '#23272B',
+                },
               },
-            },
+            }),
           },
           TextInput: {
             styles: {
@@ -61,6 +67,23 @@ function App() {
               },
             },
           },
+          Anchor: {
+            styles: (theme) => ({
+              root: {
+                color: uiConfig.css_a_tag_color,
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              },
+            }),
+          },
+          Text: {
+            styles: (theme) => ({
+              root: {
+                color: uiConfig.css_p_tag_color,
+              },
+            }),
+          },
         },
       }}
     >
@@ -68,8 +91,9 @@ function App() {
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/folder/:folderId" element={<Folder />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/*" element={<Folder />} />
+            <Route path="/404" element={<NotFound />} />
           </Routes>
         </Layout>
       </Router>

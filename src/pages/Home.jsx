@@ -1,17 +1,17 @@
 import React from 'react';
-import { Title, Breadcrumbs, Anchor } from '@mantine/core';
+import { useNavigate } from 'react-router-dom';
 import { FileList } from '../components/FileList';
-import { listFiles } from '../services/driveService';
-import { Link } from 'react-router-dom';
+import driveService from '../services/driveService';
 
 export function Home() {
+  const navigate = useNavigate();
   const [files, setFiles] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [nextPageToken, setNextPageToken] = React.useState(null);
 
   const loadFiles = async (pageToken = null) => {
     try {
-      const response = await listFiles('root', pageToken);
+      const response = await driveService.listFiles('/', pageToken);
       if (pageToken) {
         setFiles(prev => [...prev, ...response.files]);
       } else {
@@ -29,24 +29,17 @@ export function Home() {
     loadFiles();
   }, []);
 
-  const items = [
-    { title: 'Home', href: '/' },
-  ].map((item, index) => (
-    <Anchor component={Link} to={item.href} key={index}>
-      {item.title}
-    </Anchor>
-  ));
+  const handleFolderClick = (folder) => {
+    navigate(`/${folder.name}`);
+  };
 
   return (
-    <>
-      <Breadcrumbs mb="md">{items}</Breadcrumbs>
-      <Title order={2} mb="md">Files and Folders</Title>
-      <FileList 
-        files={files} 
-        loading={loading} 
-        hasMore={!!nextPageToken}
-        onLoadMore={() => loadFiles(nextPageToken)}
-      />
-    </>
+    <FileList 
+      files={files}
+      loading={loading}
+      hasMore={!!nextPageToken}
+      onLoadMore={() => loadFiles(nextPageToken)}
+      onFolderClick={handleFolderClick}
+    />
   );
 } 

@@ -1,19 +1,19 @@
 import React from 'react';
-import { Title, Breadcrumbs, Anchor } from '@mantine/core';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FileList } from '../components/FileList';
-import { listFiles, getFileMetadata } from '../services/driveService';
-import { Link, useParams } from 'react-router-dom';
+import driveService from '../services/driveService';
 
 export function Folder() {
-  const { folderId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [files, setFiles] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [nextPageToken, setNextPageToken] = React.useState(null);
-  const [folderPath, setFolderPath] = React.useState([]);
 
   const loadFiles = async (pageToken = null) => {
     try {
-      const response = await listFiles(folderId, pageToken);
+      setLoading(true);
+      const response = await driveService.listFiles(location.pathname, pageToken);
       if (pageToken) {
         setFiles(prev => [...prev, ...response.files]);
       } else {
@@ -21,45 +21,35 @@ export function Folder() {
       }
       setNextPageToken(response.nextPageToken);
     } catch (error) {
-      console.error('Error loading files:', error);
+      console.error('Error loading folder:', error);
+      if (error.message === 'Folder not found') {
+        navigate('/404');
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const loadFolderPath = async () => {
-    try {
-      const folderInfo = await getFileMetadata(folderId);
-      setFolderPath([
-        { title: 'Home', href: '/' },
-        { title: folderInfo.name, href: `/folder/${folderId}` },
-      ]);
-    } catch (error) {
-      console.error('Error loading folder path:', error);
-    }
-  };
-
   React.useEffect(() => {
     loadFiles();
-    loadFolderPath();
-  }, [folderId]);
+  }, [location.pathname]);
 
-  const breadcrumbs = folderPath.map((item, index) => (
-    <Anchor component={Link} to={item.href} key={index}>
-      {item.title}
-    </Anchor>
-  ));
+  const handleFolderClick = (folder) => {
+    const newPath = location.pathname === '/' 
+      ? `/${encodeURIComponent(folder.name)}`
+      : `${location.pathname}/${encodeURIComponent(folder.name)}`;
+    navigate(newPath);
+  };
 
   return (
-    <>
-      <Breadcrumbs mb="md">{breadcrumbs}</Breadcrumbs>
-      <Title order={2} mb="md">{folderPath[folderPath.length - 1]?.title || 'Loading...'}</Title>
+    <div style={{ paddingTop: '2rem' }}>
       <FileList 
-        files={files} 
-        loading={loading} 
+        files={files}
+        loading={loading}
         hasMore={!!nextPageToken}
         onLoadMore={() => loadFiles(nextPageToken)}
+        onFolderClick={handleFolderClick}
       />
-    </>
+    </div>
   );
 } 

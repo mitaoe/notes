@@ -1,26 +1,31 @@
 import React from 'react';
-import { Title, Breadcrumbs, Anchor } from '@mantine/core';
+import { Title, TextInput, Group, Button, Box } from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
 import { FileList } from '../components/FileList';
-import { searchFiles } from '../services/driveService';
-import { Link, useSearchParams } from 'react-router-dom';
+import driveService from '../services/driveService';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 export function Search() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const query = searchParams.get('q');
+  const [query, setQuery] = React.useState(searchParams.get('q') || '');
   const [files, setFiles] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  const [loading, setLoading] = React.useState(false);
   const [nextPageToken, setNextPageToken] = React.useState(null);
 
-  const performSearch = async (pageToken = null) => {
-    if (!query) return;
-    
+  const handleSearch = async (pageToken = null) => {
+    if (!query.trim()) return;
+
     try {
-      const response = await searchFiles(query, pageToken);
+      setLoading(true);
+      const response = await driveService.searchFiles(query, pageToken);
+      
       if (pageToken) {
-        setFiles(prev => [...prev, ...response.files]);
+        setFiles(prev => [...prev, ...response.data.files]);
       } else {
-        setFiles(response.files);
+        setFiles(response.data.files);
       }
+      
       setNextPageToken(response.nextPageToken);
     } catch (error) {
       console.error('Error searching files:', error);
@@ -30,29 +35,57 @@ export function Search() {
   };
 
   React.useEffect(() => {
-    setLoading(true);
-    setFiles([]);
-    performSearch();
-  }, [query]);
+    const searchQuery = searchParams.get('q');
+    if (searchQuery) {
+      setQuery(searchQuery);
+      handleSearch();
+    }
+  }, [searchParams]);
 
-  const items = [
-    { title: 'Home', href: '/' },
-    { title: `Search: ${query}`, href: `/search?q=${encodeURIComponent(query)}` },
-  ].map((item, index) => (
-    <Anchor component={Link} to={item.href} key={index}>
-      {item.title}
-    </Anchor>
-  ));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/search?q=${encodeURIComponent(query)}`);
+      handleSearch();
+    }
+  };
+
+  const handleFolderClick = async (folder) => {
+    const path = await driveService.findPathById(folder.id);
+    navigate(path);
+  };
 
   return (
     <>
-      <Breadcrumbs mb="md">{items}</Breadcrumbs>
-      <Title order={2} mb="md">Search Results for "{query}"</Title>
+      <Box mb="lg">
+        <form onSubmit={handleSubmit}>
+          <Group>
+            <TextInput
+              placeholder="Search files and folders..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{ flex: 1 }}
+              icon={<IconSearch size={16} />}
+            />
+            <Button type="submit" loading={loading}>
+              Search
+            </Button>
+          </Group>
+        </form>
+      </Box>
+
+      {query && (
+        <Title order={2} mb="md">
+          Search results for "{query}"
+        </Title>
+      )}
+
       <FileList 
-        files={files} 
-        loading={loading} 
+        files={files}
+        loading={loading}
         hasMore={!!nextPageToken}
-        onLoadMore={() => performSearch(nextPageToken)}
+        onLoadMore={() => handleSearch(nextPageToken)}
+        onFolderClick={handleFolderClick}
       />
     </>
   );
