@@ -37,15 +37,23 @@ driveApi.interceptors.request.use(async (config) => {
   return config;
 });
 
+const FOLDER_TYPE = 'application/vnd.google-apps.folder';
+const SHORTCUT_TYPE = 'application/vnd.google-apps.shortcut';
+const DOCUMENT_TYPE = 'application/vnd.google-apps.document';
+const SPREADSHEET_TYPE = 'application/vnd.google-apps.spreadsheet';
+const FORM_TYPE = 'application/vnd.google-apps.form';
+const SITE_TYPE = 'application/vnd.google-apps.site';
+
 export const listFiles = async (folderId = 'root', pageToken = null) => {
   try {
     const params = {
-      q: `'${folderId}' in parents and trashed = false AND name !='.password'`,
+      q: `'${folderId}' in parents and trashed = false AND name !='.password' and mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}'`,
       orderBy: 'folder,name,modifiedTime desc',
-      fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink)',
+      fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, parents, md5Checksum)',
       pageSize: config.files_list_page_size,
       supportsAllDrives: true,
       includeItemsFromAllDrives: true,
+      corpora: config.search_all_drives ? 'allDrives' : 'user',
       ...(pageToken && { pageToken }),
     };
 
@@ -53,8 +61,8 @@ export const listFiles = async (folderId = 'root', pageToken = null) => {
     
     // Sort folders first, then files
     response.data.files.sort((a, b) => {
-      const aIsFolder = a.mimeType === 'application/vnd.google-apps.folder';
-      const bIsFolder = b.mimeType === 'application/vnd.google-apps.folder';
+      const aIsFolder = a.mimeType === FOLDER_TYPE;
+      const bIsFolder = b.mimeType === FOLDER_TYPE;
       if (aIsFolder && !bIsFolder) return -1;
       if (!aIsFolder && bIsFolder) return 1;
       return a.name.localeCompare(b.name);
@@ -70,12 +78,13 @@ export const listFiles = async (folderId = 'root', pageToken = null) => {
 export const searchFiles = async (query, pageToken = null) => {
   try {
     const params = {
-      q: `fullText contains '${query}' and trashed = false`,
+      q: `fullText contains '${query}' and trashed = false and mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}'`,
       orderBy: 'folder,name,modifiedTime desc',
-      fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink)',
+      fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, parents, md5Checksum)',
       pageSize: config.search_result_list_page_size,
       supportsAllDrives: true,
       includeItemsFromAllDrives: config.search_all_drives,
+      corpora: config.search_all_drives ? 'allDrives' : 'user',
       ...(pageToken && { pageToken }),
     };
 
@@ -83,8 +92,8 @@ export const searchFiles = async (query, pageToken = null) => {
     
     // Sort folders first, then files
     response.data.files.sort((a, b) => {
-      const aIsFolder = a.mimeType === 'application/vnd.google-apps.folder';
-      const bIsFolder = b.mimeType === 'application/vnd.google-apps.folder';
+      const aIsFolder = a.mimeType === FOLDER_TYPE;
+      const bIsFolder = b.mimeType === FOLDER_TYPE;
       if (aIsFolder && !bIsFolder) return -1;
       if (!aIsFolder && bIsFolder) return 1;
       return a.name.localeCompare(b.name);
@@ -101,7 +110,7 @@ export const getFileMetadata = async (fileId) => {
   try {
     const response = await driveApi.get(`/files/${fileId}`, {
       params: {
-        fields: 'id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, webContentLink',
+        fields: 'id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, webContentLink, parents, md5Checksum',
         supportsAllDrives: true,
       },
     });
@@ -114,11 +123,32 @@ export const getFileMetadata = async (fileId) => {
 
 export const getDownloadLink = async (fileId) => {
   try {
-    const metadata = await getFileMetadata(fileId);
     const token = await getAccessToken();
     return `${BASE_URL}/files/${fileId}?alt=media&access_token=${token}`;
   } catch (error) {
     console.error('Error getting download link:', error);
+    throw error;
+  }
+};
+
+export const findPathById = async (fileId) => {
+  try {
+    const response = await driveApi.get(`/files/${fileId}`, {
+      params: {
+        fields: 'id, name, parents',
+        supportsAllDrives: true,
+      },
+    });
+
+    const file = response.data;
+    if (!file.parents) {
+      return [file.name];
+    }
+
+    const parentPath = await findPathById(file.parents[0]);
+    return [...parentPath, file.name];
+  } catch (error) {
+    console.error('Error finding path:', error);
     throw error;
   }
 }; 

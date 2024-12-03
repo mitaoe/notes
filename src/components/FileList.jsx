@@ -1,6 +1,6 @@
 import React from 'react';
 import { Table, Group, Text, ActionIcon, Loader, Button, createStyles, Box } from '@mantine/core';
-import { IconFolder, IconFile, IconDownload, IconPlayerPlay } from '@tabler/icons-react';
+import { IconFolder, IconFile, IconDownload, IconPlayerPlay, IconPhoto, IconMusic } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { getDownloadLink } from '../services/driveService';
 import { uiConfig } from '../config';
@@ -8,7 +8,7 @@ import { uiConfig } from '../config';
 const useStyles = createStyles((theme) => ({
   wrapper: {
     overflowX: 'auto',
-    '-webkit-overflow-scrolling': 'touch',
+    WebkitOverflowScrolling: 'touch',
   },
   table: {
     backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
@@ -81,19 +81,55 @@ function formatDate(dateString) {
 
 export function FileList({ files, loading, onLoadMore, hasMore }) {
   const { classes } = useStyles();
+  const [downloadingFiles, setDownloadingFiles] = React.useState(new Set());
 
   const handleDownload = async (fileId, fileName) => {
+    if (downloadingFiles.has(fileId)) return;
+
     try {
+      setDownloadingFiles(prev => new Set([...prev, fileId]));
       const downloadUrl = await getDownloadLink(fileId);
+      
+      // Create a temporary link element
       const link = document.createElement('a');
       link.href = downloadUrl;
       link.download = fileName;
       document.body.appendChild(link);
+      
+      // Start the download
       link.click();
+      
+      // Clean up
       document.body.removeChild(link);
     } catch (error) {
       console.error('Error downloading file:', error);
+    } finally {
+      setDownloadingFiles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(fileId);
+        return newSet;
+      });
     }
+  };
+
+  const getFileIcon = (file) => {
+    if (file.mimeType === 'application/vnd.google-apps.folder') {
+      return <IconFolder size={20} className={classes.icon} />;
+    }
+
+    if (file.mimeType.startsWith('video/')) {
+      return <IconPlayerPlay size={20} className={classes.icon} />;
+    }
+
+    if (file.mimeType.startsWith('image/')) {
+      return <IconPhoto size={20} className={classes.icon} />;
+    }
+
+    if (file.mimeType.startsWith('audio/')) {
+      return <IconMusic size={20} className={classes.icon} />;
+    }
+
+    return <IconFile size={20} className={classes.icon} />;
   };
 
   if (loading && (!files || files.length === 0)) {
@@ -127,18 +163,13 @@ export function FileList({ files, loading, onLoadMore, hasMore }) {
               <tr key={file.id} className={classes.row}>
                 <td>
                   <Group spacing="sm" noWrap>
+                    {getFileIcon(file)}
                     {file.mimeType === 'application/vnd.google-apps.folder' ? (
-                      <>
-                        <IconFolder size={20} className={classes.icon} />
-                        <Link to={`/folder/${file.id}`} className={classes.link}>
-                          <Text className={classes.fileName}>{file.name}</Text>
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <IconFile size={20} className={classes.icon} />
+                      <Link to={`/folder/${file.id}`} className={classes.link}>
                         <Text className={classes.fileName}>{file.name}</Text>
-                      </>
+                      </Link>
+                    ) : (
+                      <Text className={classes.fileName}>{file.name}</Text>
                     )}
                   </Group>
                 </td>
@@ -158,6 +189,8 @@ export function FileList({ files, loading, onLoadMore, hasMore }) {
                           <ActionIcon 
                             onClick={() => handleDownload(file.id, file.name)}
                             className={classes.actionIcon}
+                            loading={downloadingFiles.has(file.id)}
+                            disabled={downloadingFiles.has(file.id)}
                           >
                             <IconDownload size={18} />
                           </ActionIcon>
