@@ -1,11 +1,44 @@
 import React from 'react';
-import { Table, Group, Text, Button, Box, Loader } from '@mantine/core';
-import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload } from '@tabler/icons-react';
+import { Table, Group, Text, Button, Box, Loader, Breadcrumbs, Anchor } from '@mantine/core';
+import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconChevronRight } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick }) {
   const { classes } = useStyles();
   const [downloadingFiles, setDownloadingFiles] = React.useState(new Set());
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Parse current path for breadcrumb
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const breadcrumbItems = pathSegments.map((segment, index) => {
+    const path = '/' + pathSegments.slice(0, index + 1).join('/');
+    return (
+      <Anchor
+        key={path}
+        onClick={(event) => {
+          event.preventDefault();
+          navigate(path);
+        }}
+      >
+        {decodeURIComponent(segment)}
+      </Anchor>
+    );
+  });
+
+  // Add Home to beginning
+  breadcrumbItems.unshift(
+    <Anchor
+      key="home"
+      onClick={(event) => {
+        event.preventDefault();
+        navigate('/');
+      }}
+    >
+      Home
+    </Anchor>
+  );
 
   const handleDownload = async (file) => {
     if (downloadingFiles.has(file.id)) return;
@@ -53,16 +86,32 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
     return <IconFile size={20} className={classes.icon} />;
   };
 
-  if (loading && (!files || files.length === 0)) {
+  // Show loading state
+  if (loading) {
     return (
-      <Group position="center" style={{ minHeight: 200 }}>
-        <Loader size="lg" variant="dots" />
-      </Group>
+      <>
+        {/* Keep breadcrumb visible during loading */}
+        <Box mb="md">
+          <Breadcrumbs separator={<IconChevronRight size={16} />}>
+            {breadcrumbItems}
+          </Breadcrumbs>
+        </Box>
+        <Group position="center" style={{ minHeight: 200 }}>
+          <Loader size="lg" variant="dots" />
+        </Group>
+      </>
     );
   }
 
   return (
     <>
+      {/* Breadcrumb navigation */}
+      <Box mb="md">
+        <Breadcrumbs separator={<IconChevronRight size={16} />}>
+          {breadcrumbItems}
+        </Breadcrumbs>
+      </Box>
+
       <Box className={classes.wrapper}>
         <Table className={classes.table} verticalSpacing="sm">
           <thead>
