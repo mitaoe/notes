@@ -3,6 +3,7 @@ export const config = {
   client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
   client_secret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
   refresh_token: import.meta.env.VITE_GOOGLE_REFRESH_TOKEN,
+  api_key: import.meta.env.VITE_GOOGLE_API_KEY,
   service_account: false,
   files_list_page_size: 100,
   search_result_list_page_size: 100,

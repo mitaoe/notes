@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Group, Text, Button, Box, Loader, Breadcrumbs, Anchor } from '@mantine/core';
+import { Table, Group, Text, Button, Box, Loader, Breadcrumbs, Anchor, Paper } from '@mantine/core';
 import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconChevronRight } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -21,13 +21,19 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
           event.preventDefault();
           navigate(path);
         }}
+        sx={(theme) => ({
+          color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
+          '&:hover': {
+            textDecoration: 'underline',
+          }
+        })}
       >
         {decodeURIComponent(segment)}
       </Anchor>
     );
   });
 
-  // Add Home to beginning
+  // Always add Home to beginning
   breadcrumbItems.unshift(
     <Anchor
       key="home"
@@ -35,6 +41,12 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
         event.preventDefault();
         navigate('/');
       }}
+      sx={(theme) => ({
+        color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
+        '&:hover': {
+          textDecoration: 'underline',
+        }
+      })}
     >
       Home
     </Anchor>
@@ -46,15 +58,20 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
     try {
       setDownloadingFiles(prev => new Set([...prev, file.id]));
       
-      // Use the direct download link from the file object
+      // Get the file blob using the downloadUrl function
+      const blob = await file.downloadUrl();
+      
+      // Create a blob URL and trigger download
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = file.link;
+      link.href = url;
       link.download = file.name;
       document.body.appendChild(link);
-      
       link.click();
       
+      // Clean up
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading file:', error);
     } finally {
@@ -86,16 +103,36 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
     return <IconFile size={20} className={classes.icon} />;
   };
 
+  const renderBreadcrumb = () => (
+    <Paper 
+      shadow="xs" 
+      p="md" 
+      mb="md"
+      sx={(theme) => ({
+        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
+      })}
+    >
+      <Breadcrumbs 
+        separator={
+          <IconChevronRight 
+            size={16} 
+            style={{ 
+              marginTop: 4,
+              color: 'var(--mantine-color-gray-5)'
+            }} 
+          />
+        }
+      >
+        {breadcrumbItems}
+      </Breadcrumbs>
+    </Paper>
+  );
+
   // Show loading state
   if (loading) {
     return (
       <>
-        {/* Keep breadcrumb visible during loading */}
-        <Box mb="md">
-          <Breadcrumbs separator={<IconChevronRight size={16} />}>
-            {breadcrumbItems}
-          </Breadcrumbs>
-        </Box>
+        {renderBreadcrumb()}
         <Group position="center" style={{ minHeight: 200 }}>
           <Loader size="lg" variant="dots" />
         </Group>
@@ -105,13 +142,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
 
   return (
     <>
-      {/* Breadcrumb navigation */}
-      <Box mb="md">
-        <Breadcrumbs separator={<IconChevronRight size={16} />}>
-          {breadcrumbItems}
-        </Breadcrumbs>
-      </Box>
-
+      {renderBreadcrumb()}
       <Box className={classes.wrapper}>
         <Table className={classes.table} verticalSpacing="sm">
           <thead>

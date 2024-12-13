@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileList } from '../components/FileList';
 import driveService from '../services/driveService';
+import { Box } from '@mantine/core';
 
 export function Home() {
   const navigate = useNavigate();
@@ -34,12 +35,14 @@ export function Home() {
   };
 
   return (
-    <FileList 
-      files={files}
-      loading={loading}
-      hasMore={!!nextPageToken}
-      onLoadMore={() => loadFiles(nextPageToken)}
-      onFolderClick={handleFolderClick}
-    />
+    <Box sx={{ paddingTop: '2rem', '& .mantine-Paper-root': { padding: '1rem 1.5rem' } }}>
+      <FileList 
+        files={files}
+        loading={loading}
+        hasMore={!!nextPageToken}
+        onLoadMore={() => loadFiles(nextPageToken)}
+        onFolderClick={handleFolderClick}
+      />
+    </Box>
   );
 } 

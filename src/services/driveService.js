@@ -131,10 +131,26 @@ class GoogleDrive {
         },
       });
 
-      // Process files
-      const files = response.data.files.map((file) => ({
-        ...file,
-        link: file.mimeType !== FOLDER_TYPE ? `${BASE_URL}/files/${file.id}?alt=media` : null,
+      // Process files and generate download URLs
+      const files = await Promise.all(response.data.files.map(async (file) => {
+        if (file.mimeType === FOLDER_TYPE) {
+          return { ...file, link: null };
+        }
+        
+        // For files, create a download function
+        return {
+          ...file,
+          downloadUrl: async () => {
+            const token = await this.getAccessToken();
+            const response = await axios.get(`${BASE_URL}/files/${file.id}?alt=media`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              responseType: 'blob'
+            });
+            return response.data;
+          }
+        };
       }));
 
       return {
@@ -145,10 +161,6 @@ class GoogleDrive {
       console.error('Error listing files:', error);
       throw error;
     }
-  }
-
-  async generateDownloadLink(fileId) {
-    return `${BASE_URL}/files/${fileId}?alt=media`;
   }
 
   async findPathById(fileId) {
