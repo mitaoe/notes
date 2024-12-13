@@ -65,7 +65,13 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = file.name;
+      
+      // Set the filename with extension if available
+      const fileName = file.fileExtension 
+        ? `${file.name}` 
+        : file.name;
+      link.download = fileName;
+      
       document.body.appendChild(link);
       link.click();
       
