@@ -13,12 +13,21 @@ export function Layout({ children }) {
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const searchRef = useClickOutside(() => setIsSearchFocused(false));
+
+  const handleClickOutside = () => {
+    setIsSearchFocused(false);
+    if (!searchQuery) {
+      setMobileSearchOpened(false);
+    }
+  };
+
+  const searchRef = useClickOutside(handleClickOutside);
 
   useEffect(() => {
     if (!location.pathname.startsWith('/search')) {
       setSearchQuery('');
       setIsSearchFocused(false);
+      setMobileSearchOpened(false);
     }
   }, [location.pathname]);
 
@@ -34,6 +43,7 @@ export function Layout({ children }) {
     setSearchQuery('');
     if (!location.pathname.startsWith('/search')) {
       setIsSearchFocused(false);
+      setMobileSearchOpened(false);
     }
   };
 
@@ -160,14 +170,95 @@ export function Layout({ children }) {
               {/* Mobile Navigation */}
               <Box sx={{ '@media (min-width: 769px)': { display: 'none' } }}>
                 <Group spacing="sm">
-                  <ActionIcon 
-                    onClick={() => setMobileSearchOpened(true)}
-                    size="lg"
-                    variant="subtle"
-                    color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
-                  >
-                    <IconSearch size={22} />
-                  </ActionIcon>
+                  {!mobileSearchOpened ? (
+                    <ActionIcon 
+                      onClick={() => {
+                        setMobileSearchOpened(true);
+                        setTimeout(() => setIsSearchFocused(true), 100);
+                      }}
+                      size="lg"
+                      variant="subtle"
+                      color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+                    >
+                      <IconSearch size={22} />
+                    </ActionIcon>
+                  ) : (
+                    <form onSubmit={handleSearch} style={{ display: 'flex' }} ref={searchRef}>
+                      <TextInput
+                        placeholder="Search files..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onFocus={handleSearchFocus}
+                        autoComplete="off"
+                        autoFocus
+                        size="sm"
+                        styles={(theme) => ({
+                          root: { 
+                            width: 200,
+                            transition: 'width 0.3s ease-in-out',
+                          },
+                          input: {
+                            transition: 'all 0.3s ease-in-out',
+                            paddingLeft: isSearchFocused ? '16px' : '42px',
+                            '&:focus': {
+                              borderColor: theme.colors.blue[5],
+                            },
+                          },
+                          rightSection: {
+                            width: searchQuery ? 76 : 32,
+                            transition: 'width 0.3s ease-in-out',
+                            justifyContent: 'flex-end',
+                            paddingRight: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px'
+                          }
+                        })}
+                        icon={
+                          <ActionIcon
+                            onClick={handleSearch}
+                            size="sm"
+                            variant="transparent"
+                            sx={{
+                              cursor: 'pointer',
+                              opacity: isSearchFocused ? 1 : 0.6,
+                              transition: 'all 0.3s ease-in-out',
+                              transform: isSearchFocused ? 'translateX(138px)' : 'translateX(0)',
+                              '&:hover': {
+                                opacity: 0.8
+                              }
+                            }}
+                          >
+                            <IconSearch size={16} />
+                          </ActionIcon>
+                        }
+                        rightSection={
+                          searchQuery && (
+                            <ActionIcon 
+                              onClick={handleClearSearch} 
+                              size="sm" 
+                              variant="transparent"
+                              sx={(theme) => ({
+                                opacity: isSearchFocused ? 1 : 0,
+                                transform: isSearchFocused ? 'translateX(0)' : 'translateX(32px)',
+                                transition: 'all 0.3s ease-in-out',
+                                color: theme.colorScheme === 'dark' 
+                                  ? theme.fn.rgba(theme.colors.red[9], 0.85)
+                                  : theme.fn.rgba(theme.colors.red[7], 0.85),
+                                '&:hover': {
+                                  backgroundColor: theme.colorScheme === 'dark'
+                                    ? theme.fn.rgba(theme.colors.red[9], 0.15)
+                                    : theme.fn.rgba(theme.colors.red[7], 0.15),
+                                }
+                              })}
+                            >
+                              <IconX size={16} />
+                            </ActionIcon>
+                          )
+                        }
+                      />
+                    </form>
+                  )}
                   <Burger
                     opened={mobileMenuOpened}
                     onClick={() => setMobileMenuOpened(!mobileMenuOpened)}
@@ -188,81 +279,6 @@ export function Layout({ children }) {
         },
       })}
     >
-      {/* Mobile Search Drawer */}
-      <Drawer
-        opened={mobileSearchOpened}
-        onClose={() => setMobileSearchOpened(false)}
-        position="top"
-        size="100%"
-        withCloseButton={false}
-        styles={{
-          drawer: {
-            top: '60px',
-            height: 'auto',
-            background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-          },
-        }}
-      >
-        <Container size="lg" py="md">
-          <form onSubmit={handleSearch}>
-            <Group>
-              <TextInput
-                placeholder="Search files..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ flex: 1 }}
-                autoFocus
-                autoComplete="off"
-                icon={<IconSearch size={16} />}
-                rightSection={
-                  searchQuery && (
-                    <Group spacing={4} noWrap>
-                      <ActionIcon 
-                        onClick={handleSearch} 
-                        size="sm" 
-                        variant="transparent"
-                      >
-                        <IconSearch size={16} />
-                      </ActionIcon>
-                      <ActionIcon 
-                        onClick={handleClearSearch} 
-                        size="sm" 
-                        variant="transparent"
-                      >
-                        <IconX size={16} />
-                      </ActionIcon>
-                    </Group>
-                  )
-                }
-                styles={(theme) => ({
-                  root: { 
-                    position: 'relative',
-                  },
-                  input: {
-                    transition: 'all 0.3s ease-in-out',
-                    '&:focus': {
-                      borderColor: theme.colors.blue[5],
-                    },
-                  },
-                  rightSection: {
-                    width: searchQuery ? 70 : 32,
-                    transition: 'width 0.3s ease-in-out',
-                  }
-                })}
-              />
-              <ActionIcon 
-                onClick={() => setMobileSearchOpened(false)}
-                size="lg"
-                variant="subtle"
-                color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
-              >
-                <IconX size={22} />
-              </ActionIcon>
-            </Group>
-          </form>
-        </Container>
-      </Drawer>
-
       {/* Mobile Menu Drawer */}
       <Drawer
         opened={mobileMenuOpened}
