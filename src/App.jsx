@@ -1,3 +1,4 @@
+import React from 'react';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
@@ -6,6 +7,7 @@ import { Folder } from './pages/Folder';
 import { Search } from './pages/Search';
 import { NotFound } from './pages/NotFound';
 import { config, uiConfig } from './config';
+import { SearchProvider } from './contexts/SearchContext';
 
 function App() {
   return (
@@ -41,9 +43,9 @@ function App() {
             '#0B3162',
           ],
         },
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+        fontFamily: config.font_family || 'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
         headings: {
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
+          fontFamily: config.font_family || 'system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif',
         },
         components: {
           Button: {
@@ -51,7 +53,7 @@ function App() {
               root: {
                 fontWeight: 500,
                 backgroundColor: uiConfig.header_style_class.includes('bg-primary') ? '#1a73e8' : '#343a40',
-                color: 'white',
+                color: uiConfig.header_text_color || 'white',
                 '&:hover': {
                   backgroundColor: uiConfig.header_style_class.includes('bg-primary') ? '#1557B0' : '#23272B',
                 },
@@ -62,7 +64,7 @@ function App() {
             styles: {
               input: {
                 '&:focus': {
-                  borderColor: '#1A73E8',
+                  borderColor: uiConfig.header_style_class.includes('bg-primary') ? '#1A73E8' : '#343a40',
                 },
               },
             },
@@ -84,18 +86,34 @@ function App() {
               },
             }),
           },
+          Header: {
+            styles: (theme) => ({
+              root: {
+                backgroundColor: uiConfig.header_style_class.includes('bg-primary') 
+                  ? theme.colorScheme === 'dark' ? '#1A1B1E' : '#1a73e8'
+                  : theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+              },
+            }),
+          },
         },
+        other: {
+          siteName: config.siteName,
+          siteDescription: config.siteDescription,
+          maxFileSize: config.max_size_gb ? `${config.max_size_gb}GB` : 'Unlimited',
+        }
       }}
     >
       <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/*" element={<Folder />} />
-            <Route path="/404" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <SearchProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/*" element={<Folder />} />
+              <Route path="/404" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </SearchProvider>
       </Router>
     </MantineProvider>
   );

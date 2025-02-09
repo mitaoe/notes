@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
-import { AppShell, Header, Container, Group, Text, TextInput, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme } from '@mantine/core';
-import { Link, useNavigate } from 'react-router-dom';
-import { IconSearch, IconX, IconBrandGithub, IconMessage } from '@tabler/icons-react';
+import React, { useState, useEffect } from 'react';
+import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme } from '@mantine/core';
+import { Link, useLocation } from 'react-router-dom';
+import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
+import { useSearch } from '../contexts/SearchContext';
+import { SearchBar } from './SearchBar';
 
 export function Layout({ children }) {
   const theme = useMantineTheme();
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState('');
+  const location = useLocation();
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
+  const { clearSearch } = useSearch();
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+  useEffect(() => {
+    if (!location.pathname.startsWith('/search')) {
+      clearSearch();
       setMobileSearchOpened(false);
-      setSearchQuery('');
     }
-  };
+  }, [location.pathname, clearSearch]);
 
   return (
     <AppShell
@@ -46,22 +46,7 @@ export function Layout({ children }) {
 
               {/* Desktop Navigation */}
               <Group spacing="xl" sx={{ '@media (max-width: 768px)': { display: 'none' } }}>
-                <form onSubmit={handleSearch} style={{ display: 'flex' }}>
-                  <TextInput
-                    placeholder="Search files..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    icon={<IconSearch size={16} />}
-                    styles={(theme) => ({
-                      root: { minWidth: 300 },
-                      input: {
-                        '&:focus': {
-                          borderColor: theme.colors.blue[5],
-                        },
-                      },
-                    })}
-                  />
-                </form>
+                <SearchBar />
                 <ActionIcon
                   component="a"
                   href="https://github.com/AdityaKotkar47/notes"
@@ -87,14 +72,21 @@ export function Layout({ children }) {
               {/* Mobile Navigation */}
               <Box sx={{ '@media (min-width: 769px)': { display: 'none' } }}>
                 <Group spacing="sm">
-                  <ActionIcon 
-                    onClick={() => setMobileSearchOpened(true)}
-                    size="lg"
-                    variant="subtle"
-                    color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
-                  >
-                    <IconSearch size={22} />
-                  </ActionIcon>
+                  {!mobileSearchOpened ? (
+                    <ActionIcon 
+                      onClick={() => setMobileSearchOpened(true)}
+                      size="lg"
+                      variant="subtle"
+                      color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+                    >
+                      <IconSearch size={22} />
+                    </ActionIcon>
+                  ) : (
+                    <SearchBar 
+                      isMobile 
+                      onSearchClose={() => setMobileSearchOpened(false)} 
+                    />
+                  )}
                   <Burger
                     opened={mobileMenuOpened}
                     onClick={() => setMobileMenuOpened(!mobileMenuOpened)}
@@ -115,44 +107,6 @@ export function Layout({ children }) {
         },
       })}
     >
-      {/* Mobile Search Drawer */}
-      <Drawer
-        opened={mobileSearchOpened}
-        onClose={() => setMobileSearchOpened(false)}
-        position="top"
-        size="100%"
-        withCloseButton={false}
-        styles={{
-          drawer: {
-            top: '60px',
-            height: 'auto',
-            background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-          },
-        }}
-      >
-        <Container size="lg" py="md">
-          <form onSubmit={handleSearch}>
-            <Group>
-              <TextInput
-                placeholder="Search files..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{ flex: 1 }}
-                autoFocus
-              />
-              <ActionIcon 
-                onClick={() => setMobileSearchOpened(false)}
-                size="lg"
-                variant="subtle"
-                color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
-              >
-                <IconX size={22} />
-              </ActionIcon>
-            </Group>
-          </form>
-        </Container>
-      </Drawer>
-
       {/* Mobile Menu Drawer */}
       <Drawer
         opened={mobileMenuOpened}
