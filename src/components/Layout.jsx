@@ -14,9 +14,9 @@ export function Layout({ children }) {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setMobileSearchOpened(false);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
+      setMobileSearchOpened(false);
     }
   };
 
