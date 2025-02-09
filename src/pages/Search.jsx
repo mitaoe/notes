@@ -1,5 +1,5 @@
 import React from 'react';
-import { Title, Box } from '@mantine/core';
+import { Title, Box, Text } from '@mantine/core';
 import { FileList } from '../components/FileList';
 import driveService from '../services/driveService';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -48,15 +48,38 @@ export function Search() {
 
   const getSearchTitle = () => {
     if (!query) return null;
-    if (loading) return 'Searching...';
-    if (files.length === 0) return `No results found for "${query}"`;
-    return `Search results for "${query}"`;
+    if (loading) return (
+      <Text span weight={400} color="dimmed">Loading...</Text>
+    );
+    if (files.length === 0) return (
+      <>
+        <Text span color="dimmed">No items found matching </Text>
+        <Text span weight={500}>"{query}"</Text>
+      </>
+    );
+    return (
+      <>
+        <Text span color="dimmed">Results for </Text>
+        <Text span weight={500}>"{query}"</Text>
+      </>
+    );
   };
 
   return (
-    <Box>
+    <Box sx={{ paddingTop: '2rem' }}>
       {getSearchTitle() && (
-        <Title order={2} mb="md">
+        <Title 
+          order={2} 
+          mb="xl"
+          sx={(theme) => ({
+            fontSize: '1.5rem',
+            fontWeight: 500,
+            color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[9],
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.25rem'
+          })}
+        >
           {getSearchTitle()}
         </Title>
       )}

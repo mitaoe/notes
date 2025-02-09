@@ -15,9 +15,12 @@ export function Layout({ children }) {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
       setMobileSearchOpened(false);
     }
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery('');
   };
 
   return (
@@ -52,6 +55,13 @@ export function Layout({ children }) {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     icon={<IconSearch size={16} />}
+                    rightSection={
+                      searchQuery && (
+                        <ActionIcon onClick={handleClearSearch} size="sm" variant="transparent">
+                          <IconX size={16} />
+                        </ActionIcon>
+                      )
+                    }
                     styles={(theme) => ({
                       root: { minWidth: 300 },
                       input: {
@@ -59,6 +69,10 @@ export function Layout({ children }) {
                           borderColor: theme.colors.blue[5],
                         },
                       },
+                      rightSection: {
+                        width: 32,
+                        color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[5],
+                      }
                     })}
                   />
                 </form>
