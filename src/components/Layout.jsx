@@ -39,6 +39,17 @@ export function Layout({ children }) {
     }
   };
 
+  const handleSearchIconClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (searchQuery.trim()) {
+      handleSearch();
+    } else {
+      const input = e.currentTarget.closest('form').querySelector('input');
+      input.focus();
+    }
+  };
+
   const handleClearSearch = () => {
     setSearchQuery('');
     setIsSearchFocused(true);
@@ -56,17 +67,26 @@ export function Layout({ children }) {
     value: searchQuery,
     onChange: (e) => setSearchQuery(e.target.value),
     onFocus: handleSearchFocus,
+    onBlur: (e) => {
+      const isSearchIconClick = e.relatedTarget?.closest('[data-search-icon="true"]');
+      if (!isSearchIconClick && !searchQuery.trim()) {
+        setIsSearchFocused(false);
+      }
+    },
     autoComplete: "off",
     icon: (
       <ActionIcon
-        onClick={handleSearch}
+        data-search-icon="true"
+        onClick={handleSearchIconClick}
         size="sm"
         variant="transparent"
+        tabIndex={-1}
         sx={{
           cursor: 'pointer',
           opacity: isSearchFocused ? 1 : 0.6,
           transition: 'all 0.3s ease-in-out',
           transform: isSearchFocused ? 'translateX(236px)' : 'translateX(0)',
+          pointerEvents: 'auto',
           '&:hover': {
             opacity: 0.8
           }
