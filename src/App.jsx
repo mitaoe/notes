@@ -1,3 +1,4 @@
+import React from 'react';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
@@ -6,6 +7,7 @@ import { Folder } from './pages/Folder';
 import { Search } from './pages/Search';
 import { NotFound } from './pages/NotFound';
 import { config, uiConfig } from './config';
+import { SearchProvider } from './contexts/SearchContext';
 
 function App() {
   return (
@@ -88,14 +90,16 @@ function App() {
       }}
     >
       <Router>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/*" element={<Folder />} />
-            <Route path="/404" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <SearchProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/*" element={<Folder />} />
+              <Route path="/404" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </SearchProvider>
       </Router>
     </MantineProvider>
   );

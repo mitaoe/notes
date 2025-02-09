@@ -4,15 +4,21 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { IconSearch, IconX, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
 import { useClickOutside } from '@mantine/hooks';
+import { useSearch } from '../contexts/SearchContext';
 
 export function Layout({ children }) {
   const theme = useMantineTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const { 
+    searchQuery, 
+    setSearchQuery, 
+    performSearch, 
+    clearSearch 
+  } = useSearch();
 
   const handleClickOutside = () => {
     setIsSearchFocused(false);
@@ -25,25 +31,22 @@ export function Layout({ children }) {
 
   useEffect(() => {
     if (!location.pathname.startsWith('/search')) {
-      setSearchQuery('');
+      clearSearch();
       setIsSearchFocused(false);
       setMobileSearchOpened(false);
     }
-  }, [location.pathname]);
+  }, [location.pathname, clearSearch]);
 
   const handleSearch = (e) => {
     e?.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setIsSearchFocused(true);
-    }
+    performSearch();
   };
 
   const handleSearchIconClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (searchQuery.trim()) {
-      handleSearch();
+      performSearch();
     } else {
       const input = e.currentTarget.closest('form').querySelector('input');
       input.focus();
@@ -51,7 +54,7 @@ export function Layout({ children }) {
   };
 
   const handleClearSearch = () => {
-    setSearchQuery('');
+    clearSearch();
     setIsSearchFocused(true);
     if (!location.pathname.startsWith('/search')) {
       setMobileSearchOpened(false);

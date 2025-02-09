@@ -1,43 +1,28 @@
-import React from 'react';
-import { Title, Box, Text } from '@mantine/core';
+import React, { useEffect } from 'react';
+import { Title, Box, Text, Alert } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { FileList } from '../components/FileList';
-import driveService from '../services/driveService';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearch } from '../contexts/SearchContext';
+import driveService from '../services/driveService';
 
 export function Search() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [query, setQuery] = React.useState(searchParams.get('q') || '');
-  const [files, setFiles] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
-  const [nextPageToken, setNextPageToken] = React.useState(null);
+  const { 
+    searchQuery, 
+    setSearchQuery, 
+    files, 
+    loading, 
+    error, 
+    hasMore, 
+    loadMore 
+  } = useSearch();
 
-  const handleSearch = async (pageToken = null) => {
-    if (!query.trim()) return;
-
-    try {
-      setLoading(true);
-      const response = await driveService.searchFiles(query, pageToken);
-      
-      if (pageToken) {
-        setFiles(prev => [...prev, ...response.data.files]);
-      } else {
-        setFiles(response.data.files);
-      }
-      
-      setNextPageToken(response.nextPageToken);
-    } catch (error) {
-      console.error('Error searching files:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  React.useEffect(() => {
-    const searchQuery = searchParams.get('q');
-    if (searchQuery) {
-      setQuery(searchQuery);
-      handleSearch();
+  useEffect(() => {
+    const queryParam = searchParams.get('q');
+    if (queryParam && queryParam !== searchQuery) {
+      setSearchQuery(queryParam);
     }
   }, [searchParams]);
 
@@ -47,20 +32,23 @@ export function Search() {
   };
 
   const getSearchTitle = () => {
-    if (!query) return null;
+    if (!searchQuery) return null;
     if (loading) return (
-      <Text span weight={400} color="dimmed">Loading...</Text>
+      <Text span weight={400} color="dimmed">Searching...</Text>
+    );
+    if (error) return (
+      <Text span weight={400} color="red">Search failed</Text>
     );
     if (files.length === 0) return (
       <>
         <Text span color="dimmed">No items found matching </Text>
-        <Text span weight={500}>"{query}"</Text>
+        <Text span weight={500}>"{searchQuery}"</Text>
       </>
     );
     return (
       <>
         <Text span color="dimmed">Results for </Text>
-        <Text span weight={500}>"{query}"</Text>
+        <Text span weight={500}>"{searchQuery}"</Text>
       </>
     );
   };
@@ -84,11 +72,23 @@ export function Search() {
         </Title>
       )}
 
+      {error && (
+        <Alert 
+          icon={<IconAlertCircle size={16} />} 
+          title="Error" 
+          color="red" 
+          mb="xl"
+          variant="filled"
+        >
+          {error}
+        </Alert>
+      )}
+
       <FileList 
         files={files}
         loading={loading}
-        hasMore={!!nextPageToken}
-        onLoadMore={() => handleSearch(nextPageToken)}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
         onFolderClick={handleFolderClick}
       />
     </Box>
