@@ -16,7 +16,7 @@ export function Layout({ children }) {
 
   const handleClickOutside = () => {
     setIsSearchFocused(false);
-    if (!searchQuery) {
+    if (!searchQuery && !location.pathname.startsWith('/search')) {
       setMobileSearchOpened(false);
     }
   };
@@ -32,23 +32,92 @@ export function Layout({ children }) {
   }, [location.pathname]);
 
   const handleSearch = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setMobileSearchOpened(false);
+      setIsSearchFocused(true);
     }
   };
 
   const handleClearSearch = () => {
     setSearchQuery('');
+    setIsSearchFocused(true);
     if (!location.pathname.startsWith('/search')) {
-      setIsSearchFocused(false);
       setMobileSearchOpened(false);
     }
   };
 
   const handleSearchFocus = () => {
     setIsSearchFocused(true);
+  };
+
+  const commonInputProps = {
+    placeholder: "Search files...",
+    value: searchQuery,
+    onChange: (e) => setSearchQuery(e.target.value),
+    onFocus: handleSearchFocus,
+    autoComplete: "off",
+    icon: (
+      <ActionIcon
+        onClick={handleSearch}
+        size="sm"
+        variant="transparent"
+        sx={{
+          cursor: 'pointer',
+          opacity: isSearchFocused ? 1 : 0.6,
+          transition: 'all 0.3s ease-in-out',
+          transform: isSearchFocused ? 'translateX(236px)' : 'translateX(0)',
+          '&:hover': {
+            opacity: 0.8
+          }
+        }}
+      >
+        <IconSearch size={16} />
+      </ActionIcon>
+    ),
+    rightSection: searchQuery && (
+      <ActionIcon 
+        onClick={handleClearSearch} 
+        size="sm" 
+        variant="transparent"
+        sx={(theme) => ({
+          opacity: isSearchFocused ? 1 : 0,
+          transform: isSearchFocused ? 'translateX(0)' : 'translateX(32px)',
+          transition: 'all 0.3s ease-in-out',
+          color: theme.colorScheme === 'dark' 
+            ? theme.fn.rgba(theme.colors.red[9], 0.85)
+            : theme.fn.rgba(theme.colors.red[7], 0.85),
+          '&:hover': {
+            backgroundColor: theme.colorScheme === 'dark'
+              ? theme.fn.rgba(theme.colors.red[9], 0.15)
+              : theme.fn.rgba(theme.colors.red[7], 0.15),
+          }
+        })}
+      >
+        <IconX size={16} />
+      </ActionIcon>
+    ),
+    styles: (theme) => ({
+      root: { 
+        position: 'relative',
+      },
+      input: {
+        transition: 'all 0.3s ease-in-out',
+        paddingLeft: isSearchFocused ? '16px' : '42px',
+        '&:focus': {
+          borderColor: theme.colors.blue[5],
+        },
+      },
+      rightSection: {
+        width: searchQuery ? 76 : 32,
+        transition: 'width 0.3s ease-in-out',
+        justifyContent: 'flex-end',
+        paddingRight: '8px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }
+    })
   };
 
   return (
@@ -79,69 +148,13 @@ export function Layout({ children }) {
               <Group spacing="xl" sx={{ '@media (max-width: 768px)': { display: 'none' } }}>
                 <form onSubmit={handleSearch} style={{ display: 'flex' }} ref={searchRef}>
                   <TextInput
-                    placeholder="Search files..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onFocus={handleSearchFocus}
-                    autoComplete="off"
-                    icon={
-                      <ActionIcon
-                        onClick={isSearchFocused ? handleSearch : undefined}
-                        size="sm"
-                        variant="transparent"
-                        sx={{
-                          cursor: isSearchFocused ? 'pointer' : 'default',
-                          opacity: isSearchFocused ? 1 : 0.6,
-                          transition: 'all 0.3s ease-in-out',
-                          transform: isSearchFocused ? 'translateX(236px)' : 'translateX(0)',
-                        }}
-                      >
-                        <IconSearch size={16} />
-                      </ActionIcon>
-                    }
-                    rightSection={
-                      searchQuery && (
-                        <ActionIcon 
-                          onClick={handleClearSearch} 
-                          size="sm" 
-                          variant="transparent"
-                          sx={(theme) => ({
-                            opacity: isSearchFocused ? 1 : 0,
-                            transform: isSearchFocused ? 'translateX(0)' : 'translateX(32px)',
-                            transition: 'all 0.3s ease-in-out',
-                            marginLeft: '12px',
-                            color: theme.colorScheme === 'dark' 
-                              ? theme.fn.rgba(theme.colors.red[9], 0.85)
-                              : theme.fn.rgba(theme.colors.red[7], 0.85),
-                            '&:hover': {
-                              backgroundColor: theme.colorScheme === 'dark'
-                                ? theme.fn.rgba(theme.colors.red[9], 0.15)
-                                : theme.fn.rgba(theme.colors.red[7], 0.15),
-                            }
-                          })}
-                        >
-                          <IconX size={16} />
-                        </ActionIcon>
-                      )
-                    }
+                    {...commonInputProps}
                     styles={(theme) => ({
+                      ...commonInputProps.styles(theme),
                       root: { 
+                        ...commonInputProps.styles(theme).root,
                         minWidth: 300,
-                        position: 'relative',
                       },
-                      input: {
-                        transition: 'all 0.3s ease-in-out',
-                        paddingLeft: isSearchFocused ? '16px' : '42px',
-                        '&:focus': {
-                          borderColor: theme.colors.blue[5],
-                        },
-                      },
-                      rightSection: {
-                        width: searchQuery ? 76 : 32,
-                        transition: 'width 0.3s ease-in-out',
-                        justifyContent: 'flex-end',
-                        paddingRight: '8px',
-                      }
                     })}
                   />
                 </form>
@@ -174,7 +187,7 @@ export function Layout({ children }) {
                     <ActionIcon 
                       onClick={() => {
                         setMobileSearchOpened(true);
-                        setTimeout(() => setIsSearchFocused(true), 100);
+                        setIsSearchFocused(true);
                       }}
                       size="lg"
                       variant="subtle"
@@ -185,77 +198,26 @@ export function Layout({ children }) {
                   ) : (
                     <form onSubmit={handleSearch} style={{ display: 'flex' }} ref={searchRef}>
                       <TextInput
-                        placeholder="Search files..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        onFocus={handleSearchFocus}
-                        autoComplete="off"
+                        {...commonInputProps}
                         autoFocus
                         size="sm"
                         styles={(theme) => ({
+                          ...commonInputProps.styles(theme),
                           root: { 
+                            ...commonInputProps.styles(theme).root,
                             width: 200,
-                            transition: 'width 0.3s ease-in-out',
                           },
-                          input: {
-                            transition: 'all 0.3s ease-in-out',
-                            paddingLeft: isSearchFocused ? '16px' : '42px',
-                            '&:focus': {
-                              borderColor: theme.colors.blue[5],
-                            },
-                          },
-                          rightSection: {
-                            width: searchQuery ? 76 : 32,
-                            transition: 'width 0.3s ease-in-out',
-                            justifyContent: 'flex-end',
-                            paddingRight: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px'
-                          }
                         })}
-                        icon={
-                          <ActionIcon
-                            onClick={handleSearch}
-                            size="sm"
-                            variant="transparent"
-                            sx={{
-                              cursor: 'pointer',
-                              opacity: isSearchFocused ? 1 : 0.6,
-                              transition: 'all 0.3s ease-in-out',
+                        icon={{
+                          ...commonInputProps.icon,
+                          props: {
+                            ...commonInputProps.icon.props,
+                            sx: {
+                              ...commonInputProps.icon.props.sx,
                               transform: isSearchFocused ? 'translateX(138px)' : 'translateX(0)',
-                              '&:hover': {
-                                opacity: 0.8
-                              }
-                            }}
-                          >
-                            <IconSearch size={16} />
-                          </ActionIcon>
-                        }
-                        rightSection={
-                          searchQuery && (
-                            <ActionIcon 
-                              onClick={handleClearSearch} 
-                              size="sm" 
-                              variant="transparent"
-                              sx={(theme) => ({
-                                opacity: isSearchFocused ? 1 : 0,
-                                transform: isSearchFocused ? 'translateX(0)' : 'translateX(32px)',
-                                transition: 'all 0.3s ease-in-out',
-                                color: theme.colorScheme === 'dark' 
-                                  ? theme.fn.rgba(theme.colors.red[9], 0.85)
-                                  : theme.fn.rgba(theme.colors.red[7], 0.85),
-                                '&:hover': {
-                                  backgroundColor: theme.colorScheme === 'dark'
-                                    ? theme.fn.rgba(theme.colors.red[9], 0.15)
-                                    : theme.fn.rgba(theme.colors.red[7], 0.15),
-                                }
-                              })}
-                            >
-                              <IconX size={16} />
-                            </ActionIcon>
-                          )
-                        }
+                            }
+                          }
+                        }}
                       />
                     </form>
                   )}
