@@ -73,6 +73,7 @@ export function Layout({ children }) {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={handleSearchFocus}
+                    autoComplete="off"
                     icon={
                       <ActionIcon
                         onClick={isSearchFocused ? handleSearch : undefined}
@@ -211,6 +212,7 @@ export function Layout({ children }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ flex: 1 }}
                 autoFocus
+                autoComplete="off"
                 icon={<IconSearch size={16} />}
                 rightSection={
                   searchQuery && (
