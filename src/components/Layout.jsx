@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
-import { AppShell, Header, Container, Group, Text, TextInput, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme } from '@mantine/core';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { AppShell, Header, Container, Group, TextInput, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme } from '@mantine/core';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { IconSearch, IconX, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
+import { useClickOutside } from '@mantine/hooks';
 
 export function Layout({ children }) {
   const theme = useMantineTheme();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchRef = useClickOutside(() => setIsSearchFocused(false));
+
+  useEffect(() => {
+    if (!location.pathname.startsWith('/search')) {
+      setSearchQuery('');
+      setIsSearchFocused(false);
+    }
+  }, [location.pathname]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -21,6 +32,13 @@ export function Layout({ children }) {
 
   const handleClearSearch = () => {
     setSearchQuery('');
+    if (!location.pathname.startsWith('/search')) {
+      setIsSearchFocused(false);
+    }
+  };
+
+  const handleSearchFocus = () => {
+    setIsSearchFocused(true);
   };
 
   return (
@@ -49,29 +67,69 @@ export function Layout({ children }) {
 
               {/* Desktop Navigation */}
               <Group spacing="xl" sx={{ '@media (max-width: 768px)': { display: 'none' } }}>
-                <form onSubmit={handleSearch} style={{ display: 'flex' }}>
+                <form onSubmit={handleSearch} style={{ display: 'flex' }} ref={searchRef}>
                   <TextInput
                     placeholder="Search files..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    icon={<IconSearch size={16} />}
+                    onFocus={handleSearchFocus}
+                    icon={
+                      <ActionIcon
+                        onClick={isSearchFocused ? handleSearch : undefined}
+                        size="sm"
+                        variant="transparent"
+                        sx={{
+                          cursor: isSearchFocused ? 'pointer' : 'default',
+                          opacity: isSearchFocused ? 1 : 0.6,
+                          transition: 'all 0.3s ease-in-out',
+                          transform: isSearchFocused ? 'translateX(236px)' : 'translateX(0)',
+                        }}
+                      >
+                        <IconSearch size={16} />
+                      </ActionIcon>
+                    }
                     rightSection={
                       searchQuery && (
-                        <ActionIcon onClick={handleClearSearch} size="sm" variant="transparent">
+                        <ActionIcon 
+                          onClick={handleClearSearch} 
+                          size="sm" 
+                          variant="transparent"
+                          sx={(theme) => ({
+                            opacity: isSearchFocused ? 1 : 0,
+                            transform: isSearchFocused ? 'translateX(0)' : 'translateX(32px)',
+                            transition: 'all 0.3s ease-in-out',
+                            marginLeft: '12px',
+                            color: theme.colorScheme === 'dark' 
+                              ? theme.fn.rgba(theme.colors.red[9], 0.85)
+                              : theme.fn.rgba(theme.colors.red[7], 0.85),
+                            '&:hover': {
+                              backgroundColor: theme.colorScheme === 'dark'
+                                ? theme.fn.rgba(theme.colors.red[9], 0.15)
+                                : theme.fn.rgba(theme.colors.red[7], 0.15),
+                            }
+                          })}
+                        >
                           <IconX size={16} />
                         </ActionIcon>
                       )
                     }
                     styles={(theme) => ({
-                      root: { minWidth: 300 },
+                      root: { 
+                        minWidth: 300,
+                        position: 'relative',
+                      },
                       input: {
+                        transition: 'all 0.3s ease-in-out',
+                        paddingLeft: isSearchFocused ? '16px' : '42px',
                         '&:focus': {
                           borderColor: theme.colors.blue[5],
                         },
                       },
                       rightSection: {
-                        width: 32,
-                        color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[5],
+                        width: searchQuery ? 76 : 32,
+                        transition: 'width 0.3s ease-in-out',
+                        justifyContent: 'flex-end',
+                        paddingRight: '8px',
                       }
                     })}
                   />
@@ -153,6 +211,42 @@ export function Layout({ children }) {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{ flex: 1 }}
                 autoFocus
+                icon={<IconSearch size={16} />}
+                rightSection={
+                  searchQuery && (
+                    <Group spacing={4} noWrap>
+                      <ActionIcon 
+                        onClick={handleSearch} 
+                        size="sm" 
+                        variant="transparent"
+                      >
+                        <IconSearch size={16} />
+                      </ActionIcon>
+                      <ActionIcon 
+                        onClick={handleClearSearch} 
+                        size="sm" 
+                        variant="transparent"
+                      >
+                        <IconX size={16} />
+                      </ActionIcon>
+                    </Group>
+                  )
+                }
+                styles={(theme) => ({
+                  root: { 
+                    position: 'relative',
+                  },
+                  input: {
+                    transition: 'all 0.3s ease-in-out',
+                    '&:focus': {
+                      borderColor: theme.colors.blue[5],
+                    },
+                  },
+                  rightSection: {
+                    width: searchQuery ? 70 : 32,
+                    transition: 'width 0.3s ease-in-out',
+                  }
+                })}
               />
               <ActionIcon 
                 onClick={() => setMobileSearchOpened(false)}
