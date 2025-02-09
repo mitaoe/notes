@@ -16,11 +16,9 @@ export function SearchBar({ isMobile = false, onSearchOpen, onSearchClose }) {
   } = useSearch();
 
   const handleClickOutside = () => {
-    if (!searchQuery.trim()) {
-      setIsSearchFocused(false);
-      if (isMobile && !location.pathname.startsWith('/search')) {
-        onSearchClose?.();
-      }
+    setIsSearchFocused(false);
+    if (isMobile && !location.pathname.startsWith('/search') && !searchQuery.trim()) {
+      onSearchClose?.();
     }
   };
 
@@ -67,7 +65,7 @@ export function SearchBar({ isMobile = false, onSearchOpen, onSearchClose }) {
         onFocus={handleSearchFocus}
         onBlur={(e) => {
           const isSearchIconClick = e.relatedTarget?.closest('[data-search-icon="true"]');
-          if (!isSearchIconClick && !searchQuery.trim()) {
+          if (!isSearchIconClick) {
             setIsSearchFocused(false);
           }
         }}
@@ -101,8 +99,8 @@ export function SearchBar({ isMobile = false, onSearchOpen, onSearchClose }) {
             size="sm" 
             variant="transparent"
             sx={(theme) => ({
-              opacity: isSearchFocused ? 1 : 0,
-              transform: isSearchFocused ? 'translateX(0)' : 'translateX(32px)',
+              opacity: 1,
+              transform: 'translateX(0)',
               transition: 'all 0.3s ease-in-out',
               color: theme.colorScheme === 'dark' 
                 ? theme.fn.rgba(theme.colors.red[9], 0.85)
