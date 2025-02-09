@@ -12,12 +12,14 @@ export function Search() {
   const [files, setFiles] = React.useState([]);
   const [loading, setLoading] = React.useState(false);
   const [nextPageToken, setNextPageToken] = React.useState(null);
+  const [isTyping, setIsTyping] = React.useState(false);
 
   const handleSearch = async (pageToken = null) => {
     if (!query.trim()) return;
 
     try {
       setLoading(true);
+      setIsTyping(false);
       const response = await driveService.searchFiles(query, pageToken);
       
       if (pageToken) {
@@ -50,9 +52,22 @@ export function Search() {
     }
   };
 
+  const handleInputChange = (e) => {
+    setQuery(e.target.value);
+    setIsTyping(true);
+  };
+
   const handleFolderClick = async (folder) => {
     const path = await driveService.findPathById(folder.id);
     navigate(path);
+  };
+
+  const getSearchTitle = () => {
+    if (!query) return null;
+    if (isTyping) return 'Press Enter to search...';
+    if (loading) return 'Searching...';
+    if (files.length === 0) return `No results found for "${query}"`;
+    return `Search results for "${query}"`;
   };
 
   return (
@@ -63,7 +78,7 @@ export function Search() {
             <TextInput
               placeholder="Search files and folders..."
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={handleInputChange}
               style={{ flex: 1 }}
               icon={<IconSearch size={16} />}
             />
@@ -74,9 +89,9 @@ export function Search() {
         </form>
       </Box>
 
-      {query && (
+      {getSearchTitle() && (
         <Title order={2} mb="md">
-          Search results for "{query}"
+          {getSearchTitle()}
         </Title>
       )}
 
