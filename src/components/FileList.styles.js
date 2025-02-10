@@ -22,8 +22,16 @@ export const useStyles = createStyles((theme) => ({
   link: {
     color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
     cursor: 'pointer',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    msUserSelect: 'none',
     '&:hover': {
       textDecoration: 'underline',
     },
   },
+  fileName: {
+    userSelect: 'text',
+    WebkitUserSelect: 'text',
+    msUserSelect: 'text',
+  }
 })); 
