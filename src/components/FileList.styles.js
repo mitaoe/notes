@@ -16,6 +16,20 @@ export const useStyles = createStyles((theme) => ({
       },
     },
   },
+  emptyStateWrapper: {
+    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+    borderRadius: theme.radius.sm,
+    border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+    minHeight: 300,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.spacing.xl,
+    '@media (max-width: 768px)': {
+      minHeight: 250,
+      padding: theme.spacing.md,
+    },
+  },
   icon: {
     color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
   },

@@ -1,9 +1,33 @@
 import React from 'react';
-import { Table, Group, Text, Button, Box, Loader } from '@mantine/core';
-import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload } from '@tabler/icons-react';
+import { Table, Group, Text, Button, Box, Loader, Stack, ThemeIcon } from '@mantine/core';
+import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router-dom';
 import { BreadcrumbNav } from './BreadcrumbNav';
+
+function EmptyState() {
+  return (
+    <Stack align="center" spacing="xs" py={50}>
+      <ThemeIcon 
+        size={80} 
+        radius={100}
+        variant="light"
+        sx={(theme) => ({
+          backgroundColor: theme.colorScheme === 'dark' 
+            ? theme.fn.rgba(theme.colors.blue[9], 0.15)
+            : theme.fn.rgba(theme.colors.blue[0], 0.5),
+          color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
+        })}
+      >
+        <IconInbox size={40} />
+      </ThemeIcon>
+      <Text size="xl" weight={500}>Looks rather empty here</Text>
+      <Text size="sm" color="dimmed" align="center" px="lg">
+        Much like a professor's office during exam week, this folder appears to be vacant.
+      </Text>
+    </Stack>
+  );
+}
 
 export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick }) {
   const { classes } = useStyles();
@@ -78,62 +102,70 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
     <>
       <BreadcrumbNav pathSegments={pathSegments} />
       <Box className={classes.wrapper}>
-        <Table className={classes.table} verticalSpacing="sm">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Size</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {files.map((file) => (
-              <tr key={file.id}>
-                <td>
-                  <Group spacing="sm">
-                    {getFileIcon(file)}
-                    {file.mimeType === 'application/vnd.google-apps.folder' ? (
-                      <Text
-                        className={classes.link}
-                        onClick={() => onFolderClick(file)}
-                      >
-                        {file.name}
+        {files.length === 0 ? (
+          <Box className={classes.emptyStateWrapper}>
+            <EmptyState />
+          </Box>
+        ) : (
+          <>
+            <Table className={classes.table} verticalSpacing="sm">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Size</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {files.map((file) => (
+                  <tr key={file.id}>
+                    <td>
+                      <Group spacing="sm">
+                        {getFileIcon(file)}
+                        {file.mimeType === 'application/vnd.google-apps.folder' ? (
+                          <Text
+                            className={classes.link}
+                            onClick={() => onFolderClick(file)}
+                          >
+                            {file.name}
+                          </Text>
+                        ) : (
+                          <Text className={classes.fileName}>{file.name}</Text>
+                        )}
+                      </Group>
+                    </td>
+                    <td>
+                      <Text size="sm" color="dimmed">
+                        {file.size ? formatFileSize(file.size) : '-'}
                       </Text>
-                    ) : (
-                      <Text className={classes.fileName}>{file.name}</Text>
-                    )}
-                  </Group>
-                </td>
-                <td>
-                  <Text size="sm" color="dimmed">
-                    {file.size ? formatFileSize(file.size) : '-'}
-                  </Text>
-                </td>
-                <td>
-                  {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                    <Button
-                      compact
-                      variant="light"
-                      rightIcon={<IconDownload size={16} />}
-                      onClick={() => handleDownload(file)}
-                      loading={downloadingFiles.has(file.id)}
-                    >
-                      Download
-                    </Button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+                    </td>
+                    <td>
+                      {file.mimeType !== 'application/vnd.google-apps.folder' && (
+                        <Button
+                          compact
+                          variant="light"
+                          rightIcon={<IconDownload size={16} />}
+                          onClick={() => handleDownload(file)}
+                          loading={downloadingFiles.has(file.id)}
+                        >
+                          Download
+                        </Button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+            {hasMore && (
+              <Group position="center" mt="md">
+                <Button onClick={onLoadMore} variant="light">
+                  Load More
+                </Button>
+              </Group>
+            )}
+          </>
+        )}
       </Box>
-      {hasMore && (
-        <Group position="center" mt="md">
-          <Button onClick={onLoadMore} variant="light">
-            Load More
-          </Button>
-        </Group>
-      )}
     </>
   );
 } 
