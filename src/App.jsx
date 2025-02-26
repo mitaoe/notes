@@ -1,4 +1,5 @@
 import React from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
@@ -114,6 +115,7 @@ function App() {
             </Routes>
           </Layout>
         </SearchProvider>
+        <Analytics />
       </Router>
     </MantineProvider>
   );
