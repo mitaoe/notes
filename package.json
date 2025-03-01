@@ -31,5 +31,11 @@
     "eslint-plugin-react-refresh": "^0.4.14",
     "globals": "^15.12.0",
     "vite": "^6.0.1"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "@swc/core",
+      "esbuild"
+    ]
   }
 }
