@@ -114,14 +114,22 @@ function App() {
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mitaoe-notes.vercel.app" />
         <meta property="og:site_name" content="MITAOE Student Notes" />
+        <meta property="og:image" content="https://mitaoe-notes.vercel.app/favicon.ico" />
         <meta name="twitter:card" content="summary" />
         <meta name="twitter:title" content="MITAOE Notes - Student Community Hub" />
         <meta name="twitter:description" content="Student-curated academic resources for MIT Academy of Engineering. Learn together, grow together." />
+        <meta name="twitter:image" content="https://mitaoe-notes.vercel.app/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="robots" content="index, follow" />
         <meta name="language" content="English" />
         <meta name="revisit-after" content="7 days" />
         <meta name="author" content="MITAOE Student Community" />
+        <meta name="msapplication-TileImage" content="/favicon.ico" />
+        <meta name="msapplication-TileColor" content="#1A73E8" />
+        <meta name="theme-color" content="#1A73E8" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/favicon.ico" />
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="canonical" href="https://mitaoe-notes.vercel.app" />
       </Helmet>
       <Router>
