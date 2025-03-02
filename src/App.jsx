@@ -2,6 +2,7 @@ import React from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import { Folder } from './pages/Folder';
@@ -104,6 +105,16 @@ function App() {
         }
       }}
     >
+      <Helmet>
+        <title>MITAOE Notes - Student Resource Hub</title>
+        <meta name="description" content="Access and share academic notes, study materials, and resources for MITAOE (MIT Academy of Engineering) students. A comprehensive collection of course materials and educational resources." />
+        <meta name="keywords" content="MITAOE, MIT Academy of Engineering, notes, study materials, engineering notes, academic resources, student notes, mitaoe-notes" />
+        <meta property="og:title" content="MITAOE Notes - Student Resource Hub" />
+        <meta property="og:description" content="Access and share academic notes and study materials for MITAOE students." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://mitaoe-notes.vercel.app" />
+        <link rel="canonical" href="https://mitaoe-notes.vercel.app" />
+      </Helmet>
       <Router>
         <SearchProvider>
           <Layout>
