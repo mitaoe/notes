@@ -106,13 +106,22 @@ function App() {
       }}
     >
       <Helmet>
-        <title>MITAOE Notes - Student Resource Hub</title>
-        <meta name="description" content="Access and share academic notes, study materials, and resources for MITAOE (MIT Academy of Engineering) students. A comprehensive collection of course materials and educational resources." />
-        <meta name="keywords" content="MITAOE, MIT Academy of Engineering, notes, study materials, engineering notes, academic resources, student notes, mitaoe-notes" />
-        <meta property="og:title" content="MITAOE Notes - Student Resource Hub" />
-        <meta property="og:description" content="Access and share academic notes and study materials for MITAOE students." />
+        <title>MITAOE Notes - Student Resource Hub | MIT Academy of Engineering</title>
+        <meta name="description" content="Access and share academic notes, study materials, and resources for MITAOE (MIT Academy of Engineering) students. A comprehensive collection of course materials, lecture notes, and educational resources." />
+        <meta name="keywords" content="MITAOE, MIT Academy of Engineering, notes, study materials, engineering notes, academic resources, student notes, mitaoe-notes, engineering study materials, Alandi, Pune, engineering college notes" />
+        <meta property="og:title" content="MITAOE Notes - Student Resource Hub | MIT Academy of Engineering" />
+        <meta property="og:description" content="Access and share academic notes and study materials for MITAOE students. Find comprehensive course materials and resources." />
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://mitaoe-notes.vercel.app" />
+        <meta property="og:site_name" content="MITAOE Notes" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="MITAOE Notes - Student Resource Hub" />
+        <meta name="twitter:description" content="Access academic notes and study materials for MIT Academy of Engineering students." />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="robots" content="index, follow" />
+        <meta name="language" content="English" />
+        <meta name="revisit-after" content="7 days" />
+        <meta name="author" content="MITAOE Students" />
         <link rel="canonical" href="https://mitaoe-notes.vercel.app" />
       </Helmet>
       <Router>
