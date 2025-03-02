@@ -8,7 +8,7 @@ export function NotFound() {
   return (
     <Container size="md" style={{ textAlign: 'center', paddingTop: '4rem' }}>
       <Title order={1} size="3rem" mb="md">404</Title>
-      <Text size="xl" mb="xl">The page you're looking for doesn't exist.</Text>
+      <Text size="xl" mb="xl">The page you&apos;re looking for doesn&apos;t exist.</Text>
       <Group position="center">
         <Button onClick={() => navigate('/')}>
           Back to Home
