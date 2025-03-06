@@ -42,11 +42,11 @@ class GoogleDrive {
       const response = await axios.get('/api/files', {
         params: {
           path: parentId,
-          folderName
+          folderName: folderName
         }
       });
 
-      return response.data.files.filter(file => file.mimeType === FOLDER_TYPE);
+      return response.data.files;
     } catch (error) {
       console.error('Error listing folder contents:', error);
       return null;

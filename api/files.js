@@ -34,10 +34,39 @@ export default async function handler(req, res) {
 
   try {
     const token = await getAccessToken();
-    const { path, pageToken, search } = req.query;
+    const { path, pageToken, search, folderName, fileId } = req.query;
 
+    // Handle file metadata request
+    if (fileId) {
+      const response = await axios.get(`${BASE_URL}/files/${fileId}`, {
+        params: {
+          fields: 'id, name, mimeType, size, modifiedTime, parents, driveId',
+          supportsAllDrives: true,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.status(200).json(response.data);
+    }
+
+    // Handle folder contents request with specific name
+    if (folderName) {
+      const params = {
+        q: `'${path}' in parents and name = '${folderName}' and mimeType = '${FOLDER_TYPE}' and trashed = false`,
+        fields: 'files(id, name, mimeType)',
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+      };
+
+      const response = await axios.get(`${BASE_URL}/files`, {
+        params,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      return res.status(200).json(response.data);
+    }
+
+    // Handle search request
     if (search) {
-      // Handle search request
       const formattedQuery = search.replace(/(!=)|['"=<>/\\:]/g, '').replace(/[,，|(){}]/g, ' ').trim();
       if (!formattedQuery) {
         return res.status(200).json({
@@ -65,26 +94,26 @@ export default async function handler(req, res) {
       });
 
       return res.status(200).json(response.data);
-    } else {
-      // Handle directory listing
-      const params = {
-        q: `'${path}' in parents and trashed = false AND name !='.password' and mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}'`,
-        orderBy: 'folder,name,modifiedTime desc',
-        fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, parents, driveId)',
-        pageSize: 100,
-        supportsAllDrives: true,
-        includeItemsFromAllDrives: true,
-        corpora: 'allDrives',
-        ...(pageToken && { pageToken }),
-      };
-
-      const response = await axios.get(`${BASE_URL}/files`, {
-        params,
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      return res.status(200).json(response.data);
     }
+
+    // Handle regular directory listing
+    const params = {
+      q: `'${path}' in parents and trashed = false AND name !='.password' and mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}'`,
+      orderBy: 'folder,name,modifiedTime desc',
+      fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, parents, driveId)',
+      pageSize: 100,
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+      corpora: 'allDrives',
+      ...(pageToken && { pageToken }),
+    };
+
+    const response = await axios.get(`${BASE_URL}/files`, {
+      params,
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    return res.status(200).json(response.data);
   } catch (error) {
     console.error('API error:', error);
     return res.status(500).json({ error: 'Failed to fetch files' });
