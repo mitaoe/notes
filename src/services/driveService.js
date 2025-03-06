@@ -74,7 +74,12 @@ class GoogleDrive {
       // Process files
       const files = response.data.files.map(file => ({
         ...file,
-        downloadUrl: file.mimeType === FOLDER_TYPE ? null : `/api/stream?fileId=${file.id}`
+        downloadUrl: file.mimeType === FOLDER_TYPE ? null : async () => {
+          const response = await axios.get(`/api/stream?fileId=${file.id}`, {
+            responseType: 'blob'
+          });
+          return response.data;
+        }
       }));
 
       return {
@@ -138,7 +143,12 @@ class GoogleDrive {
 
       const files = response.data.files.map(file => ({
         ...file,
-        downloadUrl: file.mimeType === FOLDER_TYPE ? null : `/api/stream?fileId=${file.id}`
+        downloadUrl: file.mimeType === FOLDER_TYPE ? null : async () => {
+          const response = await axios.get(`/api/stream?fileId=${file.id}`, {
+            responseType: 'blob'
+          });
+          return response.data;
+        }
       }));
 
       return {
