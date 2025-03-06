@@ -1,54 +1,12 @@
 import axios from 'axios';
 import { config } from '../config';
 
-const BASE_URL = 'https://www.googleapis.com/drive/v3';
 const FOLDER_TYPE = 'application/vnd.google-apps.folder';
-const SHORTCUT_TYPE = 'application/vnd.google-apps.shortcut';
-const DOCUMENT_TYPE = 'application/vnd.google-apps.document';
-const SPREADSHEET_TYPE = 'application/vnd.google-apps.spreadsheet';
-const FORM_TYPE = 'application/vnd.google-apps.form';
-const SITE_TYPE = 'application/vnd.google-apps.site';
 
 class GoogleDrive {
   constructor() {
     this.paths = {};
-    this.files = {};
-    this.accessToken = null;
-    this.tokenExpiry = null;
     this.paths['/'] = config.roots[0].id;
-  }
-
-  async getAccessToken() {
-    if (this.accessToken && this.tokenExpiry && Date.now() < this.tokenExpiry) {
-      return this.accessToken;
-    }
-
-    try {
-      const response = await axios.post('https://www.googleapis.com/oauth2/v4/token', {
-        client_id: config.client_id,
-        client_secret: config.client_secret,
-        refresh_token: config.refresh_token,
-        grant_type: 'refresh_token',
-      });
-
-      this.accessToken = response.data.access_token;
-      this.tokenExpiry = Date.now() + 3500 * 1000; // Token expires in 1 hour
-      return this.accessToken;
-    } catch (error) {
-      console.error('Error getting access token:', error);
-      throw error;
-    }
-  }
-
-  async requestOptions(headers = {}, method = 'GET') {
-    const token = await this.getAccessToken();
-    return {
-      method,
-      headers: {
-        ...headers,
-        Authorization: `Bearer ${token}`,
-      },
-    };
   }
 
   async findPathId(path) {
@@ -80,19 +38,12 @@ class GoogleDrive {
   }
 
   async listFolderContents(parentId, folderName) {
-    const params = {
-      q: `'${parentId}' in parents and name = '${folderName}' and mimeType = '${FOLDER_TYPE}' and trashed = false`,
-      fields: 'files(id, name, mimeType)',
-      supportsAllDrives: true,
-      includeItemsFromAllDrives: true,
-    };
-
     try {
-      const response = await axios.get(`${BASE_URL}/files`, {
-        params,
-        headers: {
-          Authorization: `Bearer ${await this.getAccessToken()}`,
-        },
+      const response = await axios.get('/api/files', {
+        params: {
+          path: parentId,
+          folderName: folderName
+        }
       });
 
       return response.data.files;
@@ -112,45 +63,18 @@ class GoogleDrive {
       };
     }
 
-    const params = {
-      q: `'${folderId}' in parents and trashed = false AND name !='.password' and mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}'`,
-      orderBy: 'folder,name,modifiedTime desc',
-      fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, parents, driveId)',
-      pageSize: config.files_list_page_size,
-      supportsAllDrives: true,
-      includeItemsFromAllDrives: true,
-      corpora: config.search_all_drives ? 'allDrives' : 'user',
-      ...(pageToken && { pageToken }),
-    };
-
     try {
-      const response = await axios.get(`${BASE_URL}/files`, {
-        params,
-        headers: {
-          Authorization: `Bearer ${await this.getAccessToken()}`,
-        },
+      const response = await axios.get('/api/files', {
+        params: {
+          path: folderId,
+          pageToken
+        }
       });
 
-      // Process files and generate download URLs
-      const files = await Promise.all(response.data.files.map(async (file) => {
-        if (file.mimeType === FOLDER_TYPE) {
-          return { ...file, link: null };
-        }
-        
-        // For files, create a download function
-        return {
-          ...file,
-          downloadUrl: async () => {
-            const token = await this.getAccessToken();
-            const response = await axios.get(`${BASE_URL}/files/${file.id}?alt=media`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-              responseType: 'blob'
-            });
-            return response.data;
-          }
-        };
+      // Process files
+      const files = response.data.files.map(file => ({
+        ...file,
+        downloadUrl: file.mimeType === FOLDER_TYPE ? null : `/api/stream?fileId=${file.id}`
       }));
 
       return {
@@ -182,14 +106,10 @@ class GoogleDrive {
 
   async getFileMetadata(fileId) {
     try {
-      const response = await axios.get(`${BASE_URL}/files/${fileId}`, {
+      const response = await axios.get('/api/files', {
         params: {
-          fields: 'id, name, mimeType, size, modifiedTime, parents, driveId',
-          supportsAllDrives: true,
-        },
-        headers: {
-          Authorization: `Bearer ${await this.getAccessToken()}`,
-        },
+          fileId
+        }
       });
 
       return response.data;
@@ -208,41 +128,19 @@ class GoogleDrive {
   }
 
   async searchFiles(query, pageToken = null) {
-    const formattedQuery = this.formatSearchKeyword(query);
-    if (!formattedQuery) {
-      return {
-        nextPageToken: null,
-        data: {
-          files: [],
-        },
-      };
-    }
-
-    const words = formattedQuery.split(/\s+/);
-    const nameSearchStr = `name contains '${words.join("' AND name contains '")}'`;
-
-    const params = {
-      q: `trashed = false AND mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}' AND name !='.password' AND (${nameSearchStr})`,
-      orderBy: 'folder,name,modifiedTime desc',
-      fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime)',
-      pageSize: config.search_result_list_page_size,
-      supportsAllDrives: true,
-      includeItemsFromAllDrives: config.search_all_drives,
-      corpora: config.search_all_drives ? 'allDrives' : 'user',
-      ...(pageToken && { pageToken }),
-    };
-
     try {
-      const response = await axios.get(`${BASE_URL}/files`, {
-        params,
-        headers: {
-          Authorization: `Bearer ${await this.getAccessToken()}`,
-        },
+      const response = await axios.get('/api/files', {
+        params: {
+          search: query,
+          pageToken
+        }
       });
 
-      // Remove file ID encryption
-      const files = response.data.files;
-      
+      const files = response.data.files.map(file => ({
+        ...file,
+        downloadUrl: file.mimeType === FOLDER_TYPE ? null : `/api/stream?fileId=${file.id}`
+      }));
+
       return {
         nextPageToken: response.data.nextPageToken,
         data: {
@@ -256,5 +154,4 @@ class GoogleDrive {
   }
 }
 
-const driveService = new GoogleDrive();
-export default driveService; 
+export default new GoogleDrive(); 

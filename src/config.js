@@ -1,9 +1,5 @@
 export const config = {
   siteName: "notes",
-  client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-  client_secret: import.meta.env.VITE_GOOGLE_CLIENT_SECRET,
-  refresh_token: import.meta.env.VITE_GOOGLE_REFRESH_TOKEN,
-  service_account: false,
   files_list_page_size: 100,
   search_result_list_page_size: 100,
   enable_cors_file_down: false,
