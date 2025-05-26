@@ -195,44 +195,27 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     </Box>
                   </Group>
                   {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                    <Group spacing="sm" direction="column" align="center">
-                      {file.mimeType === 'application/pdf' && (
-                        <ActionIcon
-                          variant="subtle"
-                          onClick={() => handlePreview(file)}
-                          size="lg"
-                          title="Preview"
-                          sx={(theme) => ({
-                            color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                            backgroundColor: theme.colorScheme === 'dark' 
-                              ? theme.fn.rgba(theme.colors.gray[8], 0.15)
-                              : theme.fn.rgba(theme.colors.gray[0], 0.15),
-                          })}
-                        >
-                          <IconEye size={18} />
-                        </ActionIcon>
-                      )}
-                      <Box>
-                        <ActionIcon
-                          variant="subtle"
-                          onClick={() => handleDownload(file)}
-                          size="lg"
-                          loading={downloadingFiles.has(file.id)}
-                          title="Download"
-                          sx={(theme) => ({
-                            color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                            backgroundColor: theme.colorScheme === 'dark' 
-                              ? theme.fn.rgba(theme.colors.gray[8], 0.15)
-                              : theme.fn.rgba(theme.colors.gray[0], 0.15),
-                          })}
-                        >
-                          <IconDownload size={18} />
-                        </ActionIcon>
-                        {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
+                    <Group spacing="xs" align="center">
+                      <ActionIcon
+                        variant="subtle"
+                        onClick={() => handleDownload(file)}
+                        size="lg"
+                        loading={downloadingFiles.has(file.id)}
+                        title="Download"
+                        sx={(theme) => ({
+                          color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                          backgroundColor: theme.colorScheme === 'dark' 
+                            ? theme.fn.rgba(theme.colors.gray[8], 0.15)
+                            : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                        })}
+                      >
+                        <IconDownload size={18} />
+                      </ActionIcon>
+                      {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
+                        <Box sx={{ width: '100%', marginTop: 4 }}>
                           <Progress 
                             value={downloadProgress[file.id]} 
                             size="xs" 
-                            mt={4}
                             styles={(theme) => ({
                               bar: {
                                 transition: 'width 200ms ease',
@@ -247,8 +230,8 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                               }
                             })}
                           />
-                        )}
-                      </Box>
+                        </Box>
+                      )}
                     </Group>
                   )}
                 </Group>
@@ -288,7 +271,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     </td>
                     <td>
                       {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                        <Group spacing="sm" direction="column" align="center">
+                        <Group spacing="sm" direction="row" align="center">
                           {file.mimeType === 'application/pdf' && (
                             <ActionIcon
                               variant="subtle"
