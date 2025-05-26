@@ -195,7 +195,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     </Box>
                   </Group>
                   {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                    <Group spacing={0} direction="column" align="center">
+                    <Group spacing="sm" direction="column" align="center">
                       {file.mimeType === 'application/pdf' && (
                         <ActionIcon
                           variant="subtle"
@@ -288,7 +288,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     </td>
                     <td>
                       {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                        <Group spacing={0} direction="column" align="center">
+                        <Group spacing="sm" direction="column" align="center">
                           {file.mimeType === 'application/pdf' && (
                             <ActionIcon
                               variant="subtle"
