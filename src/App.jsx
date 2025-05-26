@@ -2,7 +2,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { Layout } from './components/Layout';
+import Layout from './components/Layout';
 import { Home } from './pages/Home';
 import { Folder } from './pages/Folder';
 import { Search } from './pages/Search';

@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
 import { useSearch } from '../contexts/SearchContext';
-import { SearchBar } from './SearchBar';
+import SearchBar from './SearchBar';
 
 const Layout = ({ children }) => {
   const theme = useMantineTheme();
