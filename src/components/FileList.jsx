@@ -5,7 +5,7 @@ import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownloa
 import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router-dom';
 import { BreadcrumbNav } from './BreadcrumbNav';
-import { FilePreview } from './FilePreview';
+import FilePreview from './FilePreview';
 
 function EmptyState() {
   return (
