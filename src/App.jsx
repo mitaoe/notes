@@ -1,12 +1,11 @@
-import React from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
-import { Layout } from './components/Layout';
+import Layout from './components/Layout';
 import { Home } from './pages/Home';
-import { Folder } from './pages/Folder';
-import { Search } from './pages/Search';
+import Folder from './pages/Folder';
+import Search from './pages/Search';
 import { NotFound } from './pages/NotFound';
 import { config, uiConfig } from './config';
 import { SearchProvider } from './contexts/SearchContext';
@@ -51,7 +50,7 @@ function App() {
         },
         components: {
           Button: {
-            styles: (theme) => ({
+            styles: () => ({
               root: {
                 fontWeight: 500,
                 backgroundColor: uiConfig.header_style_class.includes('bg-primary') ? '#1a73e8' : '#343a40',
@@ -72,7 +71,7 @@ function App() {
             },
           },
           Anchor: {
-            styles: (theme) => ({
+            styles: () => ({
               root: {
                 color: uiConfig.css_a_tag_color,
                 '&:hover': {
@@ -82,7 +81,7 @@ function App() {
             }),
           },
           Text: {
-            styles: (theme) => ({
+            styles: () => ({
               root: {
                 color: uiConfig.css_p_tag_color,
               },

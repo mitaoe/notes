@@ -1,15 +1,14 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useDebouncedValue } from '@mantine/hooks';
 import driveService from '../services/driveService';
 
 const SearchContext = createContext(null);
 
-export function SearchProvider({ children }) {
+const SearchProvider = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery] = useDebouncedValue(searchQuery, 300);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -88,12 +87,18 @@ export function SearchProvider({ children }) {
       {children}
     </SearchContext.Provider>
   );
-}
+};
 
-export function useSearch() {
+SearchProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+const useSearch = () => {
   const context = useContext(SearchContext);
   if (!context) {
     throw new Error('useSearch must be used within a SearchProvider');
   }
   return context;
-} 
+};
+
+export { SearchProvider, useSearch }; 

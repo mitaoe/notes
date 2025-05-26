@@ -1,16 +1,16 @@
-import React from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FileList } from '../components/FileList';
 import driveService from '../services/driveService';
 
-export function Folder() {
+const Folder = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [files, setFiles] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [nextPageToken, setNextPageToken] = React.useState(null);
+  const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [nextPageToken, setNextPageToken] = useState(null);
 
-  const loadFiles = async (pageToken = null) => {
+  const loadFiles = useCallback(async (pageToken = null) => {
     try {
       setLoading(true);
       const response = await driveService.listFiles(location.pathname, pageToken);
@@ -28,18 +28,18 @@ export function Folder() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [location.pathname, navigate]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadFiles();
-  }, [location.pathname]);
+  }, [loadFiles]);
 
-  const handleFolderClick = (folder) => {
+  const handleFolderClick = useCallback((folder) => {
     const newPath = location.pathname === '/' 
       ? `/${encodeURIComponent(folder.name)}`
       : `${location.pathname}/${encodeURIComponent(folder.name)}`;
     navigate(newPath);
-  };
+  }, [location.pathname, navigate]);
 
   return (
     <div style={{ paddingTop: '2rem' }}>
@@ -52,4 +52,6 @@ export function Folder() {
       />
     </div>
   );
-} 
+};
+
+export default Folder; 

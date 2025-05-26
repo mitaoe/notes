@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Title, Box, Text, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { FileList } from '../components/FileList';
@@ -6,7 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSearch } from '../contexts/SearchContext';
 import driveService from '../services/driveService';
 
-export function Search() {
+const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { 
@@ -24,7 +24,7 @@ export function Search() {
     if (queryParam && queryParam !== searchQuery) {
       setSearchQuery(queryParam);
     }
-  }, [searchParams]);
+  }, [searchParams, searchQuery, setSearchQuery]);
 
   const handleFolderClick = async (folder) => {
     const path = await driveService.findPathById(folder.id);
@@ -42,13 +42,13 @@ export function Search() {
     if (files.length === 0) return (
       <>
         <Text span color="dimmed">No items found matching </Text>
-        <Text span weight={500}>"{searchQuery}"</Text>
+        <Text span weight={500}>`&quot;${searchQuery}&quot;`</Text>
       </>
     );
     return (
       <>
         <Text span color="dimmed">Results for </Text>
-        <Text span weight={500}>"{searchQuery}"</Text>
+        <Text span weight={500}>`&quot;${searchQuery}&quot;`</Text>
       </>
     );
   };
@@ -93,4 +93,6 @@ export function Search() {
       />
     </Box>
   );
-} 
+};
+
+export default Search; 
