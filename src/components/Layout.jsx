@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme } from '@mantine/core';
 import { Link, useLocation } from 'react-router-dom';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
@@ -49,7 +49,7 @@ export function Layout({ children }) {
                 <SearchBar />
                 <ActionIcon
                   component="a"
-                  href="https://github.com/AdityaKotkar47/notes"
+                  href="https://github.com/mitaoe/notes"
                   target="_blank"
                   size="lg"
                   variant="subtle"
@@ -123,7 +123,7 @@ export function Layout({ children }) {
           <Group mb="xl">
             <ActionIcon
               component="a"
-              href="https://github.com/AdityaKotkar47/notes"
+              href="https://github.com/mitaoe/notes"
               target="_blank"
               size="xl"
               variant="light"

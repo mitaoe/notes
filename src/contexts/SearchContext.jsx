@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useDebouncedValue } from '@mantine/hooks';
 import driveService from '../services/driveService';
@@ -9,7 +9,6 @@ export function SearchProvider({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery] = useDebouncedValue(searchQuery, 300);
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

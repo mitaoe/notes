@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Title, Box, Text, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { FileList } from '../components/FileList';
@@ -42,13 +42,13 @@ export function Search() {
     if (files.length === 0) return (
       <>
         <Text span color="dimmed">No items found matching </Text>
-        <Text span weight={500}>"{searchQuery}"</Text>
+        <Text span weight={500}>`&quot;${searchQuery}&quot;`</Text>
       </>
     );
     return (
       <>
         <Text span color="dimmed">Results for </Text>
-        <Text span weight={500}>"{searchQuery}"</Text>
+        <Text span weight={500}>`&quot;${searchQuery}&quot;`</Text>
       </>
     );
   };

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { TextInput, ActionIcon } from '@mantine/core';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import { useSearch } from '../contexts/SearchContext';
 import { useClickOutside } from '@mantine/hooks';
 import { useLocation } from 'react-router-dom';
 
-export function SearchBar({ isMobile = false, onSearchOpen, onSearchClose }) {
+export function SearchBar({ isMobile = false, onSearchClose }) {
   const location = useLocation();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { 

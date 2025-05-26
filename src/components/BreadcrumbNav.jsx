@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { Paper, Breadcrumbs, Anchor, Box, ActionIcon, Group } from '@mantine/core';
 import { IconChevronRight, IconChevronLeft } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';

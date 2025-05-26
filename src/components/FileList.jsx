@@ -1,9 +1,10 @@
-import React from 'react';
+import { useState } from 'react';
 import { Table, Group, Text, Button, Box, Loader, Stack, ThemeIcon } from '@mantine/core';
-import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox } from '@tabler/icons-react';
+import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router-dom';
 import { BreadcrumbNav } from './BreadcrumbNav';
+import { FilePreview } from './FilePreview';
 
 function EmptyState() {
   return (
@@ -31,7 +32,9 @@ function EmptyState() {
 
 export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick }) {
   const { classes } = useStyles();
-  const [downloadingFiles, setDownloadingFiles] = React.useState(new Set());
+  const [downloadingFiles, setDownloadingFiles] = useState(new Set());
+  const [downloadProgress, setDownloadProgress] = useState({});
+  const [previewFile, setPreviewFile] = useState(null);
   const location = useLocation();
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
@@ -41,7 +44,32 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
 
     try {
       setDownloadingFiles(prev => new Set(prev).add(file.id));
-      const blob = await file.downloadUrl();
+      setDownloadProgress(prev => ({ ...prev, [file.id]: 0 }));
+
+      const response = await fetch(`/api/stream?fileId=${file.id}`, {
+        method: 'GET',
+      });
+
+      const reader = response.body.getReader();
+      const contentLength = +response.headers.get('Content-Length');
+      let receivedLength = 0;
+
+      const chunks = [];
+      while(true) {
+        const {done, value} = await reader.read();
+        
+        if (done) break;
+        
+        chunks.push(value);
+        receivedLength += value.length;
+        
+        setDownloadProgress(prev => ({
+          ...prev,
+          [file.id]: Math.round((receivedLength / contentLength) * 100)
+        }));
+      }
+
+      const blob = new Blob(chunks);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -58,6 +86,33 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
         newSet.delete(file.id);
         return newSet;
       });
+      setDownloadProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[file.id];
+        return newProgress;
+      });
+    }
+  };
+
+  const handlePreview = (file) => {
+    setPreviewFile(file);
+  };
+
+  const handlePreviewClose = () => {
+    setPreviewFile(null);
+  };
+
+  const handleNextFile = () => {
+    const currentIndex = files.findIndex(f => f.id === previewFile.id);
+    if (currentIndex < files.length - 1) {
+      setPreviewFile(files[currentIndex + 1]);
+    }
+  };
+
+  const handlePreviousFile = () => {
+    const currentIndex = files.findIndex(f => f.id === previewFile.id);
+    if (currentIndex > 0) {
+      setPreviewFile(files[currentIndex - 1]);
     }
   };
 
@@ -141,15 +196,27 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     </td>
                     <td>
                       {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                        <Button
-                          compact
-                          variant="light"
-                          rightIcon={<IconDownload size={16} />}
-                          onClick={() => handleDownload(file)}
-                          loading={downloadingFiles.has(file.id)}
-                        >
-                          Download
-                        </Button>
+                        <Group spacing="xs">
+                          {file.mimeType === 'application/pdf' && (
+                            <Button
+                              compact
+                              variant="light"
+                              leftIcon={<IconEye size={16} />}
+                              onClick={() => handlePreview(file)}
+                            >
+                              Preview
+                            </Button>
+                          )}
+                          <Button
+                            compact
+                            variant="light"
+                            rightIcon={<IconDownload size={16} />}
+                            onClick={() => handleDownload(file)}
+                            loading={downloadingFiles.has(file.id)}
+                          >
+                            Download
+                          </Button>
+                        </Group>
                       )}
                     </td>
                   </tr>
@@ -166,6 +233,16 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
           </>
         )}
       </Box>
+
+      <FilePreview
+        opened={!!previewFile}
+        onClose={handlePreviewClose}
+        file={previewFile}
+        files={files}
+        onNext={handleNextFile}
+        onPrevious={handlePreviousFile}
+        loading={false}
+      />
     </>
   );
 } 

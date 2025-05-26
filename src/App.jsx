@@ -1,4 +1,3 @@
-import React from 'react';
 import { Analytics } from '@vercel/analytics/react';
 import { MantineProvider } from '@mantine/core';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -51,7 +50,7 @@ function App() {
         },
         components: {
           Button: {
-            styles: (theme) => ({
+            styles: () => ({
               root: {
                 fontWeight: 500,
                 backgroundColor: uiConfig.header_style_class.includes('bg-primary') ? '#1a73e8' : '#343a40',
@@ -72,7 +71,7 @@ function App() {
             },
           },
           Anchor: {
-            styles: (theme) => ({
+            styles: () => ({
               root: {
                 color: uiConfig.css_a_tag_color,
                 '&:hover': {
@@ -82,7 +81,7 @@ function App() {
             }),
           },
           Text: {
-            styles: (theme) => ({
+            styles: () => ({
               root: {
                 color: uiConfig.css_p_tag_color,
               },

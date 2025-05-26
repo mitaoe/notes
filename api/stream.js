@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { fileId } = req.query;
+  const { fileId, inline } = req.query;
   if (!fileId) {
     return res.status(400).json({ error: 'File ID is required' });
   }
@@ -45,18 +45,48 @@ export default async function handler(req, res) {
 
     // Set response headers
     res.setHeader('Content-Type', mimeType);
-    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(name)}"`);
+    res.setHeader('Content-Disposition', `${inline === 'true' ? 'inline' : 'attachment'}; filename="${encodeURIComponent(name)}"`);
     if (size) {
       res.setHeader('Content-Length', size);
     }
 
-    // Stream the file
-    const response = await axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
-      headers: { Authorization: `Bearer ${token}` },
-      responseType: 'stream',
-    });
+    // Enable CORS for streaming
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Range');
 
-    response.data.pipe(res);
+    // Handle range requests for streaming
+    const range = req.headers.range;
+    if (range) {
+      const parts = range.replace(/bytes=/, '').split('-');
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : size - 1;
+      const chunkSize = end - start + 1;
+
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${size}`);
+      res.setHeader('Accept-Ranges', 'bytes');
+      res.setHeader('Content-Length', chunkSize);
+      res.status(206);
+
+      // Stream the file with range
+      const response = await axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Range: `bytes=${start}-${end}`,
+        },
+        responseType: 'stream',
+      });
+
+      response.data.pipe(res);
+    } else {
+      // Stream the entire file
+      const response = await axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'stream',
+      });
+
+      response.data.pipe(res);
+    }
   } catch (error) {
     console.error('Stream error:', error);
     if (!res.headersSent) {
