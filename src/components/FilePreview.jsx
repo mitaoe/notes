@@ -130,86 +130,87 @@ const FilePreview = ({
             zIndex: 2,
           })}
         >
-          <Group position="apart" align="center" spacing="md" px={20}>
-            <ActionIcon
-              variant="subtle"
-              onClick={onClose}
-              size="lg"
-              sx={(theme) => ({
-                color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
-                backgroundColor: theme.colorScheme === 'dark' 
-                  ? theme.fn.rgba(theme.colors.red[8], 0.15)
-                  : theme.fn.rgba(theme.colors.red[0], 0.15),
-              })}
-            >
-              <IconX size={20} />
-            </ActionIcon>
+          <Group position="center" align="center" spacing="xs" px={0} sx={{ width: '100%' }}>
+            <Group spacing="xs" align="center" position="center" sx={{ flex: 1 }}>
+              <ActionIcon
+                variant="subtle"
+                onClick={onClose}
+                size="lg"
+                sx={(theme) => ({
+                  color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.red[8], 0.15)
+                    : theme.fn.rgba(theme.colors.red[0], 0.15),
+                })}
+              >
+                <IconX size={20} />
+              </ActionIcon>
 
-            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-              <Box sx={{ position: 'absolute', left: 0 }}>
-                <ActionIcon
-                  variant="subtle"
-                  onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
-                  disabled={!canGoPrevious}
-                  size="lg"
-                  sx={(theme) => ({
-                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                  })}
-                >
-                  <IconChevronLeft size={20} />
-                </ActionIcon>
-              </Box>
+              <ActionIcon
+                variant="subtle"
+                onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
+                disabled={!canGoPrevious}
+                size="lg"
+                sx={(theme) => ({
+                  color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                    : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                })}
+              >
+                <IconChevronLeft size={20} />
+              </ActionIcon>
               
               <Text 
                 size="lg" 
                 weight={500} 
                 sx={{ 
-                  maxWidth: '50vw', 
+                  maxWidth: '50%', 
                   textAlign: 'center',
                   overflowX: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
-                  padding: '0 40px'
                 }}
               >
                 {file.name}
               </Text>
               
-              <Box sx={{ position: 'absolute', right: 0 }}>
-                <ActionIcon
-                  variant="subtle"
-                  onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
-                  disabled={!canGoNext}
-                  size="lg"
-                  sx={(theme) => ({
-                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                  })}
-                >
-                  <IconChevronRight size={20} />
-                </ActionIcon>
-              </Box>
-            </Box>
+              <ActionIcon
+                variant="subtle"
+                onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
+                disabled={!canGoNext}
+                size="lg"
+                sx={(theme) => ({
+                  color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                    : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                })}
+              >
+                <IconChevronRight size={20} />
+              </ActionIcon>
 
-            <Button
-              variant="filled"
-              leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
-              onClick={() => handleDownload(file)}
-              size="sm"
-              sx={{
-                backgroundColor: downloading ? '#e03131' : '#228be6',
-                '&:hover': {
-                  backgroundColor: downloading ? '#c92a2a' : '#1c7ed6'
-                }
-              }}
-            >
-              {downloading ? "Cancel" : "Download"}
-            </Button>
+              <Button
+                variant="filled"
+                leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
+                onClick={() => handleDownload(file)}
+                size="sm"
+                sx={{
+                  backgroundColor: downloading ? '#e03131' : '#228be6',
+                  '&:hover': {
+                    backgroundColor: downloading ? '#c92a2a' : '#1c7ed6'
+                  },
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  '&:active': {
+                    transform: 'translateY(1px)',
+                  }
+                }}
+              >
+                {downloading ? "Cancel" : "Download"}
+              </Button>
+            </Group>
           </Group>
         </Paper>
 
