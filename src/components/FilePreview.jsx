@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Modal, Box, Group, Text, Loader, ActionIcon, Paper, Stack, Progress } from '@mantine/core';
+import { Modal, Box, Group, Text, ActionIcon, Paper, Stack } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconX, IconDownload } from '@tabler/icons-react';
 import { useHotkeys } from '@mantine/hooks';
 import { useState, useEffect } from 'react';
@@ -10,13 +10,11 @@ const FilePreview = ({
   file, 
   onNext, 
   onPrevious,
-  loading,
   files
 }) => {
   const isPdf = file?.mimeType === 'application/pdf';
   const [downloading, setDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
-  const [iframeLoading, setIframeLoading] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
 
   useHotkeys([
     ['ArrowRight', onNext],
@@ -28,20 +26,15 @@ const FilePreview = ({
     if (downloading) return;
     try {
       setDownloading(true);
-      setDownloadProgress(0);
       const response = await fetch(`/api/stream?fileId=${file.id}`, {
         method: 'GET',
       });
       const reader = response.body.getReader();
-      const contentLength = +response.headers.get('Content-Length');
-      let receivedLength = 0;
       const chunks = [];
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         chunks.push(value);
-        receivedLength += value.length;
-        setDownloadProgress(Math.round((receivedLength / contentLength) * 100));
       }
       const blob = new Blob(chunks);
       const url = window.URL.createObjectURL(blob);
@@ -56,11 +49,10 @@ const FilePreview = ({
       console.error('Error downloading file:', error);
     } finally {
       setDownloading(false);
-      setDownloadProgress(0);
     }
   };
 
-  useEffect(() => { setIframeLoading(true); }, [file?.id]);
+  useEffect(() => { setIframeLoaded(false); }, [file?.id]);
 
   if (!file) return null;
 
@@ -197,7 +189,7 @@ const FilePreview = ({
             flex: 1,
             position: 'relative',
             overflow: 'hidden',
-            backgroundColor: 'var(--mantine-color-body)',
+            backgroundColor: '#f3f3f3',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -205,17 +197,38 @@ const FilePreview = ({
           }}
         >
           {isPdf ? (
-            <iframe
-              src={`/api/stream?fileId=${file.id}&inline=true`}
-              style={{
-                width: isMobile ? '100vw' : '100%',
-                height: isMobile ? '100vh' : '100%',
-                border: 'none',
-                background: 'white',
-                paddingTop: isMobile ? 24 : 0,
-              }}
-              title={file.name}
-            />
+            <>
+              {!iframeLoaded && (
+                <Box sx={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1,
+                  pointerEvents: 'none',
+                }}>
+                  <Text size="md" color="dimmed" sx={{ opacity: 0.7 }}>Loading PDF…</Text>
+                </Box>
+              )}
+              <iframe
+                key={file.id}
+                src={`/api/stream?fileId=${file.id}&inline=true`}
+                style={{
+                  width: isMobile ? '100vw' : '100%',
+                  height: isMobile ? '100vh' : '100%',
+                  border: 'none',
+                  background: 'white',
+                  paddingTop: isMobile ? 24 : 0,
+                  zIndex: 2,
+                }}
+                title={file.name}
+                onLoad={() => setIframeLoaded(true)}
+              />
+            </>
           ) : (
             <Group position="center" h="100%">
               <Stack align="center" spacing="xs">
@@ -240,7 +253,6 @@ FilePreview.propTypes = {
   }),
   onNext: PropTypes.func.isRequired,
   onPrevious: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired,
   files: PropTypes.array,
 };
 
