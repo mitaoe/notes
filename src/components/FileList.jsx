@@ -256,7 +256,11 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                             : theme.fn.rgba(theme.colors.gray[0], 0.15),
                         })}
                       >
-                        {downloadingFiles.has(file.id) ? <IconX size={18} /> : <IconDownload size={18} />}
+                        {downloadingFiles.has(file.id) ? (
+                          <IconX size={18} style={{ color: 'var(--mantine-color-red-filled)' }} />
+                        ) : (
+                          <IconDownload size={18} />
+                        )}
                       </ActionIcon>
                       {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
                         <Progress 

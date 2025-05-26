@@ -130,24 +130,22 @@ const FilePreview = ({
             zIndex: 2,
           })}
         >
-          <Group position="apart" align="center" spacing="md" px={40}>
+          <Group position="apart" align="center" spacing="md" px={20}>
             <ActionIcon
               variant="subtle"
               onClick={onClose}
               size="lg"
               sx={(theme) => ({
                 color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
-                '&:hover': {
-                  backgroundColor: theme.colorScheme === 'dark' 
-                    ? theme.fn.rgba(theme.colors.red[8], 0.15)
-                    : theme.fn.rgba(theme.colors.red[0], 0.15),
-                }
+                backgroundColor: theme.colorScheme === 'dark' 
+                  ? theme.fn.rgba(theme.colors.red[8], 0.15)
+                  : theme.fn.rgba(theme.colors.red[0], 0.15),
               })}
             >
               <IconX size={20} />
             </ActionIcon>
 
-            <Group spacing="sm" position="center" sx={{ flex: 1 }} align="center">
+            <Group spacing="xs" position="center" sx={{ flex: 1 }} align="center">
               <ActionIcon
                 variant="subtle"
                 onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
@@ -155,25 +153,27 @@ const FilePreview = ({
                 size="lg"
                 sx={(theme) => ({
                   color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                  backgroundColor: canGoPrevious ? undefined : theme.fn.rgba(theme.colors.gray[8], 0.15),
-                  '&:hover': {
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                  }
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                    : theme.fn.rgba(theme.colors.gray[0], 0.5),
                 })}
               >
                 <IconChevronLeft size={20} />
               </ActionIcon>
               
-              <Stack spacing={0} sx={{ minWidth: 0, maxWidth: '50vw' }} justify="center">
-                <Text size="lg" weight={500} truncate={false} sx={{ wordBreak: 'break-all', textAlign: 'center' }}>
-                  {file.name}
-                </Text>
-                <Text size="sm" color="dimmed" truncate align="center">
-                  {file.mimeType}
-                </Text>
-              </Stack>
+              <Text 
+                size="lg" 
+                weight={500} 
+                sx={{ 
+                  maxWidth: '50vw', 
+                  textAlign: 'center',
+                  overflowX: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {file.name}
+              </Text>
               
               <ActionIcon
                 variant="subtle"
@@ -182,12 +182,9 @@ const FilePreview = ({
                 size="lg"
                 sx={(theme) => ({
                   color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                  backgroundColor: canGoNext ? undefined : theme.fn.rgba(theme.colors.gray[8], 0.15),
-                  '&:hover': {
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                  }
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                    : theme.fn.rgba(theme.colors.gray[0], 0.5),
                 })}
               >
                 <IconChevronRight size={20} />
@@ -195,18 +192,11 @@ const FilePreview = ({
             </Group>
 
             <Button
-              variant="subtle"
-              leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
+              variant="filled"
+              leftIcon={downloading ? <IconX size={18} style={{ color: 'white' }} /> : <IconDownload size={18} />}
               onClick={() => handleDownload(file)}
               size="sm"
-              sx={(theme) => ({
-                color: theme.colorScheme === 'dark' ? theme.colors.cyan[4] : theme.colors.cyan[7],
-                '&:hover': {
-                  backgroundColor: theme.colorScheme === 'dark' 
-                    ? theme.fn.rgba(theme.colors.cyan[8], 0.15)
-                    : theme.fn.rgba(theme.colors.cyan[0], 0.15),
-                }
-              })}
+              color={downloading ? "red" : "cyan"}
             >
               {downloading ? "Cancel" : "Download"}
             </Button>
