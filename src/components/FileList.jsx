@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Table, Group, Text, Button, Box, Loader, Stack, ThemeIcon, Progress, ActionIcon } from '@mantine/core';
 import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
@@ -37,8 +37,15 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   const [downloadProgress, setDownloadProgress] = useState({});
   const [previewFile, setPreviewFile] = useState(null);
   const location = useLocation();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 600);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleDownload = async (file) => {
     if (downloadingFiles.has(file.id)) return;
@@ -55,22 +62,17 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
       const contentLength = +response.headers.get('Content-Length');
       let receivedLength = 0;
 
-      console.debug('Download started:', { fileName: file.name, contentLength });
-
       const chunks = [];
       while(true) {
         const {done, value} = await reader.read();
         if (done) break;
         chunks.push(value);
         receivedLength += value.length;
-        console.debug('Download progress:', { fileName: file.name, receivedLength, contentLength, percent: contentLength ? Math.round((receivedLength / contentLength) * 100) : null });
         setDownloadProgress(prev => ({
           ...prev,
           [file.id]: contentLength ? Math.round((receivedLength / contentLength) * 100) : 0
         }));
       }
-
-      console.debug('Download finished:', { fileName: file.name, receivedLength, contentLength });
 
       const blob = new Blob(chunks);
       const url = window.URL.createObjectURL(blob);
@@ -165,7 +167,66 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
             <EmptyState />
           </Box>
         ) : (
-          <>
+          isMobile ? (
+            <Stack spacing="xs">
+              {files.map((file) => (
+                <Group key={file.id} position="apart" p="md" sx={(theme) => ({
+                  background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+                  borderRadius: theme.radius.sm,
+                  border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+                  boxShadow: theme.shadows.xs,
+                  alignItems: 'center',
+                })}>
+                  <Group spacing="sm" align="center" sx={{ flex: 1, minWidth: 0 }}>
+                    {getFileIcon(file)}
+                    <Box sx={{ minWidth: 0 }}>
+                      <Text className={classes.fileName} size="md" weight={500} truncate>{file.name}</Text>
+                      <Text size="xs" color="dimmed">{file.size ? formatFileSize(file.size) : '-'}</Text>
+                    </Box>
+                  </Group>
+                  {file.mimeType !== 'application/vnd.google-apps.folder' && (
+                    <Group spacing={0}>
+                      {file.mimeType === 'application/pdf' && (
+                        <ActionIcon
+                          variant="subtle"
+                          onClick={() => handlePreview(file)}
+                          size="lg"
+                          title="Preview"
+                          sx={(theme) => ({
+                            color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                            '&:hover': {
+                              backgroundColor: theme.colorScheme === 'dark' 
+                                ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                                : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                            }
+                          })}
+                        >
+                          <IconEye size={18} />
+                        </ActionIcon>
+                      )}
+                      <ActionIcon
+                        variant="subtle"
+                        onClick={() => handleDownload(file)}
+                        size="lg"
+                        loading={downloadingFiles.has(file.id)}
+                        title="Download"
+                        sx={(theme) => ({
+                          color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                          '&:hover': {
+                            backgroundColor: theme.colorScheme === 'dark' 
+                              ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                              : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                          }
+                        })}
+                      >
+                        <IconDownload size={18} />
+                      </ActionIcon>
+                    </Group>
+                  )}
+                </Group>
+              ))}
+            </Stack>
+          ) : (
             <Table className={classes.table} verticalSpacing="sm">
               <thead>
                 <tr>
@@ -266,14 +327,14 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                 ))}
               </tbody>
             </Table>
-            {hasMore && (
-              <Group position="center" mt="md">
-                <Button onClick={onLoadMore} variant="light">
-                  Load More
-                </Button>
-              </Group>
-            )}
-          </>
+          )
+        )}
+        {hasMore && !isMobile && (
+          <Group position="center" mt="md">
+            <Button onClick={onLoadMore} variant="light">
+              Load More
+            </Button>
+          </Group>
         )}
       </Box>
 
