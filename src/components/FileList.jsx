@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Table, Group, Text, Button, Box, Loader, Stack, ThemeIcon } from '@mantine/core';
+import PropTypes from 'prop-types';
+import { Table, Group, Text, Button, Box, Loader, Stack, ThemeIcon, Progress } from '@mantine/core';
 import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router-dom';
@@ -24,7 +25,7 @@ function EmptyState() {
       </ThemeIcon>
       <Text size="xl" weight={500}>Looks rather empty here</Text>
       <Text size="sm" color="dimmed" align="center" px="lg">
-        Much like a professor's office during exam week, this folder appears to be vacant.
+        Much like a professor`&apos;`s office during exam week, this folder appears to be vacant.
       </Text>
     </Stack>
   );
@@ -207,15 +208,29 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                               Preview
                             </Button>
                           )}
-                          <Button
-                            compact
-                            variant="light"
-                            rightIcon={<IconDownload size={16} />}
-                            onClick={() => handleDownload(file)}
-                            loading={downloadingFiles.has(file.id)}
-                          >
-                            Download
-                          </Button>
+                          <Box>
+                            <Button
+                              compact
+                              variant="light"
+                              rightIcon={<IconDownload size={16} />}
+                              onClick={() => handleDownload(file)}
+                              loading={downloadingFiles.has(file.id)}
+                            >
+                              Download
+                            </Button>
+                            {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
+                              <Progress 
+                                value={downloadProgress[file.id]} 
+                                size="xs" 
+                                mt={4}
+                                styles={() => ({
+                                  bar: {
+                                    transition: 'width 200ms ease',
+                                  },
+                                })}
+                              />
+                            )}
+                          </Box>
                         </Group>
                       )}
                     </td>
@@ -245,4 +260,17 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
       />
     </>
   );
-} 
+}
+
+FileList.propTypes = {
+  files: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    mimeType: PropTypes.string.isRequired,
+    size: PropTypes.number,
+  })).isRequired,
+  loading: PropTypes.bool.isRequired,
+  onLoadMore: PropTypes.func.isRequired,
+  hasMore: PropTypes.bool.isRequired,
+  onFolderClick: PropTypes.func.isRequired,
+}; 

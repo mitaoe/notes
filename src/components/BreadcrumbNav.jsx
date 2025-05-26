@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { Paper, Breadcrumbs, Anchor, Box, ActionIcon, Group } from '@mantine/core';
 import { IconChevronRight, IconChevronLeft } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
@@ -189,4 +190,8 @@ export function BreadcrumbNav({ pathSegments }) {
       </Group>
     </Paper>
   );
-} 
+}
+
+BreadcrumbNav.propTypes = {
+  pathSegments: PropTypes.arrayOf(PropTypes.string).isRequired,
+}; 

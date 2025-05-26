@@ -6,7 +6,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useSearch } from '../contexts/SearchContext';
 import driveService from '../services/driveService';
 
-export function Search() {
+const Search = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { 
@@ -24,7 +24,7 @@ export function Search() {
     if (queryParam && queryParam !== searchQuery) {
       setSearchQuery(queryParam);
     }
-  }, [searchParams]);
+  }, [searchParams, searchQuery, setSearchQuery]);
 
   const handleFolderClick = async (folder) => {
     const path = await driveService.findPathById(folder.id);
@@ -93,4 +93,6 @@ export function Search() {
       />
     </Box>
   );
-} 
+};
+
+export default Search; 

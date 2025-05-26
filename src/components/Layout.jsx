@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme } from '@mantine/core';
 import { Link, useLocation } from 'react-router-dom';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
@@ -6,7 +7,7 @@ import { config, uiConfig } from '../config';
 import { useSearch } from '../contexts/SearchContext';
 import { SearchBar } from './SearchBar';
 
-export function Layout({ children }) {
+const Layout = ({ children }) => {
   const theme = useMantineTheme();
   const location = useLocation();
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
@@ -150,4 +151,10 @@ export function Layout({ children }) {
       </Container>
     </AppShell>
   );
-} 
+};
+
+Layout.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export default Layout; 

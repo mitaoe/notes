@@ -1,17 +1,16 @@
-import React, { useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { Modal, Box, Group, Button, Text, Loader } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconX } from '@tabler/icons-react';
 import { useHotkeys } from '@mantine/hooks';
 
-export function FilePreview({ 
+const FilePreview = ({ 
   opened, 
   onClose, 
   file, 
-  files, 
   onNext, 
   onPrevious,
   loading 
-}) {
+}) => {
   const isPdf = file?.mimeType === 'application/pdf';
 
   useHotkeys([
@@ -122,4 +121,19 @@ export function FilePreview({
       </Box>
     </Modal>
   );
-} 
+};
+
+FilePreview.propTypes = {
+  opened: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  file: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    mimeType: PropTypes.string.isRequired,
+  }),
+  onNext: PropTypes.func.isRequired,
+  onPrevious: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
+};
+
+export default FilePreview; 

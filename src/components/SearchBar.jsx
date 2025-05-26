@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { TextInput, ActionIcon } from '@mantine/core';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import { useSearch } from '../contexts/SearchContext';
 import { useClickOutside } from '@mantine/hooks';
 import { useLocation } from 'react-router-dom';
 
-export function SearchBar({ isMobile = false, onSearchClose }) {
+const SearchBar = ({ isMobile = false, onSearchClose }) => {
   const location = useLocation();
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const { 
@@ -140,4 +141,16 @@ export function SearchBar({ isMobile = false, onSearchClose }) {
       />
     </form>
   );
-} 
+};
+
+SearchBar.propTypes = {
+  isMobile: PropTypes.bool,
+  onSearchClose: PropTypes.func,
+};
+
+SearchBar.defaultProps = {
+  isMobile: false,
+  onSearchClose: undefined,
+};
+
+export default SearchBar; 
