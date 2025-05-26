@@ -15,6 +15,10 @@ export const useStyles = createStyles((theme) => ({
         padding: '8px',
       },
     },
+    '@media (max-width: 600px)': {
+      fontSize: '13px',
+      minWidth: 400,
+    },
   },
   emptyStateWrapper: {
     backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,

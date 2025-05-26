@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Table, Group, Text, Button, Box, Loader, Stack, ThemeIcon, Progress } from '@mantine/core';
+import { Table, Group, Text, Button, Box, Loader, Stack, ThemeIcon, Progress, ActionIcon } from '@mantine/core';
 import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router-dom';
@@ -201,11 +201,11 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                           <Box>
                             <Group spacing={4}>
                               {file.mimeType === 'application/pdf' && (
-                                <Button
-                                  compact
+                                <ActionIcon
                                   variant="subtle"
-                                  leftIcon={<IconEye size={16} />}
                                   onClick={() => handlePreview(file)}
+                                  size="lg"
+                                  title="Preview"
                                   sx={(theme) => ({
                                     color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
                                     '&:hover': {
@@ -215,15 +215,15 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                                     }
                                   })}
                                 >
-                                  Preview
-                                </Button>
+                                  <IconEye size={18} />
+                                </ActionIcon>
                               )}
-                              <Button
-                                compact
+                              <ActionIcon
                                 variant="subtle"
-                                leftIcon={<IconDownload size={16} />}
                                 onClick={() => handleDownload(file)}
+                                size="lg"
                                 loading={downloadingFiles.has(file.id)}
+                                title="Download"
                                 sx={(theme) => ({
                                   color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
                                   '&:hover': {
@@ -233,8 +233,8 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                                   }
                                 })}
                               >
-                                Download
-                              </Button>
+                                <IconDownload size={18} />
+                              </ActionIcon>
                             </Group>
                             {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
                               <Progress 
