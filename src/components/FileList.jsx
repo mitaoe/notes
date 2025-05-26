@@ -250,9 +250,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                         size="lg"
                         title={downloadingFiles.has(file.id) ? "Cancel Download" : "Download"}
                         sx={(theme) => ({
-                          color: downloadingFiles.has(file.id)
-                            ? (theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7])
-                            : (theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[7]),
+                          color: downloadingFiles.has(file.id) ? '#e03131' : '#228be6',
                           backgroundColor: theme.colorScheme === 'dark' 
                             ? theme.fn.rgba(theme.colors.gray[8], 0.15)
                             : theme.fn.rgba(theme.colors.gray[0], 0.15),
