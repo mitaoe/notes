@@ -128,10 +128,14 @@ const FilePreview = ({
             borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
             backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
             zIndex: 2,
+            display: 'flex',
+            alignItems: 'center',
+            height: 64,
           })}
         >
-          <Group position="center" align="center" spacing="xs" px={0} sx={{ width: '100%' }}>
-            <Group spacing="xs" align="center" position="center" sx={{ flex: 1 }}>
+          <Group sx={{ width: '100%', position: 'relative' }} position="apart" noWrap>
+            {/* Left side with close and previous buttons */}
+            <Group spacing="sm" noWrap>
               <ActionIcon
                 variant="subtle"
                 onClick={onClose}
@@ -145,7 +149,7 @@ const FilePreview = ({
               >
                 <IconX size={20} />
               </ActionIcon>
-
+              
               <ActionIcon
                 variant="subtle"
                 onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
@@ -156,16 +160,19 @@ const FilePreview = ({
                   backgroundColor: theme.colorScheme === 'dark' 
                     ? theme.fn.rgba(theme.colors.gray[8], 0.5)
                     : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                  opacity: canGoPrevious ? 1 : 0.5,
                 })}
               >
                 <IconChevronLeft size={20} />
               </ActionIcon>
-              
+            </Group>
+            
+            {/* Center - filename */}
+            <Box sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', maxWidth: '40%' }}>
               <Text 
                 size="lg" 
                 weight={500} 
                 sx={{ 
-                  maxWidth: '50%', 
                   textAlign: 'center',
                   overflowX: 'hidden',
                   textOverflow: 'ellipsis',
@@ -174,7 +181,10 @@ const FilePreview = ({
               >
                 {file.name}
               </Text>
-              
+            </Box>
+            
+            {/* Right side with next and download buttons */}
+            <Group spacing="sm" noWrap>
               <ActionIcon
                 variant="subtle"
                 onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
@@ -185,6 +195,7 @@ const FilePreview = ({
                   backgroundColor: theme.colorScheme === 'dark' 
                     ? theme.fn.rgba(theme.colors.gray[8], 0.5)
                     : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                  opacity: canGoNext ? 1 : 0.5,
                 })}
               >
                 <IconChevronRight size={20} />
@@ -195,18 +206,22 @@ const FilePreview = ({
                 leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
                 onClick={() => handleDownload(file)}
                 size="sm"
-                sx={{
-                  backgroundColor: downloading ? '#e03131' : '#228be6',
-                  '&:hover': {
-                    backgroundColor: downloading ? '#c92a2a' : '#1c7ed6'
+                styles={() => ({
+                  root: {
+                    backgroundColor: downloading ? '#e03131' : '#228be6',
+                    '&:hover': {
+                      backgroundColor: downloading ? '#c92a2a' : '#1c7ed6'
+                    },
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                    fontWeight: 600,
+                    transition: 'all 0.2s ease',
+                    height: 36,
+                    borderRadius: 4,
                   },
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  '&:active': {
-                    transform: 'translateY(1px)',
+                  leftIcon: {
+                    marginRight: 8,
                   }
-                }}
+                })}
               >
                 {downloading ? "Cancel" : "Download"}
               </Button>
