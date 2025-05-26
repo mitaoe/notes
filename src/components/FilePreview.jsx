@@ -173,24 +173,6 @@ const FilePreview = ({
               >
                 <IconDownload size={isMobile ? 18 : 20} />
               </ActionIcon>
-              {downloading && (
-                <Progress
-                  value={downloadProgress}
-                  size={isMobile ? 'xs' : 'sm'}
-                  radius="xl"
-                  mt={isMobile ? 4 : 8}
-                  styles={{
-                    bar: {
-                      background: 'linear-gradient(90deg, #00ffea 0%, #00ff6a 100%)',
-                      transition: 'width 200ms ease',
-                    },
-                    root: {
-                      background: 'rgba(0,255,234,0.08)',
-                      boxShadow: '0 0 4px #00ffea, 0 0 8px #00ff6a',
-                    },
-                  }}
-                />
-              )}
               <ActionIcon
                 variant="subtle"
                 size={isMobile ? 'md' : 'lg'}
@@ -222,11 +204,7 @@ const FilePreview = ({
             padding: isMobile ? 0 : 16,
           }}
         >
-          {loading ? (
-            <Group position="center" h="100%">
-              <Loader size="lg" />
-            </Group>
-          ) : isPdf ? (
+          {isPdf ? (
             <iframe
               src={`/api/stream?fileId=${file.id}&inline=true`}
               style={{
@@ -234,9 +212,9 @@ const FilePreview = ({
                 height: isMobile ? '100vh' : '100%',
                 border: 'none',
                 background: 'white',
+                paddingTop: isMobile ? 24 : 0,
               }}
               title={file.name}
-              onLoad={() => setIframeLoading(false)}
             />
           ) : (
             <Group position="center" h="100%">
@@ -244,11 +222,6 @@ const FilePreview = ({
                 <Text size="xl" color="dimmed">Preview not available</Text>
                 <Text size="sm" color="dimmed">This file type cannot be previewed</Text>
               </Stack>
-            </Group>
-          )}
-          {iframeLoading && (
-            <Group position="center" h="100%">
-              <Loader size="lg" />
             </Group>
           )}
         </Box>

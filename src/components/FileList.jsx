@@ -195,7 +195,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     </Box>
                   </Group>
                   {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                    <Group spacing={0}>
+                    <Group spacing={0} direction="column" align="center">
                       {file.mimeType === 'application/pdf' && (
                         <ActionIcon
                           variant="subtle"
@@ -204,54 +204,52 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                           title="Preview"
                           sx={(theme) => ({
                             color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                            '&:hover': {
-                              backgroundColor: theme.colorScheme === 'dark' 
-                                ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                                : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                            }
+                            backgroundColor: theme.colorScheme === 'dark' 
+                              ? theme.fn.rgba(theme.colors.gray[8], 0.15)
+                              : theme.fn.rgba(theme.colors.gray[0], 0.15),
                           })}
                         >
                           <IconEye size={18} />
                         </ActionIcon>
                       )}
-                      <ActionIcon
-                        variant="subtle"
-                        onClick={() => handleDownload(file)}
-                        size="lg"
-                        loading={downloadingFiles.has(file.id)}
-                        title="Download"
-                        sx={(theme) => ({
-                          color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                          '&:hover': {
+                      <Box>
+                        <ActionIcon
+                          variant="subtle"
+                          onClick={() => handleDownload(file)}
+                          size="lg"
+                          loading={downloadingFiles.has(file.id)}
+                          title="Download"
+                          sx={(theme) => ({
+                            color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
                             backgroundColor: theme.colorScheme === 'dark' 
-                              ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                              : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                          }
-                        })}
-                      >
-                        <IconDownload size={18} />
-                      </ActionIcon>
+                              ? theme.fn.rgba(theme.colors.gray[8], 0.15)
+                              : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                          })}
+                        >
+                          <IconDownload size={18} />
+                        </ActionIcon>
+                        {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
+                          <Progress 
+                            value={downloadProgress[file.id]} 
+                            size="xs" 
+                            mt={4}
+                            styles={(theme) => ({
+                              bar: {
+                                transition: 'width 200ms ease',
+                                backgroundColor: theme.colorScheme === 'dark' 
+                                  ? theme.colors.blue[4] 
+                                  : theme.colors.blue[6],
+                              },
+                              root: {
+                                backgroundColor: theme.colorScheme === 'dark'
+                                  ? theme.fn.rgba(theme.colors.blue[9], 0.15)
+                                  : theme.fn.rgba(theme.colors.blue[0], 0.5),
+                              }
+                            })}
+                          />
+                        )}
+                      </Box>
                     </Group>
-                  )}
-                  {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
-                    <Progress 
-                      value={downloadProgress[file.id]} 
-                      size="xs" 
-                      mt={4}
-                      styles={(theme) => ({
-                        bar: {
-                          transition: 'width 200ms ease',
-                          backgroundColor: theme.colorScheme === 'dark' 
-                            ? theme.colors.blue[4] 
-                            : theme.colors.blue[6],
-                        },
-                        root: {
-                          backgroundColor: theme.colorScheme === 'dark'
-                            ? theme.fn.rgba(theme.colors.blue[9], 0.15)
-                            : theme.fn.rgba(theme.colors.blue[0], 0.5),
-                        }
-                      })}
-                    />
                   )}
                 </Group>
               ))}
@@ -290,45 +288,39 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     </td>
                     <td>
                       {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                        <Group spacing="xs">
+                        <Group spacing={0} direction="column" align="center">
+                          {file.mimeType === 'application/pdf' && (
+                            <ActionIcon
+                              variant="subtle"
+                              onClick={() => handlePreview(file)}
+                              size="lg"
+                              title="Preview"
+                              sx={(theme) => ({
+                                color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                                backgroundColor: theme.colorScheme === 'dark' 
+                                  ? theme.fn.rgba(theme.colors.gray[8], 0.15)
+                                  : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                              })}
+                            >
+                              <IconEye size={18} />
+                            </ActionIcon>
+                          )}
                           <Box>
-                            <Group spacing={4}>
-                              {file.mimeType === 'application/pdf' && (
-                                <ActionIcon
-                                  variant="subtle"
-                                  onClick={() => handlePreview(file)}
-                                  size="lg"
-                                  title="Preview"
-                                  sx={(theme) => ({
-                                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                                    '&:hover': {
-                                      backgroundColor: theme.colorScheme === 'dark' 
-                                        ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                                        : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                                    }
-                                  })}
-                                >
-                                  <IconEye size={18} />
-                                </ActionIcon>
-                              )}
-                              <ActionIcon
-                                variant="subtle"
-                                onClick={() => handleDownload(file)}
-                                size="lg"
-                                loading={downloadingFiles.has(file.id)}
-                                title="Download"
-                                sx={(theme) => ({
-                                  color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                                  '&:hover': {
-                                    backgroundColor: theme.colorScheme === 'dark' 
-                                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                                  }
-                                })}
-                              >
-                                <IconDownload size={18} />
-                              </ActionIcon>
-                            </Group>
+                            <ActionIcon
+                              variant="subtle"
+                              onClick={() => handleDownload(file)}
+                              size="lg"
+                              loading={downloadingFiles.has(file.id)}
+                              title="Download"
+                              sx={(theme) => ({
+                                color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                                backgroundColor: theme.colorScheme === 'dark' 
+                                  ? theme.fn.rgba(theme.colors.gray[8], 0.15)
+                                  : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                              })}
+                            >
+                              <IconDownload size={18} />
+                            </ActionIcon>
                             {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
                               <Progress 
                                 value={downloadProgress[file.id]} 
