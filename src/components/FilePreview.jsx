@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Modal, Box, Group, Text, Loader, ActionIcon, Paper, Stack, Progress } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconX, IconDownload } from '@tabler/icons-react';
 import { useHotkeys } from '@mantine/hooks';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const FilePreview = ({ 
   opened, 
@@ -10,11 +10,13 @@ const FilePreview = ({
   file, 
   onNext, 
   onPrevious,
-  loading
+  loading,
+  files
 }) => {
   const isPdf = file?.mimeType === 'application/pdf';
   const [downloading, setDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
+  const [iframeLoading, setIframeLoading] = useState(false);
 
   useHotkeys([
     ['ArrowRight', onNext],
@@ -58,10 +60,18 @@ const FilePreview = ({
     }
   };
 
+  useEffect(() => { setIframeLoading(true); }, [file?.id]);
+
   if (!file) return null;
 
   // Responsive: Only icons on mobile
   const isMobile = window.innerWidth <= 600;
+
+  // Only allow navigation between previewable files (PDFs)
+  const previewableFiles = files?.filter(f => f.mimeType === 'application/pdf') || [];
+  const currentIndex = previewableFiles.findIndex(f => f.id === file?.id);
+  const canGoPrevious = currentIndex > 0;
+  const canGoNext = currentIndex < previewableFiles.length - 1;
 
   return (
     <Modal
@@ -103,11 +113,12 @@ const FilePreview = ({
             <Group spacing={isMobile ? 0 : 'xs'}>
               <ActionIcon
                 variant="subtle"
-                onClick={onPrevious}
-                disabled={!onPrevious}
+                onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
+                disabled={!canGoPrevious}
                 size={isMobile ? 'md' : 'lg'}
                 sx={(theme) => ({
                   color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                  backgroundColor: canGoPrevious ? undefined : theme.fn.rgba(theme.colors.gray[8], 0.15),
                   '&:hover': {
                     backgroundColor: theme.colorScheme === 'dark' 
                       ? theme.fn.rgba(theme.colors.gray[8], 0.5)
@@ -119,11 +130,12 @@ const FilePreview = ({
               </ActionIcon>
               <ActionIcon
                 variant="subtle"
-                onClick={onNext}
-                disabled={!onNext}
+                onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
+                disabled={!canGoNext}
                 size={isMobile ? 'md' : 'lg'}
                 sx={(theme) => ({
                   color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                  backgroundColor: canGoNext ? undefined : theme.fn.rgba(theme.colors.gray[8], 0.15),
                   '&:hover': {
                     backgroundColor: theme.colorScheme === 'dark' 
                       ? theme.fn.rgba(theme.colors.gray[8], 0.5)
@@ -161,6 +173,24 @@ const FilePreview = ({
               >
                 <IconDownload size={isMobile ? 18 : 20} />
               </ActionIcon>
+              {downloading && (
+                <Progress
+                  value={downloadProgress}
+                  size={isMobile ? 'xs' : 'sm'}
+                  radius="xl"
+                  mt={isMobile ? 4 : 8}
+                  styles={{
+                    bar: {
+                      background: 'linear-gradient(90deg, #00ffea 0%, #00ff6a 100%)',
+                      transition: 'width 200ms ease',
+                    },
+                    root: {
+                      background: 'rgba(0,255,234,0.08)',
+                      boxShadow: '0 0 4px #00ffea, 0 0 8px #00ff6a',
+                    },
+                  }}
+                />
+              )}
               <ActionIcon
                 variant="subtle"
                 size={isMobile ? 'md' : 'lg'}
@@ -206,6 +236,7 @@ const FilePreview = ({
                 background: 'white',
               }}
               title={file.name}
+              onLoad={() => setIframeLoading(false)}
             />
           ) : (
             <Group position="center" h="100%">
@@ -213,6 +244,11 @@ const FilePreview = ({
                 <Text size="xl" color="dimmed">Preview not available</Text>
                 <Text size="sm" color="dimmed">This file type cannot be previewed</Text>
               </Stack>
+            </Group>
+          )}
+          {iframeLoading && (
+            <Group position="center" h="100%">
+              <Loader size="lg" />
             </Group>
           )}
         </Box>

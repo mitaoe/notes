@@ -180,7 +180,17 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                   <Group spacing="sm" align="center" sx={{ flex: 1, minWidth: 0 }}>
                     {getFileIcon(file)}
                     <Box sx={{ minWidth: 0 }}>
-                      <Text className={classes.fileName} size="md" weight={500} truncate>{file.name}</Text>
+                      {file.mimeType === 'application/vnd.google-apps.folder' ? (
+                        <Text
+                          className={classes.link}
+                          onClick={() => onFolderClick(file)}
+                          sx={{ cursor: 'pointer' }}
+                        >
+                          {file.name}
+                        </Text>
+                      ) : (
+                        <Text className={classes.fileName} size="md" weight={500} truncate>{file.name}</Text>
+                      )}
                       <Text size="xs" color="dimmed">{file.size ? formatFileSize(file.size) : '-'}</Text>
                     </Box>
                   </Group>
@@ -222,6 +232,26 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                         <IconDownload size={18} />
                       </ActionIcon>
                     </Group>
+                  )}
+                  {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
+                    <Progress 
+                      value={downloadProgress[file.id]} 
+                      size="xs" 
+                      mt={4}
+                      styles={(theme) => ({
+                        bar: {
+                          transition: 'width 200ms ease',
+                          backgroundColor: theme.colorScheme === 'dark' 
+                            ? theme.colors.blue[4] 
+                            : theme.colors.blue[6],
+                        },
+                        root: {
+                          backgroundColor: theme.colorScheme === 'dark'
+                            ? theme.fn.rgba(theme.colors.blue[9], 0.15)
+                            : theme.fn.rgba(theme.colors.blue[0], 0.5),
+                        }
+                      })}
+                    />
                   )}
                 </Group>
               ))}
@@ -342,7 +372,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
         opened={!!previewFile}
         onClose={handlePreviewClose}
         file={previewFile}
-        files={files}
+        files={files.filter(f => f.mimeType === 'application/pdf')}
         onNext={handleNextFile}
         onPrevious={handlePreviousFile}
         loading={false}
