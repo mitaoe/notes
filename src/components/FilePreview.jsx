@@ -85,9 +85,6 @@ const FilePreview = ({
 
   if (!file) return null;
 
-  // Responsive: Only icons on mobile
-  const isMobile = window.innerWidth <= 600;
-
   // Only allow navigation between previewable files (PDFs)
   const previewableFiles = files?.filter(f => f.mimeType === 'application/pdf') || [];
   const currentIndex = previewableFiles.findIndex(f => f.id === file?.id);
@@ -133,23 +130,25 @@ const FilePreview = ({
             height: 64,
           })}
         >
-          <Group sx={{ width: '100%', position: 'relative' }} position="apart" noWrap>
-            {/* Left side with close and previous buttons */}
-            <Group spacing="sm" noWrap>
-              <ActionIcon
-                variant="subtle"
-                onClick={onClose}
-                size="lg"
-                sx={(theme) => ({
-                  color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
-                  backgroundColor: theme.colorScheme === 'dark' 
-                    ? theme.fn.rgba(theme.colors.red[8], 0.15)
-                    : theme.fn.rgba(theme.colors.red[0], 0.15),
-                })}
-              >
-                <IconX size={20} />
-              </ActionIcon>
-              
+          <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px' }}>
+            {/* Left section: Close button */}
+            <ActionIcon
+              variant="subtle"
+              onClick={onClose}
+              size="lg"
+              ml={4}
+              sx={(theme) => ({
+                color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
+                backgroundColor: theme.colorScheme === 'dark' 
+                  ? theme.fn.rgba(theme.colors.red[8], 0.15)
+                  : theme.fn.rgba(theme.colors.red[0], 0.15),
+              })}
+            >
+              <IconX size={20} />
+            </ActionIcon>
+            
+            {/* Navigation group - prev button, filename, next button */}
+            <Group position="center" spacing="xl" sx={{ flex: 1, maxWidth: 'calc(100% - 220px)', margin: '0 auto' }}>
               <ActionIcon
                 variant="subtle"
                 onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
@@ -165,14 +164,12 @@ const FilePreview = ({
               >
                 <IconChevronLeft size={20} />
               </ActionIcon>
-            </Group>
-            
-            {/* Center - filename */}
-            <Box sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', maxWidth: '40%' }}>
+              
               <Text 
                 size="lg" 
                 weight={500} 
                 sx={{ 
+                  maxWidth: 'calc(100% - 100px)',
                   textAlign: 'center',
                   overflowX: 'hidden',
                   textOverflow: 'ellipsis',
@@ -181,10 +178,7 @@ const FilePreview = ({
               >
                 {file.name}
               </Text>
-            </Box>
-            
-            {/* Right side with next and download buttons */}
-            <Group spacing="sm" noWrap>
+              
               <ActionIcon
                 variant="subtle"
                 onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
@@ -200,33 +194,35 @@ const FilePreview = ({
               >
                 <IconChevronRight size={20} />
               </ActionIcon>
-
-              <Button
-                variant="filled"
-                leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
-                onClick={() => handleDownload(file)}
-                size="sm"
-                styles={() => ({
-                  root: {
-                    backgroundColor: downloading ? '#e03131' : '#228be6',
-                    '&:hover': {
-                      backgroundColor: downloading ? '#c92a2a' : '#1c7ed6'
-                    },
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                    fontWeight: 600,
-                    transition: 'all 0.2s ease',
-                    height: 36,
-                    borderRadius: 4,
-                  },
-                  leftIcon: {
-                    marginRight: 8,
-                  }
-                })}
-              >
-                {downloading ? "Cancel" : "Download"}
-              </Button>
             </Group>
-          </Group>
+            
+            {/* Download button */}
+            <Button
+              variant="filled"
+              leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
+              onClick={() => handleDownload(file)}
+              size="sm"
+              mr={4}
+              styles={() => ({
+                root: {
+                  backgroundColor: downloading ? '#e03131' : '#228be6',
+                  '&:hover': {
+                    backgroundColor: downloading ? '#c92a2a' : '#1c7ed6'
+                  },
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                  height: 36,
+                  borderRadius: 4,
+                },
+                leftIcon: {
+                  marginRight: 8,
+                }
+              })}
+            >
+              {downloading ? "Cancel" : "Download"}
+            </Button>
+          </Box>
         </Paper>
 
         {/* Content */}
