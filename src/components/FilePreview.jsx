@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
-import { Modal, Box, Group, Text, ActionIcon, Paper, Stack } from '@mantine/core';
+import { Modal, Box, Group, Text, ActionIcon, Paper, Stack, Button } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconX, IconDownload } from '@tabler/icons-react';
 import { useHotkeys } from '@mantine/hooks';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const FilePreview = ({ 
   opened, 
@@ -15,6 +15,7 @@ const FilePreview = ({
   const isPdf = file?.mimeType === 'application/pdf';
   const [downloading, setDownloading] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const abortControllerRef = useRef(null);
 
   useHotkeys([
     ['ArrowRight', onNext],
@@ -23,12 +24,26 @@ const FilePreview = ({
   ]);
 
   const handleDownload = async (file) => {
-    if (downloading) return;
+    if (downloading) {
+      // Cancel the download
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+      setDownloading(false);
+      return;
+    }
+    
     try {
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
       setDownloading(true);
+      
       const response = await fetch(`/api/stream?fileId=${file.id}`, {
         method: 'GET',
+        signal: controller.signal,
       });
+      
       const reader = response.body.getReader();
       const chunks = [];
       while (true) {
@@ -36,6 +51,7 @@ const FilePreview = ({
         if (done) break;
         chunks.push(value);
       }
+      
       const blob = new Blob(chunks);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -46,13 +62,26 @@ const FilePreview = ({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Error downloading file:', error);
+      if (error.name !== 'AbortError') {
+        console.error('Error downloading file:', error);
+      }
     } finally {
+      abortControllerRef.current = null;
       setDownloading(false);
     }
   };
 
   useEffect(() => { setIframeLoaded(false); }, [file?.id]);
+
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
+  }, []);
 
   if (!file) return null;
 
@@ -94,20 +123,36 @@ const FilePreview = ({
       >
         {/* Header */}
         <Paper
-          p={isMobile ? 'xs' : 'md'}
+          p="md"
           sx={(theme) => ({
             borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
             backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
             zIndex: 2,
           })}
         >
-          <Group position="apart" align="center" spacing={isMobile ? 'xs' : 'md'}>
-            <Group spacing={isMobile ? 0 : 'xs'}>
+          <Group position="apart" align="center" spacing="md" px={40}>
+            <ActionIcon
+              variant="subtle"
+              onClick={onClose}
+              size="lg"
+              sx={(theme) => ({
+                color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
+                '&:hover': {
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.red[8], 0.15)
+                    : theme.fn.rgba(theme.colors.red[0], 0.15),
+                }
+              })}
+            >
+              <IconX size={20} />
+            </ActionIcon>
+
+            <Group spacing="sm" position="center" sx={{ flex: 1 }} align="center">
               <ActionIcon
                 variant="subtle"
                 onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
                 disabled={!canGoPrevious}
-                size={isMobile ? 'md' : 'lg'}
+                size="lg"
                 sx={(theme) => ({
                   color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
                   backgroundColor: canGoPrevious ? undefined : theme.fn.rgba(theme.colors.gray[8], 0.15),
@@ -118,13 +163,23 @@ const FilePreview = ({
                   }
                 })}
               >
-                <IconChevronLeft size={isMobile ? 18 : 20} />
+                <IconChevronLeft size={20} />
               </ActionIcon>
+              
+              <Stack spacing={0} sx={{ minWidth: 0, maxWidth: '50vw' }} justify="center">
+                <Text size="lg" weight={500} truncate={false} sx={{ wordBreak: 'break-all', textAlign: 'center' }}>
+                  {file.name}
+                </Text>
+                <Text size="sm" color="dimmed" truncate align="center">
+                  {file.mimeType}
+                </Text>
+              </Stack>
+              
               <ActionIcon
                 variant="subtle"
                 onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
                 disabled={!canGoNext}
-                size={isMobile ? 'md' : 'lg'}
+                size="lg"
                 sx={(theme) => ({
                   color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
                   backgroundColor: canGoNext ? undefined : theme.fn.rgba(theme.colors.gray[8], 0.15),
@@ -135,54 +190,29 @@ const FilePreview = ({
                   }
                 })}
               >
-                <IconChevronRight size={isMobile ? 18 : 20} />
+                <IconChevronRight size={20} />
               </ActionIcon>
             </Group>
-            <Stack spacing={0} sx={{ minWidth: 0, flex: 1, maxWidth: isMobile ? '60vw' : '100vw' }}>
-              <Text size={isMobile ? 'md' : 'lg'} weight={500} truncate={false} sx={{ wordBreak: 'break-all', textAlign: 'center' }}>
-                {file.name}
-              </Text>
-              {!isMobile && (
-                <Text size="sm" color="dimmed" truncate>
-                  {file.mimeType}
-                </Text>
-              )}
-            </Stack>
-            <Group spacing={isMobile ? 0 : 'xs'}>
-              <ActionIcon
-                variant="subtle"
-                size={isMobile ? 'md' : 'lg'}
-                onClick={() => handleDownload(file)}
-                loading={downloading}
-                sx={(theme) => ({
-                  color: theme.colorScheme === 'dark' ? theme.colors.cyan[4] : theme.colors.cyan[7],
-                  '&:hover': {
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.cyan[8], 0.15)
-                      : theme.fn.rgba(theme.colors.cyan[0], 0.15),
-                  }
-                })}
-              >
-                <IconDownload size={isMobile ? 18 : 20} />
-              </ActionIcon>
-              <ActionIcon
-                variant="subtle"
-                size={isMobile ? 'md' : 'lg'}
-                onClick={onClose}
-                sx={(theme) => ({
-                  color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
-                  '&:hover': {
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.red[8], 0.15)
-                      : theme.fn.rgba(theme.colors.red[0], 0.15),
-                  }
-                })}
-              >
-                <IconX size={isMobile ? 18 : 20} />
-              </ActionIcon>
-            </Group>
+
+            <Button
+              variant="subtle"
+              leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
+              onClick={() => handleDownload(file)}
+              size="sm"
+              sx={(theme) => ({
+                color: theme.colorScheme === 'dark' ? theme.colors.cyan[4] : theme.colors.cyan[7],
+                '&:hover': {
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.cyan[8], 0.15)
+                    : theme.fn.rgba(theme.colors.cyan[0], 0.15),
+                }
+              })}
+            >
+              {downloading ? "Cancel" : "Download"}
+            </Button>
           </Group>
         </Paper>
+
         {/* Content */}
         <Box
           sx={{
@@ -193,7 +223,7 @@ const FilePreview = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: isMobile ? 0 : 16,
+            padding: 16,
           }}
         >
           {isPdf ? (
@@ -218,11 +248,10 @@ const FilePreview = ({
                 key={file.id}
                 src={`/api/stream?fileId=${file.id}&inline=true`}
                 style={{
-                  width: isMobile ? '100vw' : '100%',
-                  height: isMobile ? '100vh' : '100%',
+                  width: '100%',
+                  height: '100%',
                   border: 'none',
                   background: 'transparent',
-                  paddingTop: isMobile ? 24 : 0,
                   zIndex: 2,
                 }}
                 title={file.name}

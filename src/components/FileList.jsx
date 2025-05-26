@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Group, Text, Button, Box, Loader, Stack, ThemeIcon, Progress, ActionIcon } from '@mantine/core';
-import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
+import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye, IconX } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router-dom';
 import { BreadcrumbNav } from './BreadcrumbNav';
@@ -38,6 +38,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   const [previewFile, setPreviewFile] = useState(null);
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const abortControllersRef = useRef({});
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
@@ -48,14 +49,38 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   }, []);
 
   const handleDownload = async (file) => {
-    if (downloadingFiles.has(file.id)) return;
+    if (downloadingFiles.has(file.id)) {
+      // Cancel the download
+      if (abortControllersRef.current[file.id]) {
+        abortControllersRef.current[file.id].abort();
+        delete abortControllersRef.current[file.id];
+      }
+      
+      setDownloadingFiles(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(file.id);
+        return newSet;
+      });
+      
+      setDownloadProgress(prev => {
+        const newProgress = { ...prev };
+        delete newProgress[file.id];
+        return newProgress;
+      });
+      
+      return;
+    }
 
     try {
+      const controller = new AbortController();
+      abortControllersRef.current[file.id] = controller;
+      
       setDownloadingFiles(prev => new Set(prev).add(file.id));
       setDownloadProgress(prev => ({ ...prev, [file.id]: 0 }));
 
       const response = await fetch(`/api/stream?fileId=${file.id}`, {
         method: 'GET',
+        signal: controller.signal,
       });
 
       const reader = response.body.getReader();
@@ -84,13 +109,18 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Error downloading file:', error);
+      if (error.name !== 'AbortError') {
+        console.error('Error downloading file:', error);
+      }
     } finally {
+      delete abortControllersRef.current[file.id];
+      
       setDownloadingFiles(prev => {
         const newSet = new Set(prev);
         newSet.delete(file.id);
         return newSet;
       });
+      
       setDownloadProgress(prev => {
         const newProgress = { ...prev };
         delete newProgress[file.id];
@@ -218,8 +248,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                         variant="subtle"
                         onClick={() => handleDownload(file)}
                         size="lg"
-                        loading={downloadingFiles.has(file.id)}
-                        title="Download"
+                        title={downloadingFiles.has(file.id) ? "Cancel Download" : "Download"}
                         sx={(theme) => ({
                           color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
                           backgroundColor: theme.colorScheme === 'dark' 
@@ -227,7 +256,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                             : theme.fn.rgba(theme.colors.gray[0], 0.15),
                         })}
                       >
-                        <IconDownload size={18} />
+                        {downloadingFiles.has(file.id) ? <IconX size={18} /> : <IconDownload size={18} />}
                       </ActionIcon>
                       {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
                         <Progress 
