@@ -189,7 +189,7 @@ const FilePreview = ({
             flex: 1,
             position: 'relative',
             overflow: 'hidden',
-            backgroundColor: '#f3f3f3',
+            backgroundColor: '#181A1B',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -211,7 +211,7 @@ const FilePreview = ({
                   zIndex: 1,
                   pointerEvents: 'none',
                 }}>
-                  <Text size="md" color="dimmed" sx={{ opacity: 0.7 }}>Loading PDF…</Text>
+                  <Text size="md" color="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
                 </Box>
               )}
               <iframe
@@ -221,7 +221,7 @@ const FilePreview = ({
                   width: isMobile ? '100vw' : '100%',
                   height: isMobile ? '100vh' : '100%',
                   border: 'none',
-                  background: 'white',
+                  background: 'transparent',
                   paddingTop: isMobile ? 24 : 0,
                   zIndex: 2,
                 }}
@@ -232,8 +232,8 @@ const FilePreview = ({
           ) : (
             <Group position="center" h="100%">
               <Stack align="center" spacing="xs">
-                <Text size="xl" color="dimmed">Preview not available</Text>
-                <Text size="sm" color="dimmed">This file type cannot be previewed</Text>
+                <Text size="xl" color="#fff" sx={{ opacity: 0.8 }}>Preview not available</Text>
+                <Text size="sm" color="#fff" sx={{ opacity: 0.7 }}>This file type cannot be previewed</Text>
               </Stack>
             </Group>
           )}
