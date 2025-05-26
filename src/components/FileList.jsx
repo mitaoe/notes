@@ -198,35 +198,61 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                     <td>
                       {file.mimeType !== 'application/vnd.google-apps.folder' && (
                         <Group spacing="xs">
-                          {file.mimeType === 'application/pdf' && (
-                            <Button
-                              compact
-                              variant="light"
-                              leftIcon={<IconEye size={16} />}
-                              onClick={() => handlePreview(file)}
-                            >
-                              Preview
-                            </Button>
-                          )}
                           <Box>
-                            <Button
-                              compact
-                              variant="light"
-                              rightIcon={<IconDownload size={16} />}
-                              onClick={() => handleDownload(file)}
-                              loading={downloadingFiles.has(file.id)}
-                            >
-                              Download
-                            </Button>
+                            <Group spacing={4}>
+                              {file.mimeType === 'application/pdf' && (
+                                <Button
+                                  compact
+                                  variant="subtle"
+                                  leftIcon={<IconEye size={16} />}
+                                  onClick={() => handlePreview(file)}
+                                  sx={(theme) => ({
+                                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                                    '&:hover': {
+                                      backgroundColor: theme.colorScheme === 'dark' 
+                                        ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                                        : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                                    }
+                                  })}
+                                >
+                                  Preview
+                                </Button>
+                              )}
+                              <Button
+                                compact
+                                variant="subtle"
+                                leftIcon={<IconDownload size={16} />}
+                                onClick={() => handleDownload(file)}
+                                loading={downloadingFiles.has(file.id)}
+                                sx={(theme) => ({
+                                  color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                                  '&:hover': {
+                                    backgroundColor: theme.colorScheme === 'dark' 
+                                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                                  }
+                                })}
+                              >
+                                Download
+                              </Button>
+                            </Group>
                             {downloadingFiles.has(file.id) && downloadProgress[file.id] > 0 && (
                               <Progress 
                                 value={downloadProgress[file.id]} 
                                 size="xs" 
                                 mt={4}
-                                styles={() => ({
+                                styles={(theme) => ({
                                   bar: {
                                     transition: 'width 200ms ease',
+                                    backgroundColor: theme.colorScheme === 'dark' 
+                                      ? theme.colors.blue[4] 
+                                      : theme.colors.blue[6],
                                   },
+                                  root: {
+                                    backgroundColor: theme.colorScheme === 'dark'
+                                      ? theme.fn.rgba(theme.colors.blue[9], 0.15)
+                                      : theme.fn.rgba(theme.colors.blue[0], 0.5),
+                                  }
                                 })}
                               />
                             )}
