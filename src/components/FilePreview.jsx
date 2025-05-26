@@ -134,16 +134,16 @@ const FilePreview = ({
                 <IconChevronRight size={isMobile ? 18 : 20} />
               </ActionIcon>
             </Group>
-            {!isMobile && (
-              <Stack spacing={0} sx={{ minWidth: 0, flex: 1 }}>
-                <Text size="lg" weight={500} truncate>
-                  {file.name}
-                </Text>
+            <Stack spacing={0} sx={{ minWidth: 0, flex: 1, maxWidth: isMobile ? '60vw' : '100vw' }}>
+              <Text size={isMobile ? 'md' : 'lg'} weight={500} truncate={false} sx={{ wordBreak: 'break-all', textAlign: 'center' }}>
+                {file.name}
+              </Text>
+              {!isMobile && (
                 <Text size="sm" color="dimmed" truncate>
                   {file.mimeType}
                 </Text>
-              </Stack>
-            )}
+              )}
+            </Stack>
             <Group spacing={isMobile ? 0 : 'xs'}>
               <ActionIcon
                 variant="subtle"
@@ -178,24 +178,6 @@ const FilePreview = ({
               </ActionIcon>
             </Group>
           </Group>
-          {downloading && (
-            <Progress
-              value={downloadProgress}
-              size={isMobile ? 'sm' : 'md'}
-              radius="xl"
-              mt={isMobile ? 4 : 8}
-              styles={{
-                bar: {
-                  background: 'linear-gradient(90deg, #00ffea 0%, #00ff6a 100%)',
-                  transition: 'width 200ms ease',
-                },
-                root: {
-                  background: 'rgba(0,255,234,0.08)',
-                  boxShadow: '0 0 4px #00ffea, 0 0 8px #00ff6a',
-                },
-              }}
-            />
-          )}
         </Paper>
         {/* Content */}
         <Box
@@ -218,11 +200,9 @@ const FilePreview = ({
             <iframe
               src={`/api/stream?fileId=${file.id}&inline=true`}
               style={{
-                width: '100%',
-                height: '100%',
+                width: isMobile ? '100vw' : '100%',
+                height: isMobile ? '100vh' : '100%',
                 border: 'none',
-                minHeight: isMobile ? '100vh' : 500,
-                minWidth: isMobile ? '100vw' : 0,
                 background: 'white',
               }}
               title={file.name}

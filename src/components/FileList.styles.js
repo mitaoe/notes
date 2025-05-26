@@ -17,7 +17,27 @@ export const useStyles = createStyles((theme) => ({
     },
     '@media (max-width: 600px)': {
       fontSize: '13px',
-      minWidth: 400,
+      minWidth: 0,
+      display: 'block',
+      width: '100%',
+      border: 'none',
+      '& thead': { display: 'none' },
+      '& tbody, & tr': { display: 'block', width: '100%' },
+      '& td': {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-start',
+        width: '100%',
+        borderBottom: `1px solid ${theme.colors.gray[3]}`,
+        padding: '12px 8px',
+      },
+      '& td:last-child': {
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        flexDirection: 'row',
+        gap: 8,
+        paddingTop: 8,
+      },
     },
   },
   emptyStateWrapper: {

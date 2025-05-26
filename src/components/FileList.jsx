@@ -55,20 +55,22 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
       const contentLength = +response.headers.get('Content-Length');
       let receivedLength = 0;
 
+      console.debug('Download started:', { fileName: file.name, contentLength });
+
       const chunks = [];
       while(true) {
         const {done, value} = await reader.read();
-        
         if (done) break;
-        
         chunks.push(value);
         receivedLength += value.length;
-        
+        console.debug('Download progress:', { fileName: file.name, receivedLength, contentLength, percent: contentLength ? Math.round((receivedLength / contentLength) * 100) : null });
         setDownloadProgress(prev => ({
           ...prev,
-          [file.id]: Math.round((receivedLength / contentLength) * 100)
+          [file.id]: contentLength ? Math.round((receivedLength / contentLength) * 100) : 0
         }));
       }
+
+      console.debug('Download finished:', { fileName: file.name, receivedLength, contentLength });
 
       const blob = new Blob(chunks);
       const url = window.URL.createObjectURL(blob);
