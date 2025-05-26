@@ -191,7 +191,9 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                       ) : (
                         <Text className={classes.fileName} size="md" weight={500} truncate>{file.name}</Text>
                       )}
-                      <Text size="xs" color="dimmed">{file.size ? formatFileSize(file.size) : '-'}</Text>
+                      {file.mimeType !== 'application/vnd.google-apps.folder' && (
+                        <Text size="xs" color="dimmed">{file.size ? formatFileSize(file.size) : ''}</Text>
+                      )}
                     </Box>
                   </Group>
                   {file.mimeType !== 'application/vnd.google-apps.folder' && (
