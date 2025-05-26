@@ -250,14 +250,16 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                         size="lg"
                         title={downloadingFiles.has(file.id) ? "Cancel Download" : "Download"}
                         sx={(theme) => ({
-                          color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                          color: downloadingFiles.has(file.id)
+                            ? (theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7])
+                            : (theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[7]),
                           backgroundColor: theme.colorScheme === 'dark' 
                             ? theme.fn.rgba(theme.colors.gray[8], 0.15)
                             : theme.fn.rgba(theme.colors.gray[0], 0.15),
                         })}
                       >
                         {downloadingFiles.has(file.id) ? (
-                          <IconX size={18} style={{ color: 'var(--mantine-color-red-filled)' }} />
+                          <IconX size={18} />
                         ) : (
                           <IconDownload size={18} />
                         )}

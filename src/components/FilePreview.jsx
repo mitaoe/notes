@@ -193,10 +193,10 @@ const FilePreview = ({
 
             <Button
               variant="filled"
-              leftIcon={downloading ? <IconX size={18} style={{ color: 'white' }} /> : <IconDownload size={18} />}
+              leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
               onClick={() => handleDownload(file)}
               size="sm"
-              color={downloading ? "red" : "cyan"}
+              color={downloading ? "red" : "blue"}
             >
               {downloading ? "Cancel" : "Download"}
             </Button>
