@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import { Modal, Box, Group, Text, ActionIcon, Paper, Stack, Button } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconX, IconDownload } from '@tabler/icons-react';
 import { useHotkeys } from '@mantine/hooks';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 const FilePreview = ({ 
   opened, 
@@ -13,9 +13,8 @@ const FilePreview = ({
   files
 }) => {
   const isPdf = file?.mimeType === 'application/pdf';
-  const [downloading, setDownloading] = useState(false);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const abortControllerRef = useRef(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   useHotkeys([
     ['ArrowRight', onNext],
@@ -24,64 +23,30 @@ const FilePreview = ({
   ]);
 
   const handleDownload = async (file) => {
-    if (downloading) {
-      // Cancel the download
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
-      setDownloading(false);
-      return;
-    }
-    
     try {
-      const controller = new AbortController();
-      abortControllerRef.current = controller;
-      setDownloading(true);
+      // Request file metadata with direct links
+      const response = await fetch(`/api/stream?fileId=${file.id}&directLink=true`);
+      const metadata = await response.json();
       
-      const response = await fetch(`/api/stream?fileId=${file.id}`, {
-        method: 'GET',
-        signal: controller.signal,
-      });
-      
-      const reader = response.body.getReader();
-      const chunks = [];
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-      }
-      
-      const blob = new Blob(chunks);
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = file.name;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // Open the direct download URL in a new tab
+      window.open(metadata.downloadUrl, '_blank');
     } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.error('Error downloading file:', error);
-      }
-    } finally {
-      abortControllerRef.current = null;
-      setDownloading(false);
+      console.error('Error getting download URL:', error);
     }
   };
 
-  useEffect(() => { setIframeLoaded(false); }, [file?.id]);
-
-  // Cleanup abort controller on unmount
-  useEffect(() => {
-    return () => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-        abortControllerRef.current = null;
-      }
-    };
-  }, []);
+  useEffect(() => { 
+    setIframeLoaded(false);
+    setPreviewUrl(null);
+    
+    // Get direct preview URL on mount for PDF files
+    if (file && isPdf) {
+      fetch(`/api/stream?fileId=${file.id}&directLink=true`)
+        .then(response => response.json())
+        .then(data => setPreviewUrl(data.previewUrl))
+        .catch(error => console.error('Error getting preview URL:', error));
+    }
+  }, [file, isPdf]);
 
   if (!file) return null;
 
@@ -199,15 +164,15 @@ const FilePreview = ({
             {/* Download button */}
             <Button
               variant="filled"
-              leftIcon={downloading ? <IconX size={18} /> : <IconDownload size={18} />}
+              leftIcon={<IconDownload size={18} />}
               onClick={() => handleDownload(file)}
               size="sm"
               mr={4}
               styles={() => ({
                 root: {
-                  backgroundColor: downloading ? '#e03131' : '#228be6',
+                  backgroundColor: '#228be6',
                   '&:hover': {
-                    backgroundColor: downloading ? '#c92a2a' : '#1c7ed6'
+                    backgroundColor: '#1c7ed6'
                   },
                   boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
                   fontWeight: 600,
@@ -220,7 +185,7 @@ const FilePreview = ({
                 }
               })}
             >
-              {downloading ? "Cancel" : "Download"}
+              Download
             </Button>
           </Box>
         </Paper>
@@ -258,7 +223,7 @@ const FilePreview = ({
               )}
               <iframe
                 key={file.id}
-                src={`/api/stream?fileId=${file.id}&inline=true`}
+                src={previewUrl || `/api/stream?fileId=${file.id}&inline=true`}
                 style={{
                   width: '100%',
                   height: '100%',

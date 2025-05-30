@@ -24,7 +24,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { fileId, inline } = req.query;
+  const { fileId, inline, directLink } = req.query;
   if (!fileId) {
     return res.status(400).json({ error: 'File ID is required' });
   }
@@ -43,6 +43,27 @@ export default async function handler(req, res) {
 
     const { name, mimeType, size } = metadataResponse.data;
 
+    // If directLink is requested, set file permissions and return direct URLs
+    if (directLink === 'true') {
+      // Set file permissions to allow public access
+      await axios.post(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
+        role: 'reader',
+        type: 'anyone',
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Return JSON with download and preview URLs
+      return res.status(200).json({
+        name,
+        mimeType,
+        size,
+        downloadUrl: `https://drive.google.com/uc?export=download&id=${fileId}`,
+        previewUrl: `https://drive.google.com/file/d/${fileId}/preview`,
+      });
+    }
+
+    // Standard file streaming (existing functionality)
     // Set response headers
     res.setHeader('Content-Type', mimeType);
     res.setHeader('Content-Disposition', `${inline === 'true' ? 'inline' : 'attachment'}; filename="${encodeURIComponent(name)}"`);

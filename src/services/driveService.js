@@ -75,10 +75,13 @@ class GoogleDrive {
       const files = response.data.files.map(file => ({
         ...file,
         downloadUrl: file.mimeType === FOLDER_TYPE ? null : async () => {
-          const response = await axios.get(`/api/stream?fileId=${file.id}`, {
-            responseType: 'blob'
-          });
-          return response.data;
+          try {
+            const response = await axios.get(`/api/stream?fileId=${file.id}&directLink=true`);
+            return response.data.downloadUrl;
+          } catch (error) {
+            console.error('Error getting direct download URL:', error);
+            throw error;
+          }
         }
       }));
 
@@ -144,10 +147,13 @@ class GoogleDrive {
       const files = response.data.files.map(file => ({
         ...file,
         downloadUrl: file.mimeType === FOLDER_TYPE ? null : async () => {
-          const response = await axios.get(`/api/stream?fileId=${file.id}`, {
-            responseType: 'blob'
-          });
-          return response.data;
+          try {
+            const response = await axios.get(`/api/stream?fileId=${file.id}&directLink=true`);
+            return response.data.downloadUrl;
+          } catch (error) {
+            console.error('Error getting direct download URL:', error);
+            throw error;
+          }
         }
       }));
 
