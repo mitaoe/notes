@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Group, Text, Button, Box, Loader, Stack, ThemeIcon, ActionIcon } from '@mantine/core';
 import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
@@ -36,6 +36,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   const [previewFile, setPreviewFile] = useState(null);
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [downloadingIds, setDownloadingIds] = useState(new Set());
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
@@ -47,13 +48,28 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
 
   const handleDownload = async (file) => {
     try {
+      setDownloadingIds(prev => new Set(prev).add(file.id));
       const response = await fetch(`/api/stream?fileId=${file.id}&directLink=true`);
       const metadata = await response.json();
       
       // Open the direct download URL in a new tab
       window.open(metadata.downloadUrl, '_blank');
+      
+      // Small delay to show feedback before resetting state
+      setTimeout(() => {
+        setDownloadingIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(file.id);
+          return newSet;
+        });
+      }, 500);
     } catch (error) {
       console.error('Error getting download URL:', error);
+      setDownloadingIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(file.id);
+        return newSet;
+      });
     }
   };
 
@@ -134,14 +150,21 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                 boxShadow: theme.shadows.xs,
                 alignItems: 'center',
               })}>
-                <Group spacing="sm" align="center" sx={{ flex: 1, minWidth: 0 }}>
-                  {getFileIcon(file)}
-                  <Box sx={{ minWidth: 0 }}>
+                <Group spacing="sm" align="center" sx={{ flex: 1, minWidth: 0, maxWidth: isMobile ? 'calc(100% - 50px)' : 'calc(100% - 110px)' }}>
+                  <Box sx={{ flexShrink: 0 }}>
+                    {getFileIcon(file)}
+                  </Box>
+                  <Box sx={{ 
+                    minWidth: 0, 
+                    maxWidth: '100%',
+                    overflow: 'hidden',
+                  }}>
                     {file.mimeType === 'application/vnd.google-apps.folder' ? (
                       <Text
                         className={classes.link}
                         onClick={() => onFolderClick(file)}
                         sx={{ cursor: 'pointer' }}
+                        truncate
                       >
                         {file.name}
                       </Text>
@@ -154,7 +177,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                   </Box>
                 </Group>
                 {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                  <Group spacing="sm" direction="row" align="center">
+                  <Group spacing="sm" direction="row" align="center" sx={{ flexShrink: 0 }}>
                     {file.mimeType === 'application/pdf' && (
                       <ActionIcon
                         variant="subtle"
@@ -171,22 +194,24 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                         <IconEye size={18} />
                       </ActionIcon>
                     )}
-                    <Box>
-                      <ActionIcon
-                        variant="subtle"
-                        onClick={() => handleDownload(file)}
-                        size="lg"
-                        title="Download"
-                        sx={(theme) => ({
-                          color: '#228be6',
-                          backgroundColor: theme.colorScheme === 'dark' 
-                            ? theme.fn.rgba(theme.colors.gray[8], 0.15)
-                            : theme.fn.rgba(theme.colors.gray[0], 0.15),
-                        })}
-                      >
-                        <IconDownload size={18} />
-                      </ActionIcon>
-                    </Box>
+                    <ActionIcon
+                      variant="subtle"
+                      onClick={() => handleDownload(file)}
+                      size="lg"
+                      disabled={downloadingIds.has(file.id)}
+                      title="Download"
+                      sx={(theme) => ({
+                        color: '#228be6',
+                        backgroundColor: theme.colorScheme === 'dark' 
+                          ? theme.fn.rgba(theme.colors.gray[8], 0.15)
+                          : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                        transform: downloadingIds.has(file.id) ? 'scale(0.95)' : 'scale(1)',
+                        transition: 'transform 0.2s ease',
+                        opacity: downloadingIds.has(file.id) ? 0.8 : 1,
+                      })}
+                    >
+                      <IconDownload size={18} />
+                    </ActionIcon>
                   </Group>
                 )}
               </Group>

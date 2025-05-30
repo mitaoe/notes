@@ -15,6 +15,8 @@ const FilePreview = ({
   const isPdf = file?.mimeType === 'application/pdf';
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
 
   useHotkeys([
     ['ArrowRight', onNext],
@@ -22,16 +24,29 @@ const FilePreview = ({
     ['Escape', onClose],
   ]);
 
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 600);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleDownload = async (file) => {
     try {
+      setIsDownloading(true);
       // Request file metadata with direct links
       const response = await fetch(`/api/stream?fileId=${file.id}&directLink=true`);
       const metadata = await response.json();
       
       // Open the direct download URL in a new tab
       window.open(metadata.downloadUrl, '_blank');
+      
+      // Small delay to show feedback before resetting state
+      setTimeout(() => {
+        setIsDownloading(false);
+      }, 500);
     } catch (error) {
       console.error('Error getting download URL:', error);
+      setIsDownloading(false);
     }
   };
 
@@ -113,7 +128,11 @@ const FilePreview = ({
             </ActionIcon>
             
             {/* Navigation group - prev button, filename, next button */}
-            <Group position="center" spacing="xl" sx={{ flex: 1, maxWidth: 'calc(100% - 220px)', margin: '0 auto' }}>
+            <Group position="center" spacing={isMobile ? "xs" : "xl"} sx={{ 
+              flex: 1, 
+              maxWidth: isMobile ? 'calc(100% - 160px)' : 'calc(100% - 220px)', 
+              margin: '0 auto' 
+            }}>
               <ActionIcon
                 variant="subtle"
                 onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
@@ -125,18 +144,19 @@ const FilePreview = ({
                     ? theme.fn.rgba(theme.colors.gray[8], 0.5)
                     : theme.fn.rgba(theme.colors.gray[0], 0.5),
                   opacity: canGoPrevious ? 1 : 0.5,
+                  flexShrink: 0,
                 })}
               >
                 <IconChevronLeft size={20} />
               </ActionIcon>
               
               <Text 
-                size="lg" 
+                size={isMobile ? "md" : "lg"} 
                 weight={500} 
                 sx={{ 
-                  maxWidth: 'calc(100% - 100px)',
+                  maxWidth: isMobile ? 'calc(100% - 80px)' : 'calc(100% - 100px)',
                   textAlign: 'center',
-                  overflowX: 'hidden',
+                  overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
                 }}
@@ -155,6 +175,7 @@ const FilePreview = ({
                     ? theme.fn.rgba(theme.colors.gray[8], 0.5)
                     : theme.fn.rgba(theme.colors.gray[0], 0.5),
                   opacity: canGoNext ? 1 : 0.5,
+                  flexShrink: 0,
                 })}
               >
                 <IconChevronRight size={20} />
@@ -162,31 +183,24 @@ const FilePreview = ({
             </Group>
             
             {/* Download button */}
-            <Button
-              variant="filled"
-              leftIcon={<IconDownload size={18} />}
+            <ActionIcon
+              variant="subtle"
               onClick={() => handleDownload(file)}
-              size="sm"
+              size="lg"
               mr={4}
-              styles={() => ({
-                root: {
-                  backgroundColor: '#228be6',
-                  '&:hover': {
-                    backgroundColor: '#1c7ed6'
-                  },
-                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                  height: 36,
-                  borderRadius: 4,
-                },
-                leftIcon: {
-                  marginRight: 8,
-                }
+              disabled={isDownloading}
+              sx={(theme) => ({
+                color: theme.colorScheme === 'dark' ? theme.colors.teal[4] : theme.colors.teal[7],
+                backgroundColor: theme.colorScheme === 'dark' 
+                  ? theme.fn.rgba(theme.colors.teal[8], 0.15)
+                  : theme.fn.rgba(theme.colors.teal[0], 0.15),
+                transform: isDownloading ? 'scale(0.95)' : 'scale(1)',
+                transition: 'all 0.2s ease',
+                opacity: isDownloading ? 0.8 : 1,
               })}
             >
-              Download
-            </Button>
+              <IconDownload size={20} />
+            </ActionIcon>
           </Box>
         </Paper>
 
