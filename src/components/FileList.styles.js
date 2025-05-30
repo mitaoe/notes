@@ -63,6 +63,12 @@ export const useStyles = createStyles((theme) => ({
     userSelect: 'none',
     WebkitUserSelect: 'none',
     msUserSelect: 'none',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '100%',
+    display: 'block',
+    width: '100%',
     '&:hover': {
       textDecoration: 'underline',
     },
@@ -71,5 +77,11 @@ export const useStyles = createStyles((theme) => ({
     userSelect: 'text',
     WebkitUserSelect: 'text',
     msUserSelect: 'text',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    maxWidth: '100%',
+    display: 'block',
+    width: '100%',
   }
 })); 
