@@ -143,78 +143,84 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
         ) : (
           <Stack spacing="xs">
             {files.map((file) => (
-              <Group key={file.id} position="apart" p="md" sx={(theme) => ({
-                background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-                borderRadius: theme.radius.sm,
-                border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
-                boxShadow: theme.shadows.xs,
-                alignItems: 'center',
-              })}>
-                <Group spacing="sm" align="center" sx={{ flex: 1, minWidth: 0, maxWidth: isMobile ? 'calc(100% - 50px)' : 'calc(100% - 110px)' }}>
-                  <Box sx={{ flexShrink: 0 }}>
-                    {getFileIcon(file)}
+              <Box
+                key={file.id}
+                sx={(theme) => ({
+                  background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+                  borderRadius: theme.radius.sm,
+                  border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+                  boxShadow: theme.shadows.xs,
+                  padding: theme.spacing.md,
+                })}
+              >
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, minWidth: 0 }}>
+                    <Box sx={{ flexShrink: 0 }}>
+                      {getFileIcon(file)}
+                    </Box>
+                    
+                    <Box sx={{ 
+                      minWidth: 0, 
+                      flex: 1, 
+                      overflow: 'hidden'
+                    }}>
+                      {file.mimeType === 'application/vnd.google-apps.folder' ? (
+                        <Text
+                          className={classes.link}
+                          onClick={() => onFolderClick(file)}
+                          truncate
+                        >
+                          {file.name}
+                        </Text>
+                      ) : (
+                        <Text className={classes.fileName} size="md" weight={500} truncate>{file.name}</Text>
+                      )}
+                      {file.mimeType !== 'application/vnd.google-apps.folder' && (
+                        <Text size="xs" color="dimmed">{file.size ? formatFileSize(file.size) : ''}</Text>
+                      )}
+                    </Box>
                   </Box>
-                  <Box sx={{ 
-                    minWidth: 0, 
-                    maxWidth: '100%',
-                    overflow: 'hidden',
-                  }}>
-                    {file.mimeType === 'application/vnd.google-apps.folder' ? (
-                      <Text
-                        className={classes.link}
-                        onClick={() => onFolderClick(file)}
-                        sx={{ cursor: 'pointer' }}
-                        truncate
-                      >
-                        {file.name}
-                      </Text>
-                    ) : (
-                      <Text className={classes.fileName} size="md" weight={500} truncate>{file.name}</Text>
-                    )}
-                    {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                      <Text size="xs" color="dimmed">{file.size ? formatFileSize(file.size) : ''}</Text>
-                    )}
-                  </Box>
-                </Group>
-                {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                  <Group spacing="sm" direction="row" align="center" sx={{ flexShrink: 0 }}>
-                    {file.mimeType === 'application/pdf' && (
+                  
+                  {file.mimeType !== 'application/vnd.google-apps.folder' && (
+                    <Box sx={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                      {file.mimeType === 'application/pdf' && (
+                        <ActionIcon
+                          variant="subtle"
+                          onClick={() => handlePreview(file)}
+                          size="lg"
+                          title="Preview"
+                          sx={(theme) => ({
+                            color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                            backgroundColor: theme.colorScheme === 'dark' 
+                              ? theme.fn.rgba(theme.colors.gray[8], 0.15)
+                              : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                          })}
+                        >
+                          <IconEye size={18} />
+                        </ActionIcon>
+                      )}
                       <ActionIcon
                         variant="subtle"
-                        onClick={() => handlePreview(file)}
+                        onClick={() => handleDownload(file)}
                         size="lg"
-                        title="Preview"
+                        disabled={downloadingIds.has(file.id)}
+                        title="Download"
                         sx={(theme) => ({
-                          color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                          color: '#228be6',
                           backgroundColor: theme.colorScheme === 'dark' 
                             ? theme.fn.rgba(theme.colors.gray[8], 0.15)
                             : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                          transform: downloadingIds.has(file.id) ? 'scale(0.95)' : 'scale(1)',
+                          transition: 'transform 0.2s ease',
+                          opacity: downloadingIds.has(file.id) ? 0.8 : 1,
                         })}
                       >
-                        <IconEye size={18} />
+                        <IconDownload size={18} />
                       </ActionIcon>
-                    )}
-                    <ActionIcon
-                      variant="subtle"
-                      onClick={() => handleDownload(file)}
-                      size="lg"
-                      disabled={downloadingIds.has(file.id)}
-                      title="Download"
-                      sx={(theme) => ({
-                        color: '#228be6',
-                        backgroundColor: theme.colorScheme === 'dark' 
-                          ? theme.fn.rgba(theme.colors.gray[8], 0.15)
-                          : theme.fn.rgba(theme.colors.gray[0], 0.15),
-                        transform: downloadingIds.has(file.id) ? 'scale(0.95)' : 'scale(1)',
-                        transition: 'transform 0.2s ease',
-                        opacity: downloadingIds.has(file.id) ? 0.8 : 1,
-                      })}
-                    >
-                      <IconDownload size={18} />
-                    </ActionIcon>
-                  </Group>
-                )}
-              </Group>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
             ))}
           </Stack>
         )}

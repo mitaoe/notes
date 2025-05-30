@@ -68,6 +68,7 @@ export const useStyles = createStyles((theme) => ({
     whiteSpace: 'nowrap',
     maxWidth: '100%',
     display: 'block',
+    width: '100%',
     '&:hover': {
       textDecoration: 'underline',
     },
@@ -81,5 +82,6 @@ export const useStyles = createStyles((theme) => ({
     whiteSpace: 'nowrap',
     maxWidth: '100%',
     display: 'block',
+    width: '100%',
   }
 })); 

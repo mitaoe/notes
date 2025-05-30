@@ -110,84 +110,111 @@ const FilePreview = ({
             height: 64,
           })}
         >
-          <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px' }}>
+          <Box sx={{ 
+            width: '100%', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'space-between',
+            gap: isMobile ? '6px' : '12px',
+            padding: '0 4px' 
+          }}>
             {/* Left section: Close button */}
-            <ActionIcon
+            <Button
               variant="subtle"
               onClick={onClose}
-              size="lg"
-              ml={4}
+              size={isMobile ? "xs" : "sm"}
+              radius="md"
+              leftIcon={<IconX size={isMobile ? 16 : 18} />}
               sx={(theme) => ({
                 color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
                 backgroundColor: theme.colorScheme === 'dark' 
                   ? theme.fn.rgba(theme.colors.red[8], 0.15)
                   : theme.fn.rgba(theme.colors.red[0], 0.15),
+                height: isMobile ? 36 : 40,
+                padding: isMobile ? '0 8px' : '0 12px',
+                flexShrink: 0,
               })}
             >
-              <IconX size={20} />
-            </ActionIcon>
+              {isMobile ? '' : 'Close'}
+            </Button>
             
             {/* Navigation group - prev button, filename, next button */}
-            <Group position="center" spacing={isMobile ? "xs" : "xl"} sx={{ 
-              flex: 1, 
-              maxWidth: isMobile ? 'calc(100% - 160px)' : 'calc(100% - 220px)', 
-              margin: '0 auto' 
+            <Box sx={{ 
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              maxWidth: isMobile ? 'calc(100% - 130px)' : 'calc(100% - 230px)',
+              position: 'relative',
+              margin: '0 auto',
             }}>
-              <ActionIcon
-                variant="subtle"
-                onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
-                disabled={!canGoPrevious}
-                size="lg"
-                sx={(theme) => ({
-                  color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                  backgroundColor: theme.colorScheme === 'dark' 
-                    ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                    : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                  opacity: canGoPrevious ? 1 : 0.5,
-                  flexShrink: 0,
-                })}
-              >
-                <IconChevronLeft size={20} />
-              </ActionIcon>
-              
-              <Text 
-                size={isMobile ? "md" : "lg"} 
-                weight={500} 
-                sx={{ 
-                  maxWidth: isMobile ? 'calc(100% - 80px)' : 'calc(100% - 100px)',
-                  textAlign: 'center',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {file.name}
-              </Text>
-              
-              <ActionIcon
-                variant="subtle"
-                onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
-                disabled={!canGoNext}
-                size="lg"
-                sx={(theme) => ({
-                  color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                  backgroundColor: theme.colorScheme === 'dark' 
-                    ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                    : theme.fn.rgba(theme.colors.gray[0], 0.5),
-                  opacity: canGoNext ? 1 : 0.5,
-                  flexShrink: 0,
-                })}
-              >
-                <IconChevronRight size={20} />
-              </ActionIcon>
-            </Group>
+              <Box sx={{ 
+                display: 'flex',
+                alignItems: 'center',
+                width: '100%',
+                justifyContent: 'space-between',
+              }}>
+                <ActionIcon
+                  variant="subtle"
+                  onClick={canGoPrevious ? () => onPrevious(previewableFiles[currentIndex - 1]) : undefined}
+                  disabled={!canGoPrevious}
+                  size={isMobile ? "md" : "lg"}
+                  sx={(theme) => ({
+                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                    backgroundColor: theme.colorScheme === 'dark' 
+                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                    opacity: canGoPrevious ? 1 : 0.5,
+                    flexShrink: 0,
+                    marginRight: isMobile ? 4 : 8,
+                  })}
+                >
+                  <IconChevronLeft size={isMobile ? 16 : 20} />
+                </ActionIcon>
+                
+                <Text 
+                  size={isMobile ? "sm" : "md"} 
+                  weight={500} 
+                  sx={{ 
+                    flex: 1,
+                    textAlign: 'center',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block',
+                    padding: '0 4px',
+                  }}
+                >
+                  {file.name}
+                </Text>
+                
+                <ActionIcon
+                  variant="subtle"
+                  onClick={canGoNext ? () => onNext(previewableFiles[currentIndex + 1]) : undefined}
+                  disabled={!canGoNext}
+                  size={isMobile ? "md" : "lg"}
+                  sx={(theme) => ({
+                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
+                    backgroundColor: theme.colorScheme === 'dark' 
+                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
+                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                    opacity: canGoNext ? 1 : 0.5,
+                    flexShrink: 0,
+                    marginLeft: isMobile ? 4 : 8,
+                  })}
+                >
+                  <IconChevronRight size={isMobile ? 16 : 20} />
+                </ActionIcon>
+              </Box>
+            </Box>
             
             {/* Download button */}
-            <ActionIcon
+            <Button
               variant="subtle"
               onClick={() => handleDownload(file)}
-              size="lg"
-              mr={4}
+              size={isMobile ? "xs" : "sm"}
+              radius="md"
+              leftIcon={<IconDownload size={isMobile ? 16 : 18} />}
               disabled={isDownloading}
               sx={(theme) => ({
                 color: theme.colorScheme === 'dark' ? theme.colors.teal[4] : theme.colors.teal[7],
@@ -197,10 +224,13 @@ const FilePreview = ({
                 transform: isDownloading ? 'scale(0.95)' : 'scale(1)',
                 transition: 'all 0.2s ease',
                 opacity: isDownloading ? 0.8 : 1,
+                height: isMobile ? 36 : 40,
+                padding: isMobile ? '0 8px' : '0 12px',
+                flexShrink: 0,
               })}
             >
-              <IconDownload size={20} />
-            </ActionIcon>
+              {isMobile ? '' : 'Download'}
+            </Button>
           </Box>
         </Paper>
 
