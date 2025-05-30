@@ -49,7 +49,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   const handleDownload = async (file) => {
     try {
       setDownloadingIds(prev => new Set(prev).add(file.id));
-      const response = await fetch(`/api/stream?fileId=${file.id}&directLink=true`);
+      const response = await fetch(`/api/download?fileId=${file.id}&directLink=true`);
       const metadata = await response.json();
       
       // Open the direct download URL in a new tab

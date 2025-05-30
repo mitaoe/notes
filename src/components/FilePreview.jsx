@@ -34,7 +34,7 @@ const FilePreview = ({
     try {
       setIsDownloading(true);
       // Request file metadata with direct links
-      const response = await fetch(`/api/stream?fileId=${file.id}&directLink=true`);
+      const response = await fetch(`/api/download?fileId=${file.id}&directLink=true`);
       const metadata = await response.json();
       
       // Open the direct download URL in a new tab
@@ -56,7 +56,7 @@ const FilePreview = ({
     
     // Get direct preview URL on mount for PDF files
     if (file && isPdf) {
-      fetch(`/api/stream?fileId=${file.id}&directLink=true`)
+      fetch(`/api/download?fileId=${file.id}&directLink=true`)
         .then(response => response.json())
         .then(data => setPreviewUrl(data.previewUrl))
         .catch(error => console.error('Error getting preview URL:', error));
@@ -277,7 +277,7 @@ const FilePreview = ({
               )}
               <iframe
                 key={file.id}
-                src={previewUrl || `/api/stream?fileId=${file.id}&inline=true`}
+                src={previewUrl || `/api/download?fileId=${file.id}&inline=true`}
                 style={{
                   width: '100%',
                   height: '100%',

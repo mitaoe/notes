@@ -76,7 +76,7 @@ class GoogleDrive {
         ...file,
         downloadUrl: file.mimeType === FOLDER_TYPE ? null : async () => {
           try {
-            const response = await axios.get(`/api/stream?fileId=${file.id}&directLink=true`);
+            const response = await axios.get(`/api/download?fileId=${file.id}&directLink=true`);
             return response.data.downloadUrl;
           } catch (error) {
             console.error('Error getting direct download URL:', error);
@@ -148,7 +148,7 @@ class GoogleDrive {
         ...file,
         downloadUrl: file.mimeType === FOLDER_TYPE ? null : async () => {
           try {
-            const response = await axios.get(`/api/stream?fileId=${file.id}&directLink=true`);
+            const response = await axios.get(`/api/download?fileId=${file.id}&directLink=true`);
             return response.data.downloadUrl;
           } catch (error) {
             console.error('Error getting direct download URL:', error);
