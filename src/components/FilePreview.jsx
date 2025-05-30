@@ -115,8 +115,8 @@ const FilePreview = ({
             display: 'flex', 
             alignItems: 'center', 
             justifyContent: 'space-between',
-            gap: isMobile ? '6px' : '12px',
-            padding: '0 4px' 
+            gap: 0,
+            padding: 0
           }}>
             {/* Left section: Close button */}
             <Button
@@ -133,6 +133,11 @@ const FilePreview = ({
                 height: isMobile ? 36 : 40,
                 padding: isMobile ? '0 8px' : '0 12px',
                 flexShrink: 0,
+                '&:hover': {
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.red[8], 0.25)
+                    : theme.fn.rgba(theme.colors.red[0], 0.25),
+                }
               })}
             >
               {isMobile ? '' : 'Close'}
@@ -144,15 +149,15 @@ const FilePreview = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              maxWidth: isMobile ? 'calc(100% - 130px)' : 'calc(100% - 230px)',
-              position: 'relative',
-              margin: '0 auto',
+              maxWidth: isMobile ? 'calc(100% - 120px)' : 'calc(100% - 210px)',
+              margin: '0 10px',
             }}>
               <Box sx={{ 
                 display: 'flex',
                 alignItems: 'center',
                 width: '100%',
-                justifyContent: 'space-between',
+                maxWidth: isMobile ? '100%' : '600px',
+                margin: '0 auto',
               }}>
                 <ActionIcon
                   variant="subtle"
@@ -166,7 +171,7 @@ const FilePreview = ({
                       : theme.fn.rgba(theme.colors.gray[0], 0.5),
                     opacity: canGoPrevious ? 1 : 0.5,
                     flexShrink: 0,
-                    marginRight: isMobile ? 4 : 8,
+                    marginRight: 4,
                   })}
                 >
                   <IconChevronLeft size={isMobile ? 16 : 20} />
@@ -200,7 +205,7 @@ const FilePreview = ({
                       : theme.fn.rgba(theme.colors.gray[0], 0.5),
                     opacity: canGoNext ? 1 : 0.5,
                     flexShrink: 0,
-                    marginLeft: isMobile ? 4 : 8,
+                    marginLeft: 4,
                   })}
                 >
                   <IconChevronRight size={isMobile ? 16 : 20} />
@@ -227,6 +232,11 @@ const FilePreview = ({
                 height: isMobile ? 36 : 40,
                 padding: isMobile ? '0 8px' : '0 12px',
                 flexShrink: 0,
+                '&:hover': {
+                  backgroundColor: theme.colorScheme === 'dark' 
+                    ? theme.fn.rgba(theme.colors.teal[8], 0.25)
+                    : theme.fn.rgba(theme.colors.teal[0], 0.25),
+                }
               })}
             >
               {isMobile ? '' : 'Download'}
