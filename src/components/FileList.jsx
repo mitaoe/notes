@@ -25,7 +25,7 @@ function EmptyState() {
       </ThemeIcon>
       <Text size="xl" weight={500}>Looks rather empty here</Text>
       <Text size="sm" color="dimmed" align="center" px="lg">
-        Much like a professor`&apos;`s office during exam week, this folder appears to be vacant.
+        Much like a professor&apos;s office during exam week, this folder appears to be vacant.
       </Text>
     </Stack>
   );
@@ -35,7 +35,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   const { classes } = useStyles();
   const [previewFile, setPreviewFile] = useState(null);
   const location = useLocation();
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
+  const [, setIsMobile] = useState(window.innerWidth <= 600);
   const [downloadingIds, setDownloadingIds] = useState(new Set());
 
   const pathSegments = location.pathname.split('/').filter(Boolean);

@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme } from '@mantine/core';
+import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme, Stack } from '@mantine/core';
 import { Link, useLocation } from 'react-router-dom';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
 import { useSearch } from '../contexts/SearchContext';
 import SearchBar from './SearchBar';
+import Footer from './Footer';
 
 const Layout = ({ children }) => {
   const theme = useMantineTheme();
@@ -147,7 +148,12 @@ const Layout = ({ children }) => {
       </Drawer>
 
       <Container size="lg">
-        {children}
+        <Stack spacing="xs" sx={{ minHeight: 'calc(100vh - 60px)', justifyContent: 'space-between' }}>
+          <Box>
+            {children}
+          </Box>
+          <Footer />
+        </Stack>
       </Container>
     </AppShell>
   );
