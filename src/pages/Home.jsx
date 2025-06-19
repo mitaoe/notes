@@ -1,14 +1,18 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FileList } from '../components/FileList';
+import { WelcomeBanner } from '../components/WelcomeBanner';
 import driveService from '../services/driveService';
 import { Box } from '@mantine/core';
 
 export function Home() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [files, setFiles] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [nextPageToken, setNextPageToken] = React.useState(null);
+
+  const isRootPage = location.pathname === '/';
 
   const loadFiles = async (pageToken = null) => {
     try {
@@ -36,7 +40,8 @@ export function Home() {
 
   return (
     <Box sx={{ paddingTop: '2rem', '& .mantine-Paper-root': { padding: '1rem 1.5rem' } }}>
-      <FileList 
+      {isRootPage && <WelcomeBanner />}
+      <FileList
         files={files}
         loading={loading}
         hasMore={!!nextPageToken}

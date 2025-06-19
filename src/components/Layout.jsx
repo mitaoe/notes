@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme, Stack } from '@mantine/core';
+import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme, Stack, Text } from '@mantine/core';
 import { Link, useLocation } from 'react-router-dom';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
@@ -35,7 +35,7 @@ const Layout = ({ children }) => {
           <Container size="lg" h="100%">
             <Group position="apart" h="100%" spacing="xl">
               <Group spacing="xl">
-                <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+                <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Image
                     src={uiConfig.logo_link_name}
                     alt={config.siteName}
@@ -43,6 +43,14 @@ const Layout = ({ children }) => {
                     height={35}
                     sx={{ borderRadius: '50%' }}
                   />
+                  <Box sx={{ '@media (max-width: 480px)': { display: 'none' } }}>
+                    <Text size="sm" weight={600} color="#1A73E8">
+                      MITAOE Notes
+                    </Text>
+                    <Text size="xs" color="dimmed" sx={{ lineHeight: 1.2 }}>
+                      Student Resources Hub
+                    </Text>
+                  </Box>
                 </Link>
               </Group>
 
