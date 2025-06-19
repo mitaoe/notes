@@ -45,6 +45,17 @@ function Footer() {
             >
               Terms of Service
             </Anchor>
+            <Anchor
+              component="button"
+              onClick={() => {
+                localStorage.removeItem('welcomeBannerDismissed');
+                alert('Welcome message restored. Refresh the page to see it again.');
+              }}
+              size="sm"
+              color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+            >
+              Restore Welcome Message
+            </Anchor>
           </Group>
         </Group>
       </Container>
@@ -52,4 +63,4 @@ function Footer() {
   );
 }
 
-export default Footer; 
+export default Footer;

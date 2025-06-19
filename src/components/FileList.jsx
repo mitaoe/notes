@@ -10,12 +10,12 @@ import FilePreview from './FilePreview';
 function EmptyState() {
   return (
     <Stack align="center" spacing="xs" py={50}>
-      <ThemeIcon 
-        size={80} 
+      <ThemeIcon
+        size={80}
         radius={100}
         variant="light"
         sx={(theme) => ({
-          backgroundColor: theme.colorScheme === 'dark' 
+          backgroundColor: theme.colorScheme === 'dark'
             ? theme.fn.rgba(theme.colors.blue[9], 0.15)
             : theme.fn.rgba(theme.colors.blue[0], 0.5),
           color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
@@ -23,9 +23,11 @@ function EmptyState() {
       >
         <IconInbox size={40} />
       </ThemeIcon>
-      <Text size="xl" weight={500}>Looks rather empty here</Text>
-      <Text size="sm" color="dimmed" align="center" px="lg">
-        Much like a professor&apos;s office during exam week, this folder appears to be vacant.
+      <Text size="xl" weight={500}>No files found in this location</Text>
+      <Text size="sm" color="dimmed" align="center" px="lg" sx={{ maxWidth: '400px' }}>
+        This folder appears to be empty. MITAOE student notes and study materials
+        are organized in folders throughout this platform. Try navigating to different
+        sections or use the search function to find specific course materials.
       </Text>
     </Stack>
   );
