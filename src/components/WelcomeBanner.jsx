@@ -64,6 +64,9 @@ export function WelcomeBanner() {
                 This platform provides easy access to course materials, study notes, and educational 
                 resources shared by your fellow students to help everyone succeed together.
               </Text>
+              <Text size="sm" color="dimmed" sx={{ lineHeight: 1.5 }}>
+                To power this platform, <b>the site uses the Google Drive API</b> to access and display files from a dedicated educational account.
+              </Text>
               
               <Group spacing="lg" sx={{ '@media (max-width: 768px)': { spacing: 'xs' } }}>
                 <Group spacing="xs" align="center">
