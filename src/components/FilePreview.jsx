@@ -258,37 +258,47 @@ const FilePreview = ({
           }}
         >
           {isPdf ? (
-            <>
-              {!iframeLoaded && (
-                <Box sx={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  zIndex: 1,
-                  pointerEvents: 'none',
-                }}>
-                  <Text size="md" color="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
-                </Box>
-              )}
-              <iframe
-                key={file.id}
-                src={previewUrl || `/api/download?fileId=${file.id}&inline=true`}
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  border: 'none',
-                  background: 'transparent',
-                  zIndex: 2,
-                }}
-                title={file.name}
-                onLoad={() => setIframeLoaded(true)}
-              />
-            </>
+            previewUrl ? (
+              <>
+                {!iframeLoaded && (
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1,
+                    pointerEvents: 'none',
+                  }}>
+                    <Text size="md" color="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
+                  </Box>
+                )}
+                <iframe
+                  key={file.id}
+                  src={previewUrl}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    background: 'transparent',
+                    zIndex: 2,
+                  }}
+                  title={file.name}
+                  onLoad={() => setIframeLoaded(true)}
+                />
+              </>
+            ) : (
+              <Box sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <Text size="md" color="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
+              </Box>
+            )
           ) : (
             <Group position="center" h="100%">
               <Stack align="center" spacing="xs">
