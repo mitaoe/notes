@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "engines": {
-    "node": "22.x"
+    "node": ">=22.0.0"
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",
@@ -42,5 +42,6 @@
       "@swc/core",
       "esbuild"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.32.0"
 }
