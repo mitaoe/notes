@@ -97,6 +97,11 @@ function App() {
             }),
           },
         },
+        globalStyles: () => ({
+          html: {
+            scrollbarGutter: 'stable',
+          },
+        }),
         other: {
           siteName: config.siteName,
           siteDescription: config.siteDescription,

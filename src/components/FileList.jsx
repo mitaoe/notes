@@ -40,6 +40,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   const [loadingMore, setLoadingMore] = useState(false);
 
   const handleLoadMore = async () => {
+    if (loadingMore) return;
     setLoadingMore(true);
     try {
       await onLoadMore();
@@ -239,10 +240,11 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
             <Button
               onClick={handleLoadMore}
               loading={loadingMore}
-              disabled={loadingMore}
+              loaderProps={{ size: 'xs', variant: 'dots' }}
               variant="light"
+              styles={{ root: { minWidth: 140 } }}
             >
-              {loadingMore ? 'Loading' : 'Load More'}
+              Load More
             </Button>
           </Group>
         )}
