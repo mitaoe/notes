@@ -13,3 +13,6 @@ updates:
       pnpm-dependencies:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"

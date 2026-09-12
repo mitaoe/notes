@@ -8,7 +8,7 @@ import Folder from './pages/Folder';
 import Search from './pages/Search';
 import { NotFound } from './pages/NotFound';
 import { config, uiConfig } from './config';
-import { SearchProvider } from './contexts/SearchContext';
+import { SearchProvider } from './contexts/SearchProvider';
 
 function App() {
   return (

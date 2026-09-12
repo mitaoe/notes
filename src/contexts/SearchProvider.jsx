@@ -1,9 +1,8 @@
-import { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate, useLocation } from 'react-router-dom';
 import driveService from '../services/driveService';
-
-const SearchContext = createContext(null);
+import { SearchContext } from './SearchContext';
 
 const SearchProvider = ({ children }) => {
   const navigate = useNavigate();
@@ -93,12 +92,4 @@ SearchProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const useSearch = () => {
-  const context = useContext(SearchContext);
-  if (!context) {
-    throw new Error('useSearch must be used within a SearchProvider');
-  }
-  return context;
-};
-
-export { SearchProvider, useSearch }; 
+export { SearchProvider }; 
