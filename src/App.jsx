@@ -98,7 +98,12 @@ function App() {
           },
         },
         globalStyles: () => ({
+          // The content Stack is min-height 100vh minus the header, and AppShell
+          // adds its own padding, so the page sits right on the threshold where a
+          // scrollbar appears. Keeping the scrollbar always present stops the
+          // viewport width, and therefore every centred element, from moving.
           html: {
+            overflowY: 'scroll',
             scrollbarGutter: 'stable',
           },
         }),
