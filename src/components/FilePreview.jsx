@@ -50,10 +50,7 @@ const FilePreview = ({
     }
   };
 
-  useEffect(() => { 
-    setIframeLoaded(false);
-    setPreviewUrl(null);
-    
+  useEffect(() => {
     // Get direct preview URL on mount for PDF files
     if (file && isPdf) {
       fetch(`/api/download?fileId=${file.id}&directLink=true`)
