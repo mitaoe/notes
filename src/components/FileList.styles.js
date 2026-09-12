@@ -1,4 +1,4 @@
-import { createStyles } from '@mantine/core';
+import { createStyles } from '@mantine/emotion';
 
 export const useStyles = createStyles((theme) => ({
   wrapper: {
@@ -6,9 +6,9 @@ export const useStyles = createStyles((theme) => ({
     WebkitOverflowScrolling: 'touch',
   },
   table: {
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+    backgroundColor: theme.colors.dark[7],
     borderRadius: theme.radius.sm,
-    border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+    border: `1px solid ${theme.colors.dark[5]}`,
     minWidth: '100%',
     '& th, & td': {
       '@media (max-width: 768px)': {
@@ -41,9 +41,9 @@ export const useStyles = createStyles((theme) => ({
     },
   },
   emptyStateWrapper: {
-    backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+    backgroundColor: theme.colors.dark[7],
     borderRadius: theme.radius.sm,
-    border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+    border: `1px solid ${theme.colors.dark[5]}`,
     minHeight: 300,
     display: 'flex',
     alignItems: 'center',
@@ -55,10 +55,10 @@ export const useStyles = createStyles((theme) => ({
     },
   },
   icon: {
-    color: theme.colorScheme === 'dark' ? theme.colors.dark[2] : theme.colors.gray[6],
+    color: theme.colors.dark[2],
   },
   link: {
-    color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
+    color: theme.colors.blue[4],
     cursor: 'pointer',
     userSelect: 'none',
     WebkitUserSelect: 'none',

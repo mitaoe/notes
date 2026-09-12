@@ -1,29 +1,27 @@
-import { Box, Container, Group, Anchor, Text, useMantineTheme } from '@mantine/core';
+import { Box, Container, Group, Anchor, Text } from '@mantine/core';
 import { uiConfig } from '../config';
 
 function Footer() {
-  const theme = useMantineTheme();
-  
   return (
     <Box
       component="footer"
       py="md"
       mt="xl"
       sx={(theme) => ({
-        borderTop: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+        borderTop: `1px solid ${theme.colors.dark[5]}`,
+        backgroundColor: theme.colors.dark[7],
         marginTop: 'auto',
       })}
     >
       <Container size="lg">
-        <Group position="apart" align="center" spacing="xl" sx={{ 
+        <Group justify="space-between" align="center" gap="xl" sx={{ 
           flexDirection: { base: 'column', sm: 'row' },
           gap: { base: '8px', sm: undefined },
         }}>
-          <Text size="sm" color="dimmed">
+          <Text size="sm" c="dimmed">
             © {new Date().getFullYear()} {uiConfig.company_name}
           </Text>
-          <Group spacing="md" sx={{ 
+          <Group gap="md" sx={{ 
             justifyContent: { base: 'center', sm: 'flex-end' },
             width: { base: '100%', sm: 'auto' }
           }}>
@@ -32,7 +30,7 @@ function Footer() {
               href="/privacy.html"
               target="_blank"
               size="sm"
-              color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+              color={'gray'}
             >
               Privacy Policy
             </Anchor>
@@ -41,7 +39,7 @@ function Footer() {
               href="/terms.html"
               target="_blank"
               size="sm"
-              color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+              color={'gray'}
             >
               Terms of Service
             </Anchor>
