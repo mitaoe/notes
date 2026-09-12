@@ -9,43 +9,68 @@ const SearchProvider = ({ children }) => {
   const location = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [nextPageToken, setNextPageToken] = useState(null);
+  const [loadedQuery, setLoadedQuery] = useState(null);
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
 
-  const handleSearch = useCallback(async (pageToken = null) => {
-    if (!searchQuery.trim()) {
+  const trimmedQuery = searchQuery.trim();
+  const onSearchRoute = location.pathname === '/search';
+
+  // Adjust state during render rather than in an effect, per the React docs on
+  // resetting state when a value changes. Navigating away from the search route
+  // drops the query and its results.
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
+    if (!location.pathname.startsWith('/search')) {
+      setSearchQuery('');
       setFiles([]);
       setNextPageToken(null);
+      setError(null);
+      setLoadedQuery(null);
+    }
+  }
+
+  // Derived rather than stored, so no effect has to set it.
+  const loading = onSearchRoute && trimmedQuery !== '' && loadedQuery !== trimmedQuery;
+
+  const handleSearch = useCallback(async (pageToken = null) => {
+    const query = searchQuery.trim();
+    if (!query) {
+      setFiles([]);
+      setNextPageToken(null);
+      setLoadedQuery(null);
       return;
     }
 
     try {
-      setLoading(true);
-      setError(null);
-      const response = await driveService.searchFiles(searchQuery, pageToken);
-      
+      const response = await driveService.searchFiles(query, pageToken);
+
       if (pageToken) {
         setFiles(prev => [...prev, ...response.data.files]);
       } else {
         setFiles(response.data.files);
       }
-      
+
       setNextPageToken(response.nextPageToken);
+      setError(null);
     } catch (error) {
       console.error('Error searching files:', error);
       setError('An error occurred while searching. Please try again.');
       setFiles([]);
     } finally {
-      setLoading(false);
+      setLoadedQuery(query);
     }
   }, [searchQuery]);
 
   useEffect(() => {
-    if (location.pathname === '/search' && searchQuery.trim()) {
-      handleSearch();
+    if (!onSearchRoute || !trimmedQuery) {
+      return;
     }
-  }, [location.pathname, searchQuery, handleSearch]);
+    (async () => {
+      await handleSearch();
+    })();
+  }, [onSearchRoute, trimmedQuery, handleSearch]);
 
   const performSearch = useCallback(() => {
     if (searchQuery.trim()) {
