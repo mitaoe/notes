@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { Modal, Box, Group, Text, ActionIcon, Paper, Stack, Button } from '@mantine/core';
+import { Modal, Box, Group, Text, ActionIcon, Paper, Stack, Button, rgba } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight, IconX, IconDownload } from '@tabler/icons-react';
 import { useHotkeys } from '@mantine/hooks';
 import { useState, useEffect } from 'react';
@@ -78,7 +78,7 @@ const FilePreview = ({
       withCloseButton={false}
       styles={(theme) => ({
         modal: {
-          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.white,
+          backgroundColor: theme.colors.dark[8],
         },
         body: {
           padding: 0,
@@ -99,8 +99,8 @@ const FilePreview = ({
         <Paper
           p="md"
           sx={(theme) => ({
-            borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+            borderBottom: `1px solid ${theme.colors.dark[5]}`,
+            backgroundColor: theme.colors.dark[7],
             zIndex: 2,
             display: 'flex',
             alignItems: 'center',
@@ -121,19 +121,15 @@ const FilePreview = ({
               onClick={onClose}
               size={isMobile ? "xs" : "sm"}
               radius="md"
-              leftIcon={<IconX size={isMobile ? 16 : 18} />}
+              leftSection={<IconX size={isMobile ? 16 : 18} />}
               sx={(theme) => ({
-                color: theme.colorScheme === 'dark' ? theme.colors.red[4] : theme.colors.red[7],
-                backgroundColor: theme.colorScheme === 'dark' 
-                  ? theme.fn.rgba(theme.colors.red[8], 0.15)
-                  : theme.fn.rgba(theme.colors.red[0], 0.15),
+                color: theme.colors.red[4],
+                backgroundColor: rgba(theme.colors.red[8], 0.15),
                 height: isMobile ? 36 : 40,
                 padding: isMobile ? '0 8px' : '0 12px',
                 flexShrink: 0,
                 '&:hover': {
-                  backgroundColor: theme.colorScheme === 'dark' 
-                    ? theme.fn.rgba(theme.colors.red[8], 0.25)
-                    : theme.fn.rgba(theme.colors.red[0], 0.25),
+                  backgroundColor: rgba(theme.colors.red[8], 0.25),
                 }
               })}
             >
@@ -162,10 +158,8 @@ const FilePreview = ({
                   disabled={!canGoPrevious}
                   size={isMobile ? "md" : "lg"}
                   sx={(theme) => ({
-                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                    color: theme.colors.gray[4],
+                    backgroundColor: rgba(theme.colors.gray[8], 0.5),
                     opacity: canGoPrevious ? 1 : 0.5,
                     flexShrink: 0,
                     marginRight: 4,
@@ -176,7 +170,7 @@ const FilePreview = ({
                 
                 <Text 
                   size={isMobile ? "sm" : "md"} 
-                  weight={500} 
+                  fw={500} 
                   sx={{ 
                     flex: 1,
                     textAlign: 'center',
@@ -196,10 +190,8 @@ const FilePreview = ({
                   disabled={!canGoNext}
                   size={isMobile ? "md" : "lg"}
                   sx={(theme) => ({
-                    color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                    backgroundColor: theme.colorScheme === 'dark' 
-                      ? theme.fn.rgba(theme.colors.gray[8], 0.5)
-                      : theme.fn.rgba(theme.colors.gray[0], 0.5),
+                    color: theme.colors.gray[4],
+                    backgroundColor: rgba(theme.colors.gray[8], 0.5),
                     opacity: canGoNext ? 1 : 0.5,
                     flexShrink: 0,
                     marginLeft: 4,
@@ -216,13 +208,11 @@ const FilePreview = ({
               onClick={() => handleDownload(file)}
               size={isMobile ? "xs" : "sm"}
               radius="md"
-              leftIcon={<IconDownload size={isMobile ? 16 : 18} />}
+              leftSection={<IconDownload size={isMobile ? 16 : 18} />}
               disabled={isDownloading}
               sx={(theme) => ({
-                color: theme.colorScheme === 'dark' ? theme.colors.teal[4] : theme.colors.teal[7],
-                backgroundColor: theme.colorScheme === 'dark' 
-                  ? theme.fn.rgba(theme.colors.teal[8], 0.15)
-                  : theme.fn.rgba(theme.colors.teal[0], 0.15),
+                color: theme.colors.teal[4],
+                backgroundColor: rgba(theme.colors.teal[8], 0.15),
                 transform: isDownloading ? 'scale(0.95)' : 'scale(1)',
                 transition: 'all 0.2s ease',
                 opacity: isDownloading ? 0.8 : 1,
@@ -230,9 +220,7 @@ const FilePreview = ({
                 padding: isMobile ? '0 8px' : '0 12px',
                 flexShrink: 0,
                 '&:hover': {
-                  backgroundColor: theme.colorScheme === 'dark' 
-                    ? theme.fn.rgba(theme.colors.teal[8], 0.25)
-                    : theme.fn.rgba(theme.colors.teal[0], 0.25),
+                  backgroundColor: rgba(theme.colors.teal[8], 0.25),
                 }
               })}
             >
@@ -270,7 +258,7 @@ const FilePreview = ({
                     zIndex: 1,
                     pointerEvents: 'none',
                   }}>
-                    <Text size="md" color="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
+                    <Text size="md" c="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
                   </Box>
                 )}
                 <iframe
@@ -293,14 +281,14 @@ const FilePreview = ({
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <Text size="md" color="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
+                <Text size="md" c="#fff" sx={{ opacity: 0.8, fontWeight: 500, letterSpacing: 1 }}>Loading PDF…</Text>
               </Box>
             )
           ) : (
-            <Group position="center" h="100%">
-              <Stack align="center" spacing="xs">
-                <Text size="xl" color="#fff" sx={{ opacity: 0.8 }}>Preview not available</Text>
-                <Text size="sm" color="#fff" sx={{ opacity: 0.7 }}>This file type cannot be previewed</Text>
+            <Group justify="center" h="100%">
+              <Stack align="center" gap="xs">
+                <Text size="xl" c="#fff" sx={{ opacity: 0.8 }}>Preview not available</Text>
+                <Text size="sm" c="#fff" sx={{ opacity: 0.7 }}>This file type cannot be previewed</Text>
               </Stack>
             </Group>
           )}

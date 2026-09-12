@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { TextInput, ActionIcon } from '@mantine/core';
+import { TextInput, ActionIcon, rgba } from '@mantine/core';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import { useSearch } from '../contexts/SearchContext';
 import { useClickOutside } from '@mantine/hooks';
@@ -73,7 +73,7 @@ const SearchBar = ({ isMobile = false, onSearchClose }) => {
         autoComplete="off"
         autoFocus={isMobile}
         size={isMobile ? "sm" : "md"}
-        icon={
+        leftSection={
           <ActionIcon
             data-search-icon="true"
             onClick={handleSearchIconClick}
@@ -103,13 +103,9 @@ const SearchBar = ({ isMobile = false, onSearchClose }) => {
               opacity: 1,
               transform: 'translateX(0)',
               transition: 'all 0.3s ease-in-out',
-              color: theme.colorScheme === 'dark' 
-                ? theme.fn.rgba(theme.colors.red[9], 0.85)
-                : theme.fn.rgba(theme.colors.red[7], 0.85),
+              color: rgba(theme.colors.red[9], 0.85),
               '&:hover': {
-                backgroundColor: theme.colorScheme === 'dark'
-                  ? theme.fn.rgba(theme.colors.red[9], 0.15)
-                  : theme.fn.rgba(theme.colors.red[7], 0.15),
+                backgroundColor: rgba(theme.colors.red[9], 0.15),
               }
             })}
           >

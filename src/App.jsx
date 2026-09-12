@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/react';
 import { MantineProvider } from '@mantine/core';
+import { emotionTransform } from '@mantine/emotion';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Layout from './components/Layout';
@@ -13,10 +14,17 @@ import { SearchProvider } from './contexts/SearchProvider';
 function App() {
   return (
     <MantineProvider
-      withGlobalStyles
-      withNormalizeCSS
+      forceColorScheme={uiConfig.theme === 'darkly' ? 'dark' : 'light'}
+      stylesTransform={emotionTransform}
+      cssVariablesResolver={() => ({
+        variables: {
+          '--mantine-color-text': uiConfig.css_p_tag_color,
+          '--mantine-color-anchor': uiConfig.css_a_tag_color,
+        },
+        light: {},
+        dark: {},
+      })}
       theme={{
-        colorScheme: uiConfig.theme === 'darkly' ? 'dark' : 'light',
         primaryColor: 'blue',
         colors: {
           dark: [
@@ -70,43 +78,16 @@ function App() {
               },
             },
           },
-          Anchor: {
-            styles: () => ({
-              root: {
-                color: uiConfig.css_a_tag_color,
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              },
-            }),
-          },
-          Text: {
-            styles: () => ({
-              root: {
-                color: uiConfig.css_p_tag_color,
-              },
-            }),
-          },
-          Header: {
+          AppShell: {
             styles: (theme) => ({
-              root: {
-                backgroundColor: uiConfig.header_style_class.includes('bg-primary') 
-                  ? theme.colorScheme === 'dark' ? '#1A1B1E' : '#1a73e8'
-                  : theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+              header: {
+                backgroundColor: uiConfig.header_style_class.includes('bg-primary')
+                  ? '#1A1B1E'
+                  : theme.colors.dark[7],
               },
             }),
           },
         },
-        globalStyles: () => ({
-          // The content Stack is min-height 100vh minus the header, and AppShell
-          // adds its own padding, so the page sits right on the threshold where a
-          // scrollbar appears. Keeping the scrollbar always present stops the
-          // viewport width, and therefore every centred element, from moving.
-          html: {
-            overflowY: 'scroll',
-            scrollbarGutter: 'stable',
-          },
-        }),
         other: {
           siteName: config.siteName,
           siteDescription: config.siteDescription,

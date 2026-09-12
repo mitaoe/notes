@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Paper, Breadcrumbs, Anchor, Box, ActionIcon, Group } from '@mantine/core';
+import { Paper, Breadcrumbs, Anchor, Box, ActionIcon, Group, rgba } from '@mantine/core';
 import { IconChevronRight, IconChevronLeft } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -48,7 +48,7 @@ export function BreadcrumbNav({ pathSegments }) {
         navigate(path);
       }}
       sx={(theme) => ({
-        color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
+        color: theme.colors.blue[4],
         '&:hover': {
           textDecoration: 'underline',
         },
@@ -62,9 +62,7 @@ export function BreadcrumbNav({ pathSegments }) {
         borderRadius: theme.radius.sm,
 
         ...(index === pathSegments.length && {
-          backgroundColor: theme.colorScheme === 'dark' 
-            ? theme.fn.rgba(theme.colors.blue[9], 0.15)
-            : theme.fn.rgba(theme.colors.blue[0], 0.5),
+          backgroundColor: rgba(theme.colors.blue[9], 0.15),
         }),
         '@media (max-width: 480px)': {
           maxWidth: segment.length > 30 ? '150px' : 'none',
@@ -92,14 +90,14 @@ export function BreadcrumbNav({ pathSegments }) {
       p="md" 
       mb="md"
       sx={(theme) => ({
-        backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[6] : theme.white,
+        backgroundColor: theme.colors.dark[6],
         position: 'relative',
         userSelect: 'none',
         WebkitUserSelect: 'none',
         msUserSelect: 'none',
       })}
     >
-      <Group spacing={0} noWrap>
+      <Group gap={0} wrap="nowrap">
         {showLeftScroll && (
           <ActionIcon
             variant="subtle"
@@ -110,13 +108,9 @@ export function BreadcrumbNav({ pathSegments }) {
               zIndex: 2,
               height: '100%',
               borderRadius: 0,
-              background: theme => theme.colorScheme === 'dark' 
-                ? 'linear-gradient(to right, rgba(37, 38, 43, 0.9), transparent)'
-                : 'linear-gradient(to right, rgba(255, 255, 255, 0.9), transparent)',
+              background: 'linear-gradient(to right, rgba(37, 38, 43, 0.9), transparent)',
               '&:hover': {
-                background: theme => theme.colorScheme === 'dark'
-                  ? 'linear-gradient(to right, rgba(37, 38, 43, 1), transparent)'
-                  : 'linear-gradient(to right, rgba(255, 255, 255, 1), transparent)',
+                background: 'linear-gradient(to right, rgba(37, 38, 43, 1), transparent)',
               }
             }}
           >
@@ -174,13 +168,9 @@ export function BreadcrumbNav({ pathSegments }) {
               zIndex: 2,
               height: '100%',
               borderRadius: 0,
-              background: theme => theme.colorScheme === 'dark'
-                ? 'linear-gradient(to left, rgba(37, 38, 43, 0.9), transparent)'
-                : 'linear-gradient(to left, rgba(255, 255, 255, 0.9), transparent)',
+              background: 'linear-gradient(to left, rgba(37, 38, 43, 0.9), transparent)',
               '&:hover': {
-                background: theme => theme.colorScheme === 'dark'
-                  ? 'linear-gradient(to left, rgba(37, 38, 43, 1), transparent)'
-                  : 'linear-gradient(to left, rgba(255, 255, 255, 1), transparent)',
+                background: 'linear-gradient(to left, rgba(37, 38, 43, 1), transparent)',
               }
             }}
           >

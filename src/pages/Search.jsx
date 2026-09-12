@@ -24,21 +24,21 @@ const Search = () => {
   const getSearchTitle = () => {
     if (!submittedQuery) return null;
     if (loading) return (
-      <Text span weight={400} color="dimmed">Searching...</Text>
+      <Text span fw={400} c="dimmed">Searching...</Text>
     );
     if (error) return (
-      <Text span weight={400} color="red">Search failed</Text>
+      <Text span fw={400} c="red">Search failed</Text>
     );
     if (files.length === 0) return (
       <>
-        <Text span color="dimmed">No items found matching </Text>
-        <Text span weight={500}>&quot;{submittedQuery}&quot;</Text>
+        <Text span c="dimmed">No items found matching </Text>
+        <Text span fw={500}>&quot;{submittedQuery}&quot;</Text>
       </>
     );
     return (
       <>
-        <Text span color="dimmed">Results for </Text>
-        <Text span weight={500}>&quot;{submittedQuery}&quot;</Text>
+        <Text span c="dimmed">Results for </Text>
+        <Text span fw={500}>&quot;{submittedQuery}&quot;</Text>
       </>
     );
   };
@@ -52,7 +52,7 @@ const Search = () => {
           sx={(theme) => ({
             fontSize: '1.5rem',
             fontWeight: 500,
-            color: theme.colorScheme === 'dark' ? theme.colors.dark[0] : theme.colors.gray[9],
+            color: theme.colors.dark[0],
             display: 'flex',
             alignItems: 'center',
             gap: '0.25rem'

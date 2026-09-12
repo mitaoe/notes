@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Group, Text, Button, Box, Loader, Stack, ThemeIcon, ActionIcon } from '@mantine/core';
+import { Group, Text, Button, Box, Loader, Stack, ThemeIcon, ActionIcon, rgba } from '@mantine/core';
 import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router-dom';
@@ -9,22 +9,20 @@ import FilePreview from './FilePreview';
 
 function EmptyState() {
   return (
-    <Stack align="center" spacing="xs" py={50}>
+    <Stack align="center" gap="xs" py={50}>
       <ThemeIcon 
         size={80} 
         radius={100}
         variant="light"
         sx={(theme) => ({
-          backgroundColor: theme.colorScheme === 'dark' 
-            ? theme.fn.rgba(theme.colors.blue[9], 0.15)
-            : theme.fn.rgba(theme.colors.blue[0], 0.5),
-          color: theme.colorScheme === 'dark' ? theme.colors.blue[4] : theme.colors.blue[6],
+          backgroundColor: rgba(theme.colors.blue[9], 0.15),
+          color: theme.colors.blue[4],
         })}
       >
         <IconInbox size={40} />
       </ThemeIcon>
-      <Text size="xl" weight={500}>Looks rather empty here</Text>
-      <Text size="sm" color="dimmed" align="center" px="lg">
+      <Text size="xl" fw={500}>Looks rather empty here</Text>
+      <Text size="sm" c="dimmed" ta="center" px="lg">
         Much like a professor&apos;s office during exam week, this folder appears to be vacant.
       </Text>
     </Stack>
@@ -136,8 +134,8 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
     return (
       <>
         <BreadcrumbNav pathSegments={pathSegments} />
-        <Group position="center" style={{ minHeight: 200 }}>
-          <Loader size="lg" variant="dots" />
+        <Group justify="center" style={{ minHeight: 200 }}>
+          <Loader size="lg" type="dots" />
         </Group>
       </>
     );
@@ -152,14 +150,14 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
             <EmptyState />
           </Box>
         ) : (
-          <Stack spacing="xs">
+          <Stack gap="xs">
             {files.map((file) => (
               <Box
                 key={file.id}
                 sx={(theme) => ({
-                  background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+                  background: theme.colors.dark[7],
                   borderRadius: theme.radius.sm,
-                  border: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
+                  border: `1px solid ${theme.colors.dark[5]}`,
                   boxShadow: theme.shadows.xs,
                   padding: theme.spacing.md,
                 })}
@@ -184,10 +182,10 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                           {file.name}
                         </Text>
                       ) : (
-                        <Text className={classes.fileName} size="md" weight={500} truncate>{file.name}</Text>
+                        <Text className={classes.fileName} size="md" fw={500} truncate>{file.name}</Text>
                       )}
                       {file.mimeType !== 'application/vnd.google-apps.folder' && (
-                        <Text size="xs" color="dimmed">{file.size ? formatFileSize(file.size) : ''}</Text>
+                        <Text size="xs" c="dimmed">{file.size ? formatFileSize(file.size) : ''}</Text>
                       )}
                     </Box>
                   </Box>
@@ -201,10 +199,8 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                           size="lg"
                           title="Preview"
                           sx={(theme) => ({
-                            color: theme.colorScheme === 'dark' ? theme.colors.gray[4] : theme.colors.gray[7],
-                            backgroundColor: theme.colorScheme === 'dark' 
-                              ? theme.fn.rgba(theme.colors.gray[8], 0.15)
-                              : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                            color: theme.colors.gray[4],
+                            backgroundColor: rgba(theme.colors.gray[8], 0.15),
                           })}
                         >
                           <IconEye size={18} />
@@ -218,9 +214,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
                         title="Download"
                         sx={(theme) => ({
                           color: '#228be6',
-                          backgroundColor: theme.colorScheme === 'dark' 
-                            ? theme.fn.rgba(theme.colors.gray[8], 0.15)
-                            : theme.fn.rgba(theme.colors.gray[0], 0.15),
+                          backgroundColor: rgba(theme.colors.gray[8], 0.15),
                           transform: downloadingIds.has(file.id) ? 'scale(0.95)' : 'scale(1)',
                           transition: 'transform 0.2s ease',
                           opacity: downloadingIds.has(file.id) ? 0.8 : 1,
@@ -236,11 +230,11 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
           </Stack>
         )}
         {hasMore && (
-          <Group position="center" mt="md" style={{ minHeight: 36 }}>
+          <Group justify="center" mt="md" style={{ minHeight: 36 }}>
             <Button
               onClick={handleLoadMore}
               loading={loadingMore}
-              loaderProps={{ size: 'xs', variant: 'dots' }}
+              loaderProps={{ size: 'xs', type: 'dots' }}
               variant="light"
               styles={{ root: { minWidth: 140 } }}
             >
