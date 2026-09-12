@@ -1,6 +1,5 @@
-/* Mantine 7+ removed theme.globalStyles, so app-wide CSS lives here.
-   Reserving the scrollbar gutter keeps the viewport width constant when the
-   page grows past it, so centred content does not shift sideways. */
+/* Reserve the scrollbar gutter so centred content does not shift sideways
+   when the page grows past the viewport. */
 html {
   scrollbar-gutter: stable;
 }

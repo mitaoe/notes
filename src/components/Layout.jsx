@@ -14,9 +14,6 @@ const Layout = ({ children }) => {
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
   const [prevPathname, setPrevPathname] = useState(location.pathname);
 
-  // Adjust state during render rather than in an effect, per the React docs on
-  // resetting state when a value changes. Clearing the search itself now lives
-  // in SearchProvider, which owns that state.
   if (location.pathname !== prevPathname) {
     setPrevPathname(location.pathname);
     if (!location.pathname.startsWith('/search') && mobileSearchOpened) {
