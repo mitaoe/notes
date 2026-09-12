@@ -1,7 +1,7 @@
 export const config = {
   siteName: "notes",
-  files_list_page_size: 100,
-  search_result_list_page_size: 100,
+  files_list_page_size: 10,
+  search_result_list_page_size: 10,
   enable_cors_file_down: false,
   enable_password_file_verify: false,
   direct_link_protection: false,

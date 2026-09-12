@@ -7,6 +7,7 @@ const DOCUMENT_TYPE = 'application/vnd.google-apps.document';
 const SPREADSHEET_TYPE = 'application/vnd.google-apps.spreadsheet';
 const FORM_TYPE = 'application/vnd.google-apps.form';
 const SITE_TYPE = 'application/vnd.google-apps.site';
+const DEFAULT_PAGE_SIZE = 100;
 
 const clientId = process.env.VITE_GOOGLE_CLIENT_ID;
 const clientSecret = process.env.VITE_GOOGLE_CLIENT_SECRET;
@@ -35,6 +36,7 @@ export default async function handler(req, res) {
   try {
     const token = await getAccessToken();
     const { path, pageToken, search, folderName, fileId } = req.query;
+    const pageSize = Math.min(Math.max(parseInt(req.query.pageSize, 10) || DEFAULT_PAGE_SIZE, 1), 1000);
 
     // Handle file metadata request
     if (fileId) {
@@ -81,7 +83,7 @@ export default async function handler(req, res) {
         q: `trashed = false AND mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}' AND name !='.password' AND (${nameSearchStr})`,
         orderBy: 'folder,name,modifiedTime desc',
         fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime)',
-        pageSize: 100,
+        pageSize,
         supportsAllDrives: true,
         includeItemsFromAllDrives: true,
         corpora: 'allDrives',
@@ -101,7 +103,7 @@ export default async function handler(req, res) {
       q: `'${path}' in parents and trashed = false AND name !='.password' and mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}'`,
       orderBy: 'folder,name,modifiedTime desc',
       fields: 'nextPageToken, files(id, name, mimeType, size, modifiedTime, fileExtension, iconLink, thumbnailLink, parents, driveId)',
-      pageSize: 100,
+      pageSize,
       supportsAllDrives: true,
       includeItemsFromAllDrives: true,
       corpora: 'allDrives',

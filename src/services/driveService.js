@@ -67,7 +67,8 @@ class GoogleDrive {
       const response = await axios.get('/api/files', {
         params: {
           path: folderId,
-          pageToken
+          pageToken,
+          pageSize: config.files_list_page_size
         }
       });
 
@@ -140,7 +141,8 @@ class GoogleDrive {
       const response = await axios.get('/api/files', {
         params: {
           search: query,
-          pageToken
+          pageToken,
+          pageSize: config.search_result_list_page_size
         }
       });
 
