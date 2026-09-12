@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme, Stack } from '@mantine/core';
 import { Link, useLocation } from 'react-router-dom';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
-import { useSearch } from '../contexts/SearchContext';
 import SearchBar from './SearchBar';
 import Footer from './Footer';
 
@@ -13,14 +12,17 @@ const Layout = ({ children }) => {
   const location = useLocation();
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
-  const { clearSearch } = useSearch();
+  const [prevPathname, setPrevPathname] = useState(location.pathname);
 
-  useEffect(() => {
-    if (!location.pathname.startsWith('/search')) {
-      clearSearch();
+  // Adjust state during render rather than in an effect, per the React docs on
+  // resetting state when a value changes. Clearing the search itself now lives
+  // in SearchProvider, which owns that state.
+  if (location.pathname !== prevPathname) {
+    setPrevPathname(location.pathname);
+    if (!location.pathname.startsWith('/search') && mobileSearchOpened) {
       setMobileSearchOpened(false);
     }
-  }, [location.pathname, clearSearch]);
+  }
 
   return (
     <AppShell

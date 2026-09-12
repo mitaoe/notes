@@ -7,8 +7,9 @@ import { Box } from '@mantine/core';
 export function Home() {
   const navigate = useNavigate();
   const [files, setFiles] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
+  const [loaded, setLoaded] = React.useState(false);
   const [nextPageToken, setNextPageToken] = React.useState(null);
+  const loading = !loaded;
 
   const loadFiles = async (pageToken = null) => {
     try {
@@ -22,12 +23,14 @@ export function Home() {
     } catch (error) {
       console.error('Error loading files:', error);
     } finally {
-      setLoading(false);
+      setLoaded(true);
     }
   };
 
   React.useEffect(() => {
-    loadFiles();
+    (async () => {
+      await loadFiles();
+    })();
   }, []);
 
   const handleFolderClick = (folder) => {

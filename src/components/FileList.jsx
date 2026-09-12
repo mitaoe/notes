@@ -234,6 +234,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
       </Box>
 
       <FilePreview
+        key={previewFile?.id}
         opened={!!previewFile}
         onClose={handlePreviewClose}
         file={previewFile}
