@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { AppShell, Header, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme, Stack } from '@mantine/core';
+import { AppShell, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme, Stack } from '@mantine/core';
 import { Link, useLocation } from 'react-router-dom';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
@@ -27,16 +27,23 @@ const Layout = ({ children }) => {
   return (
     <AppShell
       padding="md"
-      header={
-        <Header height={60} fixed={uiConfig.fixed_header} 
-          sx={(theme) => ({
-            backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
-            borderBottom: `1px solid ${theme.colorScheme === 'dark' ? theme.colors.dark[5] : theme.colors.gray[2]}`,
-          })}
-        >
+      header={{ height: 60 }}
+      styles={(theme) => ({
+        main: {
+          backgroundColor: theme.colors.dark[8],
+          minHeight: '100vh',
+        },
+      })}
+    >
+      <AppShell.Header
+        sx={(theme) => ({
+          backgroundColor: theme.colors.dark[7],
+          borderBottom: `1px solid ${theme.colors.dark[5]}`,
+        })}
+      >
           <Container size="lg" h="100%">
-            <Group position="apart" h="100%" spacing="xl">
-              <Group spacing="xl">
+            <Group justify="space-between" h="100%" gap="xl">
+              <Group gap="xl">
                 <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
                   <Image
                     src={uiConfig.logo_link_name}
@@ -49,7 +56,7 @@ const Layout = ({ children }) => {
               </Group>
 
               {/* Desktop Navigation */}
-              <Group spacing="xl" sx={{ '@media (max-width: 768px)': { display: 'none' } }}>
+              <Group gap="xl" sx={{ '@media (max-width: 768px)': { display: 'none' } }}>
                 <SearchBar />
                 <ActionIcon
                   component="a"
@@ -57,7 +64,7 @@ const Layout = ({ children }) => {
                   target="_blank"
                   size="lg"
                   variant="subtle"
-                  color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+                  color={'gray'}
                 >
                   <IconBrandGithub size={22} />
                 </ActionIcon>
@@ -67,7 +74,7 @@ const Layout = ({ children }) => {
                   target="_blank"
                   size="lg"
                   variant="subtle"
-                  color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+                  color={'gray'}
                 >
                   <IconMessage size={22} />
                 </ActionIcon>
@@ -75,13 +82,13 @@ const Layout = ({ children }) => {
 
               {/* Mobile Navigation */}
               <Box sx={{ '@media (min-width: 769px)': { display: 'none' } }}>
-                <Group spacing="sm">
+                <Group gap="sm">
                   {!mobileSearchOpened ? (
                     <ActionIcon 
                       onClick={() => setMobileSearchOpened(true)}
                       size="lg"
                       variant="subtle"
-                      color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+                      color={'gray'}
                     >
                       <IconSearch size={22} />
                     </ActionIcon>
@@ -95,22 +102,15 @@ const Layout = ({ children }) => {
                     opened={mobileMenuOpened}
                     onClick={() => setMobileMenuOpened(!mobileMenuOpened)}
                     size="sm"
-                    color={theme.colorScheme === 'dark' ? theme.colors.gray[5] : theme.colors.dark[6]}
+                    color={theme.colors.gray[5]}
                   />
                 </Group>
               </Box>
             </Group>
           </Container>
-        </Header>
-      }
-      styles={(theme) => ({
-        main: {
-          backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0],
-          paddingTop: '60px',
-          minHeight: '100vh',
-        },
-      })}
-    >
+      </AppShell.Header>
+
+      <AppShell.Main>
       {/* Mobile Menu Drawer */}
       <Drawer
         opened={mobileMenuOpened}
@@ -118,8 +118,8 @@ const Layout = ({ children }) => {
         position="right"
         size="xs"
         styles={{
-          drawer: {
-            background: theme.colorScheme === 'dark' ? theme.colors.dark[7] : theme.white,
+          content: {
+            background: theme.colors.dark[7],
           },
         }}
       >
@@ -131,7 +131,7 @@ const Layout = ({ children }) => {
               target="_blank"
               size="xl"
               variant="light"
-              color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+              color={'gray'}
             >
               <IconBrandGithub size={24} />
             </ActionIcon>
@@ -141,7 +141,7 @@ const Layout = ({ children }) => {
               target="_blank"
               size="xl"
               variant="light"
-              color={theme.colorScheme === 'dark' ? 'gray' : 'dark'}
+              color={'gray'}
             >
               <IconMessage size={24} />
             </ActionIcon>
@@ -150,13 +150,14 @@ const Layout = ({ children }) => {
       </Drawer>
 
       <Container size="lg">
-        <Stack spacing="xs" sx={{ minHeight: 'calc(100vh - 60px)', justifyContent: 'space-between' }}>
+        <Stack gap="xs" sx={{ minHeight: 'calc(100vh - 60px)', justifyContent: 'space-between' }}>
           <Box>
             {children}
           </Box>
           <Footer />
         </Stack>
       </Container>
+      </AppShell.Main>
     </AppShell>
   );
 };
