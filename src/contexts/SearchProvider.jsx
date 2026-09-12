@@ -16,8 +16,6 @@ const SearchProvider = ({ children }) => {
 
   const onSearchRoute = location.pathname === '/search';
 
-  // The URL holds the query that has been searched; `searchQuery` is only what
-  // is currently typed in the box.
   const submittedQuery = onSearchRoute
     ? (new URLSearchParams(location.search).get('q') || '').trim()
     : '';
@@ -30,7 +28,6 @@ const SearchProvider = ({ children }) => {
     }
   }
 
-  // Navigating away from the search route drops the query and its results.
   if (location.pathname !== prevPathname) {
     setPrevPathname(location.pathname);
     if (!location.pathname.startsWith('/search')) {

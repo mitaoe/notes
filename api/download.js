@@ -32,7 +32,6 @@ export default async function handler(req, res) {
   try {
     const token = await getAccessToken();
 
-    // Get file metadata first
     const metadataResponse = await axios.get(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
       params: {
         fields: 'name,mimeType,size',
@@ -43,7 +42,6 @@ export default async function handler(req, res) {
 
     const { name, mimeType, size } = metadataResponse.data;
 
-    // Set file permissions to allow public access
     await axios.post(`https://www.googleapis.com/drive/v3/files/${fileId}/permissions`, {
       role: 'reader',
       type: 'anyone',
@@ -51,7 +49,6 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${token}` },
     });
 
-    // Always return JSON with download and preview URLs
     return res.status(200).json({
       name,
       mimeType,

@@ -33,14 +33,11 @@ const FilePreview = ({
   const handleDownload = async (file) => {
     try {
       setIsDownloading(true);
-      // Request file metadata with direct links
       const response = await fetch(`/api/download?fileId=${file.id}&directLink=true`);
       const metadata = await response.json();
       
-      // Open the direct download URL in a new tab
       window.open(metadata.downloadUrl, '_blank');
       
-      // Small delay to show feedback before resetting state
       setTimeout(() => {
         setIsDownloading(false);
       }, 500);
@@ -51,7 +48,6 @@ const FilePreview = ({
   };
 
   useEffect(() => {
-    // Get direct preview URL on mount for PDF files
     if (file && isPdf) {
       fetch(`/api/download?fileId=${file.id}&directLink=true`)
         .then(response => response.json())
@@ -62,7 +58,6 @@ const FilePreview = ({
 
   if (!file) return null;
 
-  // Only allow navigation between previewable files (PDFs)
   const previewableFiles = files?.filter(f => f.mimeType === 'application/pdf') || [];
   const currentIndex = previewableFiles.findIndex(f => f.id === file?.id);
   const canGoPrevious = currentIndex > 0;
@@ -95,7 +90,6 @@ const FilePreview = ({
           backgroundColor: 'var(--mantine-color-body)',
         }}
       >
-        {/* Header */}
         <Paper
           p="md"
           sx={(theme) => ({
@@ -115,7 +109,6 @@ const FilePreview = ({
             gap: 0,
             padding: 0
           }}>
-            {/* Left section: Close button */}
             <Button
               variant="subtle"
               onClick={onClose}
@@ -136,7 +129,6 @@ const FilePreview = ({
               {isMobile ? '' : 'Close'}
             </Button>
             
-            {/* Navigation group - prev button, filename, next button */}
             <Box sx={{ 
               flex: 1,
               display: 'flex',
@@ -202,7 +194,6 @@ const FilePreview = ({
               </Box>
             </Box>
             
-            {/* Download button */}
             <Button
               variant="subtle"
               onClick={() => handleDownload(file)}
@@ -229,7 +220,6 @@ const FilePreview = ({
           </Box>
         </Paper>
 
-        {/* Content */}
         <Box
           sx={{
             flex: 1,

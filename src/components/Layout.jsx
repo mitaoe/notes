@@ -52,7 +52,6 @@ const Layout = ({ children }) => {
                 </Link>
               </Group>
 
-              {/* Desktop Navigation */}
               <Group gap="xl" sx={{ '@media (max-width: 768px)': { display: 'none' } }}>
                 <SearchBar />
                 <ActionIcon
@@ -77,7 +76,6 @@ const Layout = ({ children }) => {
                 </ActionIcon>
               </Group>
 
-              {/* Mobile Navigation */}
               <Box sx={{ '@media (min-width: 769px)': { display: 'none' } }}>
                 <Group gap="sm">
                   {!mobileSearchOpened ? (
@@ -108,7 +106,6 @@ const Layout = ({ children }) => {
       </AppShell.Header>
 
       <AppShell.Main>
-      {/* Mobile Menu Drawer */}
       <Drawer
         opened={mobileMenuOpened}
         onClose={() => setMobileMenuOpened(false)}

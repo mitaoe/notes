@@ -1,5 +1,3 @@
-/* Reserve the scrollbar gutter so centred content does not shift sideways
-   when the page grows past the viewport. */
 html {
   scrollbar-gutter: stable;
 }

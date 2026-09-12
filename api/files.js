@@ -38,7 +38,6 @@ export default async function handler(req, res) {
     const { path, pageToken, search, folderName, fileId } = req.query;
     const pageSize = Math.min(Math.max(parseInt(req.query.pageSize, 10) || DEFAULT_PAGE_SIZE, 1), 1000);
 
-    // Handle file metadata request
     if (fileId) {
       const response = await axios.get(`${BASE_URL}/files/${fileId}`, {
         params: {
@@ -50,7 +49,6 @@ export default async function handler(req, res) {
       return res.status(200).json(response.data);
     }
 
-    // Handle folder contents request with specific name
     if (folderName) {
       const params = {
         q: `'${path}' in parents and name = '${folderName}' and mimeType = '${FOLDER_TYPE}' and trashed = false`,
@@ -67,7 +65,6 @@ export default async function handler(req, res) {
       return res.status(200).json(response.data);
     }
 
-    // Handle search request
     if (search) {
       const formattedQuery = search.replace(/(!=)|['"=<>/\\:]/g, '').replace(/[,，|(){}]/g, ' ').trim();
       if (!formattedQuery) {
@@ -98,7 +95,6 @@ export default async function handler(req, res) {
       return res.status(200).json(response.data);
     }
 
-    // Handle regular directory listing
     const params = {
       q: `'${path}' in parents and trashed = false AND name !='.password' and mimeType != '${SHORTCUT_TYPE}' and mimeType != '${DOCUMENT_TYPE}' and mimeType != '${SPREADSHEET_TYPE}' and mimeType != '${FORM_TYPE}' and mimeType != '${SITE_TYPE}'`,
       orderBy: 'folder,name,modifiedTime desc',

@@ -14,7 +14,6 @@ class GoogleDrive {
       return config.roots[0].id;
     }
 
-    // Remove leading and trailing slashes and split path
     const parts = path.split('/').filter(Boolean);
     let currentId = config.roots[0].id;
 
@@ -72,7 +71,6 @@ class GoogleDrive {
         }
       });
 
-      // Process files
       const files = response.data.files.map(file => ({
         ...file,
         downloadUrl: file.mimeType === FOLDER_TYPE ? null : async () => {
