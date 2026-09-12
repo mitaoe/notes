@@ -1,30 +1,20 @@
-import { useEffect } from 'react';
 import { Title, Box, Text, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { FileList } from '../components/FileList';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSearch } from '../contexts/SearchContext';
 import driveService from '../services/driveService';
 
 const Search = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const { 
-    searchQuery, 
-    setSearchQuery, 
-    files, 
-    loading, 
-    error, 
-    hasMore, 
-    loadMore 
+  const {
+    submittedQuery,
+    files,
+    loading,
+    error,
+    hasMore,
+    loadMore
   } = useSearch();
-
-  useEffect(() => {
-    const queryParam = searchParams.get('q');
-    if (queryParam && queryParam !== searchQuery) {
-      setSearchQuery(queryParam);
-    }
-  }, [searchParams, searchQuery, setSearchQuery]);
 
   const handleFolderClick = async (folder) => {
     const path = await driveService.findPathById(folder.id);
@@ -32,7 +22,7 @@ const Search = () => {
   };
 
   const getSearchTitle = () => {
-    if (!searchQuery) return null;
+    if (!submittedQuery) return null;
     if (loading) return (
       <Text span weight={400} color="dimmed">Searching...</Text>
     );
@@ -42,13 +32,13 @@ const Search = () => {
     if (files.length === 0) return (
       <>
         <Text span color="dimmed">No items found matching </Text>
-        <Text span weight={500}>`&quot;${searchQuery}&quot;`</Text>
+        <Text span weight={500}>&quot;{submittedQuery}&quot;</Text>
       </>
     );
     return (
       <>
         <Text span color="dimmed">Results for </Text>
-        <Text span weight={500}>`&quot;${searchQuery}&quot;`</Text>
+        <Text span weight={500}>&quot;{submittedQuery}&quot;</Text>
       </>
     );
   };

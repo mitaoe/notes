@@ -14,12 +14,26 @@ const SearchProvider = ({ children }) => {
   const [loadedQuery, setLoadedQuery] = useState(null);
   const [prevPathname, setPrevPathname] = useState(location.pathname);
 
-  const trimmedQuery = searchQuery.trim();
   const onSearchRoute = location.pathname === '/search';
 
+  // The URL is the source of truth for what has actually been searched.
+  // `searchQuery` is only what is currently typed in the box, so editing it
+  // never fights the URL and never re-runs a search per keystroke.
+  const submittedQuery = onSearchRoute
+    ? (new URLSearchParams(location.search).get('q') || '').trim()
+    : '';
+  const [prevSubmitted, setPrevSubmitted] = useState(submittedQuery);
+
   // Adjust state during render rather than in an effect, per the React docs on
-  // resetting state when a value changes. Navigating away from the search route
-  // drops the query and its results.
+  // resetting state when a value changes.
+  if (submittedQuery !== prevSubmitted) {
+    setPrevSubmitted(submittedQuery);
+    if (submittedQuery) {
+      setSearchQuery(submittedQuery);
+    }
+  }
+
+  // Navigating away from the search route drops the query and its results.
   if (location.pathname !== prevPathname) {
     setPrevPathname(location.pathname);
     if (!location.pathname.startsWith('/search')) {
@@ -32,10 +46,9 @@ const SearchProvider = ({ children }) => {
   }
 
   // Derived rather than stored, so no effect has to set it.
-  const loading = onSearchRoute && trimmedQuery !== '' && loadedQuery !== trimmedQuery;
+  const loading = onSearchRoute && submittedQuery !== '' && loadedQuery !== submittedQuery;
 
-  const handleSearch = useCallback(async (pageToken = null) => {
-    const query = searchQuery.trim();
+  const runSearch = useCallback(async (query, pageToken = null) => {
     if (!query) {
       setFiles([]);
       setNextPageToken(null);
@@ -61,16 +74,16 @@ const SearchProvider = ({ children }) => {
     } finally {
       setLoadedQuery(query);
     }
-  }, [searchQuery]);
+  }, []);
 
   useEffect(() => {
-    if (!onSearchRoute || !trimmedQuery) {
+    if (!submittedQuery) {
       return;
     }
     (async () => {
-      await handleSearch();
+      await runSearch(submittedQuery);
     })();
-  }, [onSearchRoute, trimmedQuery, handleSearch]);
+  }, [submittedQuery, runSearch]);
 
   const performSearch = useCallback(() => {
     if (searchQuery.trim()) {
@@ -89,14 +102,16 @@ const SearchProvider = ({ children }) => {
   }, [navigate, location.pathname]);
 
   const loadMore = useCallback(() => {
-    if (nextPageToken) {
-      handleSearch(nextPageToken);
+    if (!nextPageToken) {
+      return Promise.resolve();
     }
-  }, [nextPageToken, handleSearch]);
+    return runSearch(submittedQuery, nextPageToken);
+  }, [nextPageToken, runSearch, submittedQuery]);
 
   const contextValue = {
     searchQuery,
     setSearchQuery,
+    submittedQuery,
     files,
     loading,
     error,
