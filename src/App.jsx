@@ -16,6 +16,14 @@ function App() {
     <MantineProvider
       forceColorScheme={uiConfig.theme === 'darkly' ? 'dark' : 'light'}
       stylesTransform={emotionTransform}
+      cssVariablesResolver={() => ({
+        variables: {
+          '--mantine-color-text': uiConfig.css_p_tag_color,
+          '--mantine-color-anchor': uiConfig.css_a_tag_color,
+        },
+        light: {},
+        dark: {},
+      })}
       theme={{
         primaryColor: 'blue',
         colors: {
@@ -69,23 +77,6 @@ function App() {
                 },
               },
             },
-          },
-          Anchor: {
-            styles: () => ({
-              root: {
-                color: uiConfig.css_a_tag_color,
-                '&:hover': {
-                  textDecoration: 'underline',
-                },
-              },
-            }),
-          },
-          Text: {
-            styles: () => ({
-              root: {
-                color: uiConfig.css_p_tag_color,
-              },
-            }),
           },
           AppShell: {
             styles: (theme) => ({
