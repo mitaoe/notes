@@ -12,13 +12,13 @@ importers:
         specifier: ^11.13.5
         version: 11.14.0(@types/react@19.2.18)(react@19.2.8)
       '@mantine/core':
-        specifier: ^9.6.1
+        specifier: 9.6.1
         version: 9.6.1(@mantine/hooks@9.6.1(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@mantine/emotion':
         specifier: 9.6.1
         version: 9.6.1(@emotion/cache@11.14.0)(@emotion/react@11.14.0(@types/react@19.2.18)(react@19.2.8))(@emotion/serialize@1.3.3)(@emotion/utils@1.4.2)(@mantine/core@9.6.1(@mantine/hooks@9.6.1(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@mantine/hooks@9.6.1(react@19.2.8))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@mantine/hooks':
-        specifier: ^9.6.1
+        specifier: 9.6.1
         version: 9.6.1(react@19.2.8)
       '@tabler/icons-react':
         specifier: ^3.46.0
