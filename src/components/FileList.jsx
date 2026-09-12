@@ -144,7 +144,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   return (
     <>
       <BreadcrumbNav pathSegments={pathSegments} />
-      <Box className={classes.wrapper}>
+      <Box>
         {files.length === 0 ? (
           <Box className={classes.emptyStateWrapper}>
             <EmptyState />
