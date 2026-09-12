@@ -1,0 +1,9 @@
+/* Mantine 7+ removed theme.globalStyles, so app-wide CSS lives here.
+   The content Stack is min-height 100vh minus the header and AppShell adds its
+   own padding, which puts the page right on the threshold where a scrollbar
+   appears. Keeping it always present stops the viewport width, and so every
+   centred element, from moving. */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
