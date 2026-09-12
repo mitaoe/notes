@@ -1,10 +1,6 @@
 import { createStyles } from '@mantine/emotion';
 
 export const useStyles = createStyles((theme) => ({
-  wrapper: {
-    overflowX: 'auto',
-    WebkitOverflowScrolling: 'touch',
-  },
   table: {
     backgroundColor: theme.colors.dark[7],
     borderRadius: theme.radius.sm,
