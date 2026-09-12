@@ -37,6 +37,16 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   const location = useLocation();
   const [, setIsMobile] = useState(window.innerWidth <= 600);
   const [downloadingIds, setDownloadingIds] = useState(new Set());
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const handleLoadMore = async () => {
+    setLoadingMore(true);
+    try {
+      await onLoadMore();
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
@@ -225,9 +235,14 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
           </Stack>
         )}
         {hasMore && (
-          <Group position="center" mt="md">
-            <Button onClick={onLoadMore} variant="light">
-              Load More
+          <Group position="center" mt="md" style={{ minHeight: 36 }}>
+            <Button
+              onClick={handleLoadMore}
+              loading={loadingMore}
+              disabled={loadingMore}
+              variant="light"
+            >
+              {loadingMore ? 'Loading' : 'Load More'}
             </Button>
           </Group>
         )}
