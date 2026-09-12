@@ -14,9 +14,6 @@ const Layout = ({ children }) => {
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
   const [prevPathname, setPrevPathname] = useState(location.pathname);
 
-  // Adjust state during render rather than in an effect, per the React docs on
-  // resetting state when a value changes. Clearing the search itself now lives
-  // in SearchProvider, which owns that state.
   if (location.pathname !== prevPathname) {
     setPrevPathname(location.pathname);
     if (!location.pathname.startsWith('/search') && mobileSearchOpened) {
@@ -55,7 +52,6 @@ const Layout = ({ children }) => {
                 </Link>
               </Group>
 
-              {/* Desktop Navigation */}
               <Group gap="xl" sx={{ '@media (max-width: 768px)': { display: 'none' } }}>
                 <SearchBar />
                 <ActionIcon
@@ -80,7 +76,6 @@ const Layout = ({ children }) => {
                 </ActionIcon>
               </Group>
 
-              {/* Mobile Navigation */}
               <Box sx={{ '@media (min-width: 769px)': { display: 'none' } }}>
                 <Group gap="sm">
                   {!mobileSearchOpened ? (
@@ -111,7 +106,6 @@ const Layout = ({ children }) => {
       </AppShell.Header>
 
       <AppShell.Main>
-      {/* Mobile Menu Drawer */}
       <Drawer
         opened={mobileMenuOpened}
         onClose={() => setMobileMenuOpened(false)}

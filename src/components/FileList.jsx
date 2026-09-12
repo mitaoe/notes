@@ -61,10 +61,8 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
       const response = await fetch(`/api/download?fileId=${file.id}&directLink=true`);
       const metadata = await response.json();
       
-      // Open the direct download URL in a new tab
       window.open(metadata.downloadUrl, '_blank');
       
-      // Small delay to show feedback before resetting state
       setTimeout(() => {
         setDownloadingIds(prev => {
           const newSet = new Set(prev);

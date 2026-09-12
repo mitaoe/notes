@@ -16,16 +16,11 @@ const SearchProvider = ({ children }) => {
 
   const onSearchRoute = location.pathname === '/search';
 
-  // The URL is the source of truth for what has actually been searched.
-  // `searchQuery` is only what is currently typed in the box, so editing it
-  // never fights the URL and never re-runs a search per keystroke.
   const submittedQuery = onSearchRoute
     ? (new URLSearchParams(location.search).get('q') || '').trim()
     : '';
   const [prevSubmitted, setPrevSubmitted] = useState(submittedQuery);
 
-  // Adjust state during render rather than in an effect, per the React docs on
-  // resetting state when a value changes.
   if (submittedQuery !== prevSubmitted) {
     setPrevSubmitted(submittedQuery);
     if (submittedQuery) {
@@ -33,7 +28,6 @@ const SearchProvider = ({ children }) => {
     }
   }
 
-  // Navigating away from the search route drops the query and its results.
   if (location.pathname !== prevPathname) {
     setPrevPathname(location.pathname);
     if (!location.pathname.startsWith('/search')) {
@@ -45,7 +39,6 @@ const SearchProvider = ({ children }) => {
     }
   }
 
-  // Derived rather than stored, so no effect has to set it.
   const loading = onSearchRoute && submittedQuery !== '' && loadedQuery !== submittedQuery;
 
   const runSearch = useCallback(async (query, pageToken = null) => {
