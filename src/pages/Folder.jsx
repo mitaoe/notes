@@ -7,12 +7,12 @@ const Folder = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadedPath, setLoadedPath] = useState(null);
   const [nextPageToken, setNextPageToken] = useState(null);
+  const loading = loadedPath !== location.pathname;
 
   const loadFiles = useCallback(async (pageToken = null) => {
     try {
-      setLoading(true);
       const response = await driveService.listFiles(location.pathname, pageToken);
       if (pageToken) {
         setFiles(prev => [...prev, ...response.files]);
@@ -26,12 +26,14 @@ const Folder = () => {
         navigate('/404');
       }
     } finally {
-      setLoading(false);
+      setLoadedPath(location.pathname);
     }
   }, [location.pathname, navigate]);
 
   useEffect(() => {
-    loadFiles();
+    (async () => {
+      await loadFiles();
+    })();
   }, [loadFiles]);
 
   const handleFolderClick = useCallback((folder) => {
