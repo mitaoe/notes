@@ -3,7 +3,7 @@ import { IconAlertCircle } from '@tabler/icons-react';
 import { useNavigate, useSearchParams } from 'react-router';
 import type { DriveItem } from '../../shared/drive.ts';
 import { fetchFolderPath, fetchSearch } from '../api/drive.ts';
-import { FileList } from '../components/FileList';
+import { FileList } from '../components/FileList.tsx';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
 import classes from './Page.module.css';
 
@@ -51,7 +51,7 @@ export function SearchPage() {
         </Alert>
       )}
 
-      <FileList files={files} loading={loading} hasMore={hasMore} onLoadMore={loadMore} onFolderClick={(folder: DriveItem) => void openFolder(folder)} />
+      <FileList files={files} loading={loading} hasMore={hasMore} onLoadMore={loadMore} onFolderClick={(folder) => void openFolder(folder)} />
     </Box>
   );
 }

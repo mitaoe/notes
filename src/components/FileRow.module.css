@@ -1,0 +1,81 @@
+.row {
+  padding: var(--mantine-spacing-md);
+  border: 1px solid var(--mantine-color-dark-5);
+  border-radius: var(--mantine-radius-sm);
+  background: var(--mantine-color-dark-7);
+  box-shadow: var(--mantine-shadow-xs);
+}
+
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.details {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+.names {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.name {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.folderName {
+  color: var(--mantine-color-blue-4);
+  cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.fileName {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 8px;
+}
+
+.previewButton {
+  background-color: rgba(52, 58, 64, 0.15);
+  color: var(--mantine-color-gray-4);
+}
+
+.downloadButton {
+  background-color: rgba(52, 58, 64, 0.15);
+  color: #228be6;
+  opacity: 1;
+  transform: scale(1);
+  transition: transform 0.2s ease;
+}
+
+.downloading {
+  opacity: 0.8;
+  transform: scale(0.95);
+}
