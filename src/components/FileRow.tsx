@@ -1,8 +1,8 @@
 import { ActionIcon, Box, Text } from '@mantine/core';
 import { useTimeout } from '@mantine/hooks';
 import { IconDownload, IconEye, IconFile, IconFolder, IconMusic, IconPhoto, IconPlayerPlay } from '@tabler/icons-react';
-import clsx from 'clsx';
-import { useState, type KeyboardEvent } from 'react';
+import { clsx } from 'clsx';
+import { useState } from 'react';
 import { PDF_MIME_TYPE, isFolder, type DriveItem } from '../../shared/drive.ts';
 import { downloadHref } from '../api/drive.ts';
 import { formatFileSize } from '../lib/format.ts';
@@ -36,10 +36,6 @@ export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
     downloadFeedback.start();
   };
 
-  const openOnEnter = (event: KeyboardEvent) => {
-    if (event.key === 'Enter') onOpenFolder(file);
-  };
-
   return (
     <Box className={classes.row}>
       <Box className={classes.content}>
@@ -50,12 +46,11 @@ export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
           <Box className={classes.names}>
             {folder ? (
               <Text
-                role="link"
-                tabIndex={0}
+                component="button"
+                type="button"
                 truncate
                 className={clsx(classes.name, classes.folderName)}
                 onClick={() => onOpenFolder(file)}
-                onKeyDown={openOnEnter}
               >
                 {file.name}
               </Text>

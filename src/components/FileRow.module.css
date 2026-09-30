@@ -41,7 +41,11 @@
 }
 
 .folderName {
+  appearance: none;
+  border: 0;
+  background-color: transparent;
   color: var(--mantine-color-blue-4);
+  text-align: start;
   cursor: pointer;
   -webkit-user-select: none;
   user-select: none;
