@@ -22,8 +22,10 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
     const controller = new AbortController();
     if (key !== null) {
       loadPage(key, null, controller.signal).then(
-        (page) =>
-          setLoaded({ key, files: page.files, nextPageToken: page.nextPageToken, failed: false }),
+        (page) => {
+          if (controller.signal.aborted) return;
+          setLoaded({ key, files: page.files, nextPageToken: page.nextPageToken, failed: false });
+        },
         (error: unknown) => {
           if (controller.signal.aborted) return;
           console.error(error);
@@ -39,19 +41,21 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
 
   const loadMore = useCallback(async () => {
     if (key === null || nextPageToken === null) return;
+    const update = (change: (previous: LoadedPages) => LoadedPages) =>
+      setLoaded((previous) =>
+        previous !== null && previous.key === key ? change(previous) : previous,
+      );
     try {
       const page = await loadPage(key, nextPageToken, null);
-      setLoaded((previous) =>
-        previous !== null && previous.key === key
-          ? {
-              ...previous,
-              files: [...previous.files, ...page.files],
-              nextPageToken: page.nextPageToken,
-            }
-          : previous,
-      );
+      update((previous) => ({
+        ...previous,
+        files: [...previous.files, ...page.files],
+        nextPageToken: page.nextPageToken,
+        failed: false,
+      }));
     } catch (error) {
       console.error(error);
+      update((previous) => ({ ...previous, failed: true }));
     }
   }, [key, nextPageToken, loadPage]);
 

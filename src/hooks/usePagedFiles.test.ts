@@ -11,10 +11,14 @@ const item = (id: string): DriveItem => ({
   size: 1,
 });
 
+const pageA: DrivePage = { files: [item('a1')], nextPageToken: 'a:second' };
+const pageB: DrivePage = { files: [item('b1')], nextPageToken: null };
+
 const pages: Record<string, DrivePage> = {
-  'a:first': { files: [item('a1')], nextPageToken: 'a:second' },
+  'a:first': pageA,
   'a:second': { files: [item('a2')], nextPageToken: null },
-  'b:first': { files: [item('b1')], nextPageToken: null },
+  'b:first': pageB,
+  'c:first': { files: [item('c1')], nextPageToken: 'c:missing' },
 };
 
 const loader = () =>
@@ -69,6 +73,40 @@ describe('usePagedFiles', () => {
     await waitFor(() => expect(result.current.failed).toBe(true));
     expect(result.current.files).toEqual([]);
     expect(result.current.loading).toBe(false);
+  });
+
+  it('ignores a response for a key that is no longer current', async () => {
+    const resolvers = new Map<string, (page: DrivePage) => void>();
+    const load = vi.fn<PageLoader>(
+      (key) =>
+        new Promise((resolve) => {
+          resolvers.set(key, resolve);
+        }),
+    );
+    const { result, rerender } = renderHook(({ key }) => usePagedFiles(key, load), {
+      initialProps: { key: 'a' },
+    });
+
+    rerender({ key: 'b' });
+    await act(async () => {
+      resolvers.get('b')?.(pageB);
+      resolvers.get('a')?.(pageA);
+    });
+
+    expect(result.current.files.map((file) => file.id)).toEqual(['b1']);
+    expect(result.current.loading).toBe(false);
+  });
+
+  it('keeps the loaded files and reports failure when loading more fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles('c', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    await act(() => result.current.loadMore());
+
+    expect(result.current.files.map((file) => file.id)).toEqual(['c1']);
+    expect(result.current.failed).toBe(true);
   });
 
   it('stays idle without a key', () => {

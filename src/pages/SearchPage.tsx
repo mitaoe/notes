@@ -1,53 +1,39 @@
-import { Alert, Box, Text, Title } from '@mantine/core';
+import { Box, Title } from '@mantine/core';
+import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import type { DriveItem } from '../../shared/drive.ts';
 import { fetchFolderPath, fetchSearch } from '../api/drive.ts';
+import { ErrorAlert } from '../components/ErrorAlert.tsx';
 import { FileList } from '../components/FileList.tsx';
+import { SearchTitle } from '../components/SearchTitle.tsx';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
-import { IconAlertCircle } from '../icons.ts';
 
 import classes from './Page.module.css';
 
 const SEARCH_ERROR = 'An error occurred while searching. Please try again.';
-
-type SearchTitleProps = { query: string; loading: boolean; failed: boolean; empty: boolean };
-
-function SearchTitle({ query, loading, failed, empty }: SearchTitleProps) {
-  if (loading)
-    return (
-      <Text span fw={400} c="dimmed">
-        Searching...
-      </Text>
-    );
-  if (failed)
-    return (
-      <Text span fw={400} c="red">
-        Search failed
-      </Text>
-    );
-  return (
-    <>
-      <Text span c="dimmed">
-        {empty ? 'No items found matching ' : 'Results for '}
-      </Text>
-      <Text span fw={500}>
-        &quot;{query}&quot;
-      </Text>
-    </>
-  );
-}
 
 export function SearchPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = (searchParams.get('q') ?? '').trim();
   const { files, loading, failed, hasMore, loadMore } = usePagedFiles(query || null, fetchSearch);
+  const openingFolder = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    const opening = openingFolder;
+    return () => opening.current?.abort();
+  }, []);
 
   const openFolder = async (folder: DriveItem) => {
+    openingFolder.current?.abort();
+    const controller = new AbortController();
+    openingFolder.current = controller;
     try {
-      await navigate(await fetchFolderPath(folder.id));
+      const path = await fetchFolderPath(folder.id, controller.signal);
+      await navigate(path);
     } catch (error) {
+      if (controller.signal.aborted) return;
       console.error(error);
       await navigate('/404');
     }
@@ -61,19 +47,10 @@ export function SearchPage() {
         </Title>
       )}
 
-      {failed && (
-        <Alert
-          icon={<IconAlertCircle size={16} />}
-          title="Error"
-          color="red"
-          mb="xl"
-          variant="filled"
-        >
-          {SEARCH_ERROR}
-        </Alert>
-      )}
+      {failed && <ErrorAlert message={SEARCH_ERROR} />}
 
       <FileList
+        key={query}
         files={files}
         loading={loading}
         hasMore={hasMore}

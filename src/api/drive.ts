@@ -1,16 +1,9 @@
 import * as v from 'valibot';
 
 import { DrivePageSchema, FolderPathSchema, type DrivePage } from '../../shared/drive.ts';
+import { StatusError } from '../../shared/status-error.ts';
 
-export class ApiRequestError extends Error {
-  readonly status: number;
-
-  constructor(status: number, message: string) {
-    super(message);
-    this.name = 'ApiRequestError';
-    this.status = status;
-  }
-}
+export class ApiRequestError extends StatusError {}
 
 const EMPTY_PAGE: DrivePage = { files: [], nextPageToken: null };
 
@@ -52,5 +45,5 @@ export const downloadHref = (fileId: string) =>
 export const previewHref = (fileId: string) =>
   `/api/preview?${new URLSearchParams({ id: fileId })}`;
 
-export const fetchFolderPath = async (folderId: string) =>
-  (await request('/api/path', { id: folderId }, null, FolderPathSchema)).path;
+export const fetchFolderPath = async (folderId: string, signal: AbortSignal | null) =>
+  (await request('/api/path', { id: folderId }, signal, FolderPathSchema)).path;

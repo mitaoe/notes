@@ -73,7 +73,7 @@ describe('fetchSearch', () => {
 describe('fetchFolderPath', () => {
   it('returns the resolved path', async () => {
     stubFetch({ path: '/fy/00_journals' });
-    expect(await fetchFolderPath('abc')).toBe('/fy/00_journals');
+    expect(await fetchFolderPath('abc', null)).toBe('/fy/00_journals');
   });
 });
 
