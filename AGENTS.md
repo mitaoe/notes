@@ -48,7 +48,7 @@ scripts/             Node scripts used by package.json
 vite/                Vite plugins and tests for the build tooling
 ```
 
-Anything in `api/` whose name does not start with `_` becomes a public endpoint. Helpers and tests must live under `api/_lib/` and `api/_tests/`.
+Every `.ts` file directly in `api/` whose name does not start with `_` becomes a public endpoint. Helpers and tests must live under `api/_lib/` and `api/_tests/`.
 
 ## File naming
 
@@ -67,27 +67,27 @@ One component per file. A file exports the things it is named after.
 
 ## Code conventions
 
-- TypeScript everywhere. No `any`, no non-null assertions and no `as` casts on untrusted data.
+- TypeScript everywhere. No `any`, no non-null assertions and no `as` casts on untrusted data; oxlint enforces the first two.
 - Validate data at every boundary with valibot: Google responses in `api/_lib/`, API responses in `src/api/`. Infer types from the schemas instead of declaring them twice.
 - Use `null` for "no value" in our own types. `undefined` only appears where an external API produces it.
-- Named exports only.
+- Named exports only, enforced by oxlint. Tool configs that must default-export are listed as exceptions in `.oxlintrc.json`.
 - Relative imports include the file extension (`./drive.ts`, `./FileRow.tsx`). oxfmt sorts and groups imports.
-- No comments. Names carry the meaning; the reasoning behind a constraint belongs in ARCHITECTURE.md.
+- No comments in source code. Names carry the meaning; the reasoning behind a constraint belongs in ARCHITECTURE.md.
 - Fixed values (limits, delays, URLs, patterns) are `SCREAMING_SNAKE_CASE` constants at the top of the module that owns them. Never repeat a value that already has a name elsewhere.
 
 ## React conventions
 
-- Function components with a `<Component>Props` type for their props.
+- Function components with a `<Component>Props` type for their props. Logic shared by components lives in a hook in `src/hooks/`, and a class shared by CSS modules lives in `src/styles/`.
 - Derive values during render. Use effects only to synchronise with something outside React (the network, timers, the DOM), and give them honest dependency lists; to reset a component on a new value, change its `key`.
-- Style with a CSS module next to the component and combine classes with `clsx`. Mantine style props (`mb`, `p`, `gap`) are fine for spacing. Use Mantine CSS variables (`var(--mantine-color-dark-7)`) instead of copying colours.
+- Style with a CSS module next to the component and combine classes with `clsx`. Mantine style props (`mb`, `p`, `gap`) are fine for spacing. Use Mantine CSS variables (`var(--mantine-color-dark-7)`, `alpha(var(--mantine-color-red-8), 0.15)`) instead of copying colours, and do not restate what Mantine or the browser already applies.
 - Import icons from `src/icons.ts`, adding a line there for a new one.
-- When you use a Mantine component for the first time, add its stylesheet to `src/styles/mantine.css`. `vite/mantine-css.test.ts` names any stylesheet that is missing.
+- When you use a Mantine component for the first time, add its stylesheet to `src/styles/mantine.css` in Mantine's bundle order. `vite/mantine-css.test.ts` names any stylesheet that is missing and fails on the wrong order.
 - Use real elements: links (`Link`, `Anchor`) for navigation and buttons for actions. Every icon-only control gets an accessible name through `aria-label` or `title`.
 
 ## API conventions
 
 - One endpoint per file, exporting `GET = handleGet(async (params) => ...)`.
-- Read parameters with the helpers in `api/_lib/http.ts`. Signal client errors by throwing `HttpError`; let anything unexpected propagate so it is logged and answered with a 500.
+- Read parameters with the helpers in `api/_lib/http.ts`. Signal client errors by throwing `HttpError`, passing a cache policy when the answer depends only on the URL (a 404 for a missing folder); let anything unexpected propagate so it is logged and answered with a 500.
 - Every response sets a policy from `CACHE_CONTROL`. Anything that depends only on the URL should be cacheable at the CDN.
 - Drive queries are built in `api/_lib/drive.ts`, and every value placed in a query goes through `quote`.
 - Credentials are read only through `process.env` in `api/_lib/google.ts`. No new environment variables without updating `.env.example` and the Vercel project.
@@ -109,6 +109,6 @@ One component per file. A file exports the things it is named after.
 ## Git and pull requests
 
 - Branch names are `<type>/<short-slug>`, for example `fix/search-paging`.
-- Commits follow Conventional Commits: `type(scope): description`, imperative, under 50 characters, subject only. Types: `feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`.
+- Commits follow Conventional Commits: `type(scope): description`, imperative, at most 50 characters, subject only. Types: `feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`.
 - Keep commits small and self-contained, each one passing the checks above.
 - Pull request titles use the same prefix with a readable summary. The description has a Description section with the context and a list of the changes, then Behaviour changes, Verification and References where they apply.
