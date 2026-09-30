@@ -1,5 +1,6 @@
 import { Button, Container, Group, Text, Title } from '@mantine/core';
 import { Link } from 'react-router';
+
 import classes from './NotFoundPage.module.css';
 
 export function NotFoundPage() {

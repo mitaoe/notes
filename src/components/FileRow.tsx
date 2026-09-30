@@ -1,11 +1,21 @@
 import { ActionIcon, Box, Text } from '@mantine/core';
 import { useTimeout } from '@mantine/hooks';
-import { IconDownload, IconEye, IconFile, IconFolder, IconMusic, IconPhoto, IconPlayerPlay } from '../icons.ts';
 import { clsx } from 'clsx';
 import { useState } from 'react';
+
 import { PDF_MIME_TYPE, isFolder, type DriveItem } from '../../shared/drive.ts';
 import { downloadHref } from '../api/drive.ts';
+import {
+  IconDownload,
+  IconEye,
+  IconFile,
+  IconFolder,
+  IconMusic,
+  IconPhoto,
+  IconPlayerPlay,
+} from '../icons.ts';
 import { formatFileSize } from '../lib/format.ts';
+
 import classes from './FileRow.module.css';
 
 const DOWNLOAD_FEEDBACK_MS = 500;
@@ -70,7 +80,13 @@ export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
         {!folder && (
           <Box className={classes.actions}>
             {file.mimeType === PDF_MIME_TYPE && (
-              <ActionIcon variant="subtle" size="lg" title="Preview" className={classes.previewButton} onClick={() => onPreview(file)}>
+              <ActionIcon
+                variant="subtle"
+                size="lg"
+                title="Preview"
+                className={classes.previewButton}
+                onClick={() => onPreview(file)}
+              >
                 <IconEye size={18} />
               </ActionIcon>
             )}

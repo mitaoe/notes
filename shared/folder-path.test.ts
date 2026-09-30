@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+
 import { parseFolderPath, toFolderPath } from './folder-path.ts';
 
 describe('toFolderPath', () => {

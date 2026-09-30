@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
+
 import type { DriveItem, DrivePage } from '../../shared/drive.ts';
 
-export type PageLoader = (key: string, pageToken: string | null, signal: AbortSignal | null) => Promise<DrivePage>;
+export type PageLoader = (
+  key: string,
+  pageToken: string | null,
+  signal: AbortSignal | null,
+) => Promise<DrivePage>;
 
 type LoadedPages = {
   key: string;
@@ -17,7 +22,8 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
     const controller = new AbortController();
     if (key !== null) {
       loadPage(key, null, controller.signal).then(
-        (page) => setLoaded({ key, files: page.files, nextPageToken: page.nextPageToken, failed: false }),
+        (page) =>
+          setLoaded({ key, files: page.files, nextPageToken: page.nextPageToken, failed: false }),
         (error: unknown) => {
           if (controller.signal.aborted) return;
           console.error(error);
@@ -37,7 +43,11 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
       const page = await loadPage(key, nextPageToken, null);
       setLoaded((previous) =>
         previous !== null && previous.key === key
-          ? { ...previous, files: [...previous.files, ...page.files], nextPageToken: page.nextPageToken }
+          ? {
+              ...previous,
+              files: [...previous.files, ...page.files],
+              nextPageToken: page.nextPageToken,
+            }
           : previous,
       );
     } catch (error) {

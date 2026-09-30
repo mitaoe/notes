@@ -17,7 +17,11 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'desktop', grepInvert: /@mobile-only/, use: { viewport: { width: 1280, height: 900 } } },
+    {
+      name: 'desktop',
+      grepInvert: /@mobile-only/,
+      use: { viewport: { width: 1280, height: 900 } },
+    },
     { name: 'mobile', grepInvert: /@desktop-only/, use: { viewport: { width: 390, height: 844 } } },
   ],
   webServer: {

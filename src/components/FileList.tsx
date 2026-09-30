@@ -1,12 +1,14 @@
 import { Box, Button, Group, Loader, Stack } from '@mantine/core';
 import { useState } from 'react';
 import { useLocation } from 'react-router';
+
 import { PDF_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
 import { BreadcrumbNav } from './BreadcrumbNav.tsx';
 import { EmptyState } from './EmptyState.tsx';
-import classes from './FileList.module.css';
 import { FilePreview } from './FilePreview.tsx';
 import { FileRow } from './FileRow.tsx';
+
+import classes from './FileList.module.css';
 
 type FileListProps = {
   files: DriveItem[];
@@ -51,7 +53,12 @@ export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }:
         ) : (
           <Stack gap="xs">
             {files.map((file) => (
-              <FileRow key={file.id} file={file} onOpenFolder={onFolderClick} onPreview={setPreviewFile} />
+              <FileRow
+                key={file.id}
+                file={file}
+                onOpenFolder={onFolderClick}
+                onPreview={setPreviewFile}
+              />
             ))}
           </Stack>
         )}

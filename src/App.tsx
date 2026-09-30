@@ -1,6 +1,7 @@
 import { MantineProvider } from '@mantine/core';
 import { Analytics } from '@vercel/analytics/react';
 import { BrowserRouter, Route, Routes } from 'react-router';
+
 import { Layout } from './components/Layout.tsx';
 import { FolderPage } from './pages/FolderPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';

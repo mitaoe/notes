@@ -15,9 +15,19 @@ export const ROOT_ID = 'real-root-id';
 
 const DRIVE_URL = 'https://www.googleapis.com/drive/v3';
 
-export const folder = (id: string, name: string, parent = ROOT_ID): FakeFile => ({ id, name, mimeType: FOLDER, parents: [parent] });
+export const folder = (id: string, name: string, parent = ROOT_ID): FakeFile => ({
+  id,
+  name,
+  mimeType: FOLDER,
+  parents: [parent],
+});
 
-export const pdf = (id: string, name: string, parent: string, extra: Partial<FakeFile> = {}): FakeFile => ({
+export const pdf = (
+  id: string,
+  name: string,
+  parent: string,
+  extra: Partial<FakeFile> = {},
+): FakeFile => ({
   id,
   name,
   mimeType: 'application/pdf',
@@ -45,9 +55,14 @@ export const useFakeGoogle = (files: FakeFile[]) => {
   const fetchMock = vi.fn<FakeFetch>(async (input, init = {}) => {
     const url = new URL(input);
     const method = init.method ?? 'GET';
-    requests.push({ method, url, body: typeof init.body === 'string' ? JSON.parse(init.body) : init.body });
+    requests.push({
+      method,
+      url,
+      body: typeof init.body === 'string' ? JSON.parse(init.body) : init.body,
+    });
 
-    if (url.href === 'https://oauth2.googleapis.com/token') return respond({ access_token: 'access-token', expires_in: 3600 });
+    if (url.href === 'https://oauth2.googleapis.com/token')
+      return respond({ access_token: 'access-token', expires_in: 3600 });
     if (!url.href.startsWith(DRIVE_URL)) return respond({ error: 'unexpected url' }, 500);
 
     const path = url.pathname.replace('/drive/v3', '');
@@ -72,7 +87,14 @@ export const useFakeGoogle = (files: FakeFile[]) => {
         (name === undefined || file.name === unescape(name)) &&
         (!q.includes(`mimeType = '${FOLDER}'`) || file.mimeType === FOLDER),
     );
-    return respond({ files: matches.map(({ id, name: fileName, mimeType, size }) => ({ id, name: fileName, mimeType, size })) });
+    return respond({
+      files: matches.map(({ id, name: fileName, mimeType, size }) => ({
+        id,
+        name: fileName,
+        mimeType,
+        size,
+      })),
+    });
   });
 
   vi.stubGlobal('fetch', fetchMock);

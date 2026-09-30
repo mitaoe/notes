@@ -1,8 +1,17 @@
 import { ActionIcon, TextInput } from '@mantine/core';
 import { useClickOutside } from '@mantine/hooks';
-import { IconSearch, IconX } from '../icons.ts';
 import { clsx } from 'clsx';
-import { useEffect, useRef, useState, type FocusEvent, type FormEvent, type MouseEvent } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FocusEvent,
+  type FormEvent,
+  type MouseEvent,
+} from 'react';
+
+import { IconSearch, IconX } from '../icons.ts';
+
 import classes from './SearchBar.module.css';
 
 type SearchBarProps = {
@@ -14,7 +23,14 @@ type SearchBarProps = {
   onClickOutside?: () => void;
 };
 
-export function SearchBar({ query, onQueryChange, onSearch, onClear, isMobile = false, onClickOutside }: SearchBarProps) {
+export function SearchBar({
+  query,
+  onQueryChange,
+  onSearch,
+  onClear,
+  isMobile = false,
+  onClickOutside,
+}: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const searchIconRef = useRef<HTMLButtonElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -88,7 +104,13 @@ export function SearchBar({ query, onQueryChange, onSearch, onClear, isMobile = 
         }
         rightSection={
           query && (
-            <ActionIcon size="sm" variant="transparent" aria-label="Clear search" className={classes.clearIcon} onClick={handleClear}>
+            <ActionIcon
+              size="sm"
+              variant="transparent"
+              aria-label="Clear search"
+              className={classes.clearIcon}
+              onClick={handleClear}
+            >
               <IconX size={16} />
             </ActionIcon>
           )

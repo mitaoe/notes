@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+
 import { DrivePageSchema, FolderPathSchema, type DrivePage } from '../../shared/drive.ts';
 
 export class ApiRequestError extends Error {
@@ -24,11 +25,16 @@ const request = async <TSchema extends v.GenericSchema>(
     if (value !== null) query.set(name, value);
   }
   const response = await fetch(`${path}?${query}`, { signal });
-  if (!response.ok) throw new ApiRequestError(response.status, `${path} answered ${response.status}`);
+  if (!response.ok)
+    throw new ApiRequestError(response.status, `${path} answered ${response.status}`);
   return v.parse(schema, await response.json());
 };
 
-export const fetchFolder = async (path: string, pageToken: string | null, signal: AbortSignal | null) => {
+export const fetchFolder = async (
+  path: string,
+  pageToken: string | null,
+  signal: AbortSignal | null,
+) => {
   try {
     return await request('/api/list', { path, pageToken }, signal, DrivePageSchema);
   } catch (error) {
@@ -40,9 +46,11 @@ export const fetchFolder = async (path: string, pageToken: string | null, signal
 export const fetchSearch = (query: string, pageToken: string | null, signal: AbortSignal | null) =>
   request('/api/search', { q: query, pageToken }, signal, DrivePageSchema);
 
-export const downloadHref = (fileId: string) => `/api/download?${new URLSearchParams({ id: fileId })}`;
+export const downloadHref = (fileId: string) =>
+  `/api/download?${new URLSearchParams({ id: fileId })}`;
 
-export const previewHref = (fileId: string) => `/api/preview?${new URLSearchParams({ id: fileId })}`;
+export const previewHref = (fileId: string) =>
+  `/api/preview?${new URLSearchParams({ id: fileId })}`;
 
 export const fetchFolderPath = async (folderId: string) =>
   (await request('/api/path', { id: folderId }, null, FolderPathSchema)).path;

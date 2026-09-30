@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { folder, pdf, useFakeGoogle } from './fake-google.ts';
 
-const tree = [folder('fy', 'fy'), folder('journals', '00_journals', 'fy'), pdf('am', 'am_journal.pdf', 'journals')];
+const tree = [
+  folder('fy', 'fy'),
+  folder('journals', '00_journals', 'fy'),
+  pdf('am', 'am_journal.pdf', 'journals'),
+];
 
 const get = (url: string) => new Request(`https://notes.test${url}`);
 
@@ -27,7 +32,9 @@ describe('GET /api/list', () => {
   it('decodes percent-encoded folder names', async () => {
     useFakeGoogle([folder('spaced', 'first year')]);
     const { GET } = await import('../list.ts');
-    expect((await GET(get(`/api/list?path=${encodeURIComponent('/first%20year')}`))).status).toBe(200);
+    expect((await GET(get(`/api/list?path=${encodeURIComponent('/first%20year')}`))).status).toBe(
+      200,
+    );
   });
 
   it('answers 404 for unknown and malformed paths', async () => {
@@ -39,7 +46,10 @@ describe('GET /api/list', () => {
 
   it('answers 500 without caching when Drive fails', async () => {
     useFakeGoogle(tree);
-    vi.stubGlobal('fetch', vi.fn<() => Promise<Response>>(async () => new Response('boom', { status: 503 })));
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<() => Promise<Response>>(async () => new Response('boom', { status: 503 })),
+    );
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const { GET } = await import('../list.ts');
 
@@ -93,7 +103,9 @@ describe.each([
     expect(response.status).toBe(302);
     expect(response.headers.get('location')).toBe(location);
     expect(response.headers.get('cache-control')).toContain('s-maxage=86400');
-    expect(requests.some((request) => request.url.pathname === '/drive/v3/files/am/permissions')).toBe(true);
+    expect(
+      requests.some((request) => request.url.pathname === '/drive/v3/files/am/permissions'),
+    ).toBe(true);
   });
 
   it('answers 404 for folders and unknown files', async () => {

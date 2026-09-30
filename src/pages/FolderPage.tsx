@@ -1,9 +1,11 @@
 import { useNavigate, useLocation } from 'react-router';
+
 import type { DriveItem } from '../../shared/drive.ts';
 import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import { fetchFolder } from '../api/drive.ts';
 import { FileList } from '../components/FileList.tsx';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
+
 import classes from './Page.module.css';
 
 export function FolderPage() {
@@ -17,7 +19,13 @@ export function FolderPage() {
 
   return (
     <div className={classes.page}>
-      <FileList files={files} loading={loading} hasMore={hasMore} onLoadMore={loadMore} onFolderClick={openFolder} />
+      <FileList
+        files={files}
+        loading={loading}
+        hasMore={hasMore}
+        onLoadMore={loadMore}
+        onFolderClick={openFolder}
+      />
     </div>
   );
 }

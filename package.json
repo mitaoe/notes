@@ -1,7 +1,7 @@
 {
   "name": "gdrive-index",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,9 +14,6 @@
     "playwright:server": "docker run --rm --init -p 3000:3000 --add-host=hostmachine:host-gateway --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.63.0-noble npx -y playwright@1.63.0 run-server --port 3000 --host 0.0.0.0",
     "format": "oxfmt",
     "format:check": "oxfmt --check"
-  },
-  "engines": {
-    "node": "24.x"
   },
   "dependencies": {
     "@mantine/core": "9.6.3",
@@ -43,6 +40,9 @@
     "typescript": "^7.0.2",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"
+  },
+  "engines": {
+    "node": "24.x"
   },
   "packageManager": "pnpm@12.8.1"
 }

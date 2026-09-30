@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { FOLDER, ROOT_ID, folder, pdf, useFakeGoogle } from './fake-google.ts';
 
 const loadDrive = () => import('../_lib/drive.ts');
@@ -10,7 +11,12 @@ const tree = [
   pdf('am', 'am_journal.pdf', 'journals'),
   pdf('shared', 'shared.pdf', 'journals', { permissionIds: ['anyoneWithLink'] }),
   pdf('binned', 'binned.pdf', 'journals', { trashed: true }),
-  { id: 'doc', name: 'notes', mimeType: 'application/vnd.google-apps.document', parents: ['journals'] },
+  {
+    id: 'doc',
+    name: 'notes',
+    mimeType: 'application/vnd.google-apps.document',
+    parents: ['journals'],
+  },
   { id: 'secret', name: '.password', mimeType: 'text/plain', parents: ['journals'] },
   folder('outside', 'outside', 'someone-elses-drive'),
 ];
@@ -64,7 +70,12 @@ describe('listFolder', () => {
 
     const page = await listFolder(['fy'], null);
 
-    expect(page?.files).toContainEqual({ id: 'journals', name: '00_journals', mimeType: FOLDER, size: null });
+    expect(page?.files).toContainEqual({
+      id: 'journals',
+      name: '00_journals',
+      mimeType: FOLDER,
+      size: null,
+    });
     const files = await listFolder(['fy', '00_journals'], null);
     expect(files?.files.find((file) => file.id === 'am')?.size).toBe(2048);
   });
@@ -95,8 +106,12 @@ describe('listFolder', () => {
     await listFolder(['fy', '00_journals'], null);
     await listFolder(['fy', '00_journals'], 'next-page');
 
-    expect(requests.filter((request) => request.url.hostname === 'oauth2.googleapis.com')).toHaveLength(1);
-    expect(requests.filter((request) => request.url.searchParams.get('fields') === 'files(id)')).toHaveLength(2);
+    expect(
+      requests.filter((request) => request.url.hostname === 'oauth2.googleapis.com'),
+    ).toHaveLength(1);
+    expect(
+      requests.filter((request) => request.url.searchParams.get('fields') === 'files(id)'),
+    ).toHaveLength(2);
   });
 });
 
@@ -134,7 +149,9 @@ describe('shareFile', () => {
 
     expect(await shareFile('am')).toBe(true);
 
-    const permission = requests.find((request) => request.method === 'POST' && request.url.pathname.endsWith('/permissions'));
+    const permission = requests.find(
+      (request) => request.method === 'POST' && request.url.pathname.endsWith('/permissions'),
+    );
     expect(permission?.url.pathname).toBe('/drive/v3/files/am/permissions');
     expect(permission?.body).toEqual({ role: 'reader', type: 'anyone' });
   });
@@ -144,7 +161,11 @@ describe('shareFile', () => {
     const { shareFile } = await loadDrive();
 
     expect(await shareFile('shared')).toBe(true);
-    expect(requests.some((request) => request.method === 'POST' && request.url.hostname === 'www.googleapis.com')).toBe(false);
+    expect(
+      requests.some(
+        (request) => request.method === 'POST' && request.url.hostname === 'www.googleapis.com',
+      ),
+    ).toBe(false);
   });
 
   it.each(['journals', 'binned', 'doc', 'secret', 'missing'])('refuses to share %s', async (id) => {

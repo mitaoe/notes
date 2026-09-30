@@ -1,11 +1,23 @@
-import { ActionIcon, AppShell, Box, Burger, Container, Drawer, Group, Image, Stack } from '@mantine/core';
-import { IconBrandGithub, IconMessage, IconSearch } from '../icons.ts';
+import {
+  ActionIcon,
+  AppShell,
+  Box,
+  Burger,
+  Container,
+  Drawer,
+  Group,
+  Image,
+  Stack,
+} from '@mantine/core';
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
+
 import { site } from '../config.ts';
+import { IconBrandGithub, IconMessage, IconSearch } from '../icons.ts';
 import { Footer } from './Footer.tsx';
-import classes from './Layout.module.css';
 import { SearchBar } from './SearchBar.tsx';
+
+import classes from './Layout.module.css';
 
 const isSearchPath = (pathname: string) => pathname.startsWith('/search');
 
@@ -14,10 +26,26 @@ type SocialLinksProps = { size: 'lg' | 'xl'; variant: 'subtle' | 'light'; iconSi
 function SocialLinks({ size, variant, iconSize }: SocialLinksProps) {
   return (
     <>
-      <ActionIcon component="a" href={site.githubUrl} target="_blank" size={size} variant={variant} color="gray" aria-label="GitHub">
+      <ActionIcon
+        component="a"
+        href={site.githubUrl}
+        target="_blank"
+        size={size}
+        variant={variant}
+        color="gray"
+        aria-label="GitHub"
+      >
         <IconBrandGithub size={iconSize} />
       </ActionIcon>
-      <ActionIcon component="a" href={site.contactUrl} target="_blank" size={size} variant={variant} color="gray" aria-label="Contact">
+      <ActionIcon
+        component="a"
+        href={site.contactUrl}
+        target="_blank"
+        size={size}
+        variant={variant}
+        color="gray"
+        aria-label="Contact"
+      >
         <IconMessage size={iconSize} />
       </ActionIcon>
     </>
@@ -33,7 +61,8 @@ export function Layout({ children }: LayoutProps) {
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
 
-  const submittedQuery = location.pathname === '/search' ? (searchParams.get('q') ?? '').trim() : '';
+  const submittedQuery =
+    location.pathname === '/search' ? (searchParams.get('q') ?? '').trim() : '';
   const [query, setQuery] = useState('');
   const [previous, setPrevious] = useState({ pathname: location.pathname, submittedQuery });
 
@@ -67,7 +96,13 @@ export function Layout({ children }: LayoutProps) {
           <Group justify="space-between" h="100%" gap="xl">
             <Group gap="xl">
               <Link to="/" className={classes.logoLink}>
-                <Image src={site.logoUrl} alt={site.name} width={35} height={35} className={classes.logo} />
+                <Image
+                  src={site.logoUrl}
+                  alt={site.name}
+                  width={35}
+                  height={35}
+                  className={classes.logo}
+                />
               </Link>
             </Group>
 
@@ -88,7 +123,13 @@ export function Layout({ children }: LayoutProps) {
                     onClickOutside={closeMobileSearch}
                   />
                 ) : (
-                  <ActionIcon onClick={() => setMobileSearchOpened(true)} size="lg" variant="subtle" color="gray" aria-label="Open search">
+                  <ActionIcon
+                    onClick={() => setMobileSearchOpened(true)}
+                    size="lg"
+                    variant="subtle"
+                    color="gray"
+                    aria-label="Open search"
+                  >
                     <IconSearch size={22} />
                   </ActionIcon>
                 )}

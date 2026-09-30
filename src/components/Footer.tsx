@@ -1,5 +1,7 @@
 import { Anchor, Box, Container, Group, Text } from '@mantine/core';
+
 import { site } from '../config.ts';
+
 import classes from './Footer.module.css';
 
 const CURRENT_YEAR = new Date().getFullYear();

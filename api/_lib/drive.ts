@@ -1,4 +1,5 @@
 import * as v from 'valibot';
+
 import { FOLDER_MIME_TYPE, type DriveItem, type DrivePage } from '../../shared/drive.ts';
 import { toFolderPath } from '../../shared/folder-path.ts';
 import { GoogleApiError, driveGet, drivePost } from './google.ts';
@@ -46,9 +47,14 @@ const DriveIdSchema = v.object({ id: v.string() });
 type DriveFile = v.InferOutput<typeof DriveFileSchema>;
 type DriveMetadata = v.InferOutput<typeof DriveMetadataSchema>;
 
-const ALL_DRIVES = { supportsAllDrives: true, includeItemsFromAllDrives: true, corpora: 'allDrives' };
+const ALL_DRIVES = {
+  supportsAllDrives: true,
+  includeItemsFromAllDrives: true,
+  corpora: 'allDrives',
+};
 
-export const quote = (value: string) => `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+export const quote = (value: string) =>
+  `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
 
 const VISIBLE_ITEMS = [
   'trashed = false',
@@ -56,7 +62,8 @@ const VISIBLE_ITEMS = [
   ...HIDDEN_MIME_TYPES.map((mimeType) => `mimeType != ${quote(mimeType)}`),
 ].join(' and ');
 
-export const folderContentsQuery = (folderId: string) => `${quote(folderId)} in parents and ${VISIBLE_ITEMS}`;
+export const folderContentsQuery = (folderId: string) =>
+  `${quote(folderId)} in parents and ${VISIBLE_ITEMS}`;
 
 export const searchQuery = (text: string) => {
   const terms = text.split(SEARCH_TERM_SEPARATORS).filter(Boolean);
@@ -72,8 +79,18 @@ const toDriveItem = ({ id, name, mimeType, size }: DriveFile): DriveItem => ({
 });
 
 const listFiles = async (q: string, pageToken: string | null): Promise<DrivePage> => {
-  const params = { ...ALL_DRIVES, q, orderBy: LIST_ORDER, fields: LIST_FIELDS, pageSize: PAGE_SIZE };
-  const result = await driveGet('/files', pageToken === null ? params : { ...params, pageToken }, DriveFileListSchema);
+  const params = {
+    ...ALL_DRIVES,
+    q,
+    orderBy: LIST_ORDER,
+    fields: LIST_FIELDS,
+    pageSize: PAGE_SIZE,
+  };
+  const result = await driveGet(
+    '/files',
+    pageToken === null ? params : { ...params, pageToken },
+    DriveFileListSchema,
+  );
   return { files: result.files.map(toDriveItem), nextPageToken: result.nextPageToken ?? null };
 };
 
@@ -100,13 +117,10 @@ const findChildFolderId = async (parentId: string, name: string) => {
 };
 
 const resolveFolderId = (names: readonly string[]) =>
-  names.reduce<Promise<string | null>>(
-    async (parentId, name) => {
-      const resolvedParentId = await parentId;
-      return resolvedParentId === null ? null : findChildFolderId(resolvedParentId, name);
-    },
-    Promise.resolve(ROOT_FOLDER_ID),
-  );
+  names.reduce<Promise<string | null>>(async (parentId, name) => {
+    const resolvedParentId = await parentId;
+    return resolvedParentId === null ? null : findChildFolderId(resolvedParentId, name);
+  }, Promise.resolve(ROOT_FOLDER_ID));
 
 export const listFolder = async (names: readonly string[], pageToken: string | null) => {
   const folderId = await resolveFolderId(names);
@@ -120,7 +134,11 @@ export const searchFiles = async (text: string, pageToken: string | null): Promi
 
 const getMetadata = async (id: string) => {
   try {
-    return await driveGet(`/files/${encodeURIComponent(id)}`, { fields: METADATA_FIELDS, supportsAllDrives: true }, DriveMetadataSchema);
+    return await driveGet(
+      `/files/${encodeURIComponent(id)}`,
+      { fields: METADATA_FIELDS, supportsAllDrives: true },
+      DriveMetadataSchema,
+    );
   } catch (error) {
     if (error instanceof GoogleApiError && error.status === 404) return null;
     throw error;
@@ -143,7 +161,11 @@ const getRootFolderId = () => {
 const isLiveFolder = (item: DriveMetadata | null): item is DriveMetadata =>
   item !== null && item.mimeType === FOLDER_MIME_TYPE && !item.trashed;
 
-const collectFolderNames = async (folderId: string, rootId: string, names: readonly string[]): Promise<string[] | null> => {
+const collectFolderNames = async (
+  folderId: string,
+  rootId: string,
+  names: readonly string[],
+): Promise<string[] | null> => {
   const folder = await getMetadata(folderId);
   if (!isLiveFolder(folder) || names.length >= MAX_FOLDER_DEPTH) return null;
   const path = [folder.name, ...names];
@@ -177,6 +199,8 @@ export const shareFile = async (fileId: string) => {
   return true;
 };
 
-export const downloadUrl = (fileId: string) => `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
+export const downloadUrl = (fileId: string) =>
+  `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
 
-export const previewUrl = (fileId: string) => `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview`;
+export const previewUrl = (fileId: string) =>
+  `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/preview`;

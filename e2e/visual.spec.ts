@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+
 import { FAILING_QUERY, mockDriveApi } from './support/mock-api.ts';
 
 test.beforeEach(async ({ page }) => {
@@ -6,7 +7,8 @@ test.beforeEach(async ({ page }) => {
   await mockDriveApi(page);
 });
 
-const matchPage = (page: Page, name: string) => expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
+const matchPage = (page: Page, name: string) =>
+  expect(page).toHaveScreenshot(`${name}.png`, { fullPage: true });
 
 test('home', async ({ page }) => {
   await page.goto('/');

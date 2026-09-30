@@ -1,8 +1,10 @@
 import { ActionIcon, Anchor, Box, Breadcrumbs, Group, Paper } from '@mantine/core';
-import { IconChevronLeft, IconChevronRight } from '../icons.ts';
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
+
+import { IconChevronLeft, IconChevronRight } from '../icons.ts';
+
 import classes from './BreadcrumbNav.module.css';
 
 const LONG_LABEL_LENGTH = 30;
@@ -78,7 +80,10 @@ export function BreadcrumbNav({ pathname }: BreadcrumbNavProps) {
         )}
 
         <Box ref={viewportRef} className={classes.viewport} onScroll={updateScrollButtons}>
-          <Breadcrumbs className={classes.breadcrumbs} separator={<IconChevronRight size={16} className={classes.separator} />}>
+          <Breadcrumbs
+            className={classes.breadcrumbs}
+            separator={<IconChevronRight size={16} className={classes.separator} />}
+          >
             {crumbs.map((crumb, index) => (
               <Anchor
                 key={crumb.path}

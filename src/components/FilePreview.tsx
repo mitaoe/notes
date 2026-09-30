@@ -1,10 +1,12 @@
 import { ActionIcon, Box, Button, Modal, Paper, Text } from '@mantine/core';
 import { useHotkeys, useMediaQuery, useTimeout } from '@mantine/hooks';
-import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '../icons.ts';
 import { clsx } from 'clsx';
 import { useState } from 'react';
+
 import type { DriveItem } from '../../shared/drive.ts';
 import { downloadHref, previewHref } from '../api/drive.ts';
+import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '../icons.ts';
+
 import classes from './FilePreview.module.css';
 
 const DOWNLOAD_FEEDBACK_MS = 500;
@@ -46,7 +48,15 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
   const chevronSize = compact ? 16 : 20;
 
   return (
-    <Modal opened onClose={onClose} size="xl" fullScreen padding={0} withCloseButton={false} classNames={{ body: classes.body }}>
+    <Modal
+      opened
+      onClose={onClose}
+      size="xl"
+      fullScreen
+      padding={0}
+      withCloseButton={false}
+      classNames={{ body: classes.body }}
+    >
       <Box className={classes.container}>
         <Paper p="md" className={classes.toolbar}>
           <Box className={classes.toolbarContent}>
@@ -99,7 +109,11 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
               leftSection={<IconDownload size={iconSize} />}
               disabled={downloading}
               aria-label="Download file"
-              className={clsx(classes.actionButton, classes.downloadButton, downloading && classes.downloading)}
+              className={clsx(
+                classes.actionButton,
+                classes.downloadButton,
+                downloading && classes.downloading,
+              )}
               onClick={download}
             >
               {compact ? '' : 'Download'}

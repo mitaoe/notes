@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { join } from 'node:path';
+
 import { isRunnableDevEnvironment, loadEnv, type Plugin } from 'vite';
 
 type ApiModule = { GET?: (request: Request) => Promise<Response> };
@@ -13,7 +14,10 @@ const toRequest = (req: IncomingMessage) => {
   for (const [name, value] of Object.entries(req.headers)) {
     if (typeof value === 'string') headers.set(name, value);
   }
-  return new Request(new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`), { method: req.method ?? 'GET', headers });
+  return new Request(new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`), {
+    method: req.method ?? 'GET',
+    headers,
+  });
 };
 
 const send = async (res: ServerResponse, response: Response) => {
