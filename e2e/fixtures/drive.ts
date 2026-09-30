@@ -53,10 +53,10 @@ export const allNodes = (node: FixtureNode = root): FixtureNode[] =>
 export const findById = (id: string): FixtureNode | null =>
   id === root.id ? root : allNodes().find((node) => node.id === id) ?? null;
 
-export const findByPath = (path: string): FixtureNode | null => {
+export const findByPath = (names: readonly string[]): FixtureNode | null => {
   let node: FixtureNode | null = root;
-  for (const segment of path.split('/').filter(Boolean)) {
-    node = node.children.find((child) => child.name === segment && child.mimeType === FOLDER_MIME_TYPE) ?? null;
+  for (const name of names) {
+    node = node.children.find((child) => child.name === name && child.mimeType === FOLDER_MIME_TYPE) ?? null;
     if (!node) return null;
   }
   return node;

@@ -4,12 +4,10 @@ import { emotionTransform } from '@mantine/emotion';
 import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import { Helmet } from 'react-helmet-async';
 import { Layout } from './components/Layout';
-import { Home } from './pages/Home';
-import Folder from './pages/Folder';
-import Search from './pages/Search';
+import { FolderPage } from './pages/FolderPage';
+import { SearchPage } from './pages/SearchPage';
 import { NotFound } from './pages/NotFound';
 import { config, uiConfig } from './config';
-import { SearchProvider } from './contexts/SearchProvider';
 
 function App() {
   return (
@@ -123,16 +121,13 @@ function App() {
         <link rel="canonical" href="https://mitaoe-notes.vercel.app" />
       </Helmet>
       <Router>
-        <SearchProvider>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/search" element={<Search />} />
-              <Route path="/*" element={<Folder />} />
-              <Route path="/404" element={<NotFound />} />
-            </Routes>
-          </Layout>
-        </SearchProvider>
+        <Layout>
+          <Routes>
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<FolderPage />} />
+          </Routes>
+        </Layout>
         <Analytics />
       </Router>
     </MantineProvider>

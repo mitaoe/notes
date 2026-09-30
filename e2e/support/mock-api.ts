@@ -1,58 +1,61 @@
 import { readFileSync } from 'node:fs';
 import type { Page, Route } from '@playwright/test';
-import { FOLDER_MIME_TYPE, findById, paginate, searchNodes, sortForListing, type FixtureNode } from '../fixtures/drive.ts';
+import { PAGE_SIZE } from '../../api/_lib/drive.ts';
+import type { DriveItem, DrivePage } from '../../shared/drive.ts';
+import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
+import { FOLDER_MIME_TYPE, findById, findByPath, paginate, searchNodes, sortForListing, type FixtureNode } from '../fixtures/drive.ts';
 
 export const FAILING_QUERY = 'boom';
 
 const logo = readFileSync(new URL('../../public/favicon.ico', import.meta.url));
 
-const toDriveFile = (node: FixtureNode) => ({
-  id: node.id,
-  name: node.name,
-  mimeType: node.mimeType,
-  ...(node.size === null ? {} : { size: String(node.size) }),
-});
+const toDriveItem = ({ id, name, mimeType, size }: FixtureNode): DriveItem => ({ id, name, mimeType, size });
 
 const json = (route: Route, body: unknown, status = 200) =>
   route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
 
-const handleFiles = (route: Route, params: URLSearchParams) => {
-  const pageSize = Number(params.get('pageSize') ?? 100);
-  const pageToken = params.get('pageToken');
-  const search = params.get('search');
-  const fileId = params.get('fileId');
-  const folderName = params.get('folderName');
-  const parent = findById(params.get('path') ?? 'root');
-
-  if (fileId) {
-    const node = findById(fileId);
-    if (!node) return json(route, { error: 'File not found' }, 404);
-    return json(route, { ...toDriveFile(node), parents: node.parentId ? [node.parentId] : [] });
-  }
-
-  if (folderName !== null) {
-    const match = parent?.children.filter((child) => child.name === folderName && child.mimeType === FOLDER_MIME_TYPE) ?? [];
-    return json(route, { files: match.map(toDriveFile) });
-  }
-
-  if (search !== null) {
-    if (search === FAILING_QUERY) return json(route, { error: 'Failed to fetch files' }, 500);
-    const page = paginate(searchNodes(search), pageToken, pageSize);
-    return json(route, { files: page.items.map(toDriveFile), nextPageToken: page.nextPageToken });
-  }
-
-  const page = paginate(sortForListing(parent?.children ?? []), pageToken, pageSize);
-  return json(route, { files: page.items.map(toDriveFile), nextPageToken: page.nextPageToken });
+const page = (nodes: FixtureNode[], pageToken: string | null): DrivePage => {
+  const { items, nextPageToken } = paginate(nodes, pageToken, PAGE_SIZE);
+  return { files: items.map(toDriveItem), nextPageToken };
 };
 
-export const mockDriveApi = async (page: Page) => {
-  await page.route('**/api/files?**', (route) => handleFiles(route, new URL(route.request().url()).searchParams));
-  await page.route('**/api/download?**', (route) => {
-    const id = new URL(route.request().url()).searchParams.get('fileId');
+const pathOf = (node: FixtureNode) => {
+  const names: string[] = [];
+  for (let current: FixtureNode | null = node; current?.parentId; current = findById(current.parentId)) names.unshift(current.name);
+  return toFolderPath(names);
+};
+
+const handlers: Record<string, (route: Route, params: URLSearchParams) => Promise<void>> = {
+  list: (route, params) => {
+    const names = parseFolderPath(params.get('path') ?? '/');
+    const folder = names === null ? null : findByPath(names);
+    if (folder === null) return json(route, { error: 'Folder not found' }, 404);
+    return json(route, page(sortForListing(folder.children), params.get('pageToken')));
+  },
+  search: (route, params) => {
+    const query = params.get('q') ?? '';
+    if (query === FAILING_QUERY) return json(route, { error: 'Something went wrong' }, 500);
+    return json(route, page(searchNodes(query), params.get('pageToken')));
+  },
+  path: (route, params) => {
+    const folder = findById(params.get('id') ?? '');
+    if (folder === null || folder.mimeType !== FOLDER_MIME_TYPE) return json(route, { error: 'Folder not found' }, 404);
+    return json(route, { path: pathOf(folder) });
+  },
+  download: (route, params) => {
+    const id = params.get('fileId');
     return json(route, {
       downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`,
       previewUrl: `https://drive.google.com/file/d/${id}/preview`,
     });
+  },
+};
+
+export const mockDriveApi = async (page: Page) => {
+  await page.route('**/api/*', (route) => {
+    const url = new URL(route.request().url());
+    const handler = handlers[url.pathname.replace('/api/', '')];
+    return handler ? handler(route, url.searchParams) : json(route, { error: 'Not found' }, 404);
   });
   await page.route('https://drive.google.com/**', (route) =>
     route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>preview</title><body style="margin:0;background:#fff"></body>' }),
