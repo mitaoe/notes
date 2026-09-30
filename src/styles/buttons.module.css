@@ -1,9 +1,9 @@
 .primary {
-  background-color: #1a73e8;
+  background-color: var(--mantine-color-blue-6);
   color: white;
   font-weight: 500;
 
   &:hover {
-    background-color: #1557b0;
+    background-color: var(--mantine-color-blue-7);
   }
 }

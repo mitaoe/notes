@@ -15,6 +15,6 @@
 }
 
 .icon {
-  background-color: rgba(11, 49, 98, 0.15);
+  background-color: alpha(var(--mantine-color-blue-9), 0.15);
   color: var(--mantine-color-blue-4);
 }

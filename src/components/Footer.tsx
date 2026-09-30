@@ -4,7 +4,7 @@ import { site } from '../config.ts';
 
 import classes from './Footer.module.css';
 
-const CURRENT_YEAR = new Date().getFullYear();
+const currentYear = new Date().getFullYear();
 
 export function Footer() {
   return (
@@ -12,7 +12,7 @@ export function Footer() {
       <Container size="lg">
         <Group justify="space-between" align="center" gap="xl">
           <Text size="sm" c="dimmed">
-            © {CURRENT_YEAR} {site.companyName}
+            © {currentYear} {site.companyName}
           </Text>
           <Group gap="md">
             <Anchor href="/privacy.html" target="_blank" size="sm">

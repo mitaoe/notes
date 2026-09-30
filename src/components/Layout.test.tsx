@@ -1,35 +1,73 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { Link } from 'react-router';
 import { describe, expect, it } from 'vitest';
 
 import { LOCATION_TEST_ID } from '../test/CurrentLocation.tsx';
 import { renderWithProviders } from '../test/render.tsx';
 import { Layout } from './Layout.tsx';
 
-const searchInput = () => screen.getByRole('textbox', { name: 'Search files' });
+const renderLayout = (route = '/') =>
+  renderWithProviders(
+    <Layout>
+      <Link to="/fy">open fy</Link>
+    </Layout>,
+    route,
+  );
+
+const location = () => screen.getByTestId(LOCATION_TEST_ID);
 
 describe('Layout search', () => {
   it('navigates to the search page with the trimmed query', async () => {
-    renderWithProviders(<Layout>page</Layout>);
+    renderLayout();
 
-    await userEvent.type(searchInput(), '  unit 1  {Enter}');
+    await userEvent.type(
+      screen.getByRole('textbox', { name: 'Search files' }),
+      '  unit 1  {Enter}',
+    );
 
-    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=unit%201');
+    expect(location()).toHaveTextContent('/search?q=unit%201');
   });
 
   it('goes home when clearing on the search page', async () => {
-    renderWithProviders(<Layout>page</Layout>, '/search?q=unit');
+    renderLayout('/search?q=unit');
 
-    await userEvent.type(searchInput(), 'x');
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search files' }), 'x');
     await userEvent.click(screen.getByRole('button', { name: 'Clear search' }));
 
-    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent(/^\/$/);
-    expect(searchInput()).toHaveValue('');
+    expect(location()).toHaveTextContent(/^\/$/);
+    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
   });
 
-  it('renders the page content and footer links', () => {
-    renderWithProviders(<Layout>page body</Layout>);
-    expect(screen.getByText('page body')).toBeInTheDocument();
+  it('clears the search box after leaving the search page', async () => {
+    renderLayout();
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search files' }), 'unit{Enter}');
+    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('unit');
+
+    await userEvent.click(screen.getByRole('link', { name: 'open fy' }));
+
+    expect(location()).toHaveTextContent('/fy');
+    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
+  });
+
+  it('keeps the search box empty when a search link is opened directly', () => {
+    renderLayout('/search?q=unit');
+    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
+  });
+
+  it('closes the empty mobile search when clicking elsewhere', async () => {
+    renderLayout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Open search' }));
+    expect(screen.getAllByRole('textbox', { name: 'Search files' })).toHaveLength(2);
+
+    await userEvent.click(screen.getByRole('link', { name: 'open fy' }));
+
+    expect(screen.getByRole('button', { name: 'Open search' })).toBeInTheDocument();
+  });
+
+  it('renders the footer links', () => {
+    renderLayout();
     expect(screen.getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
       'href',
       '/privacy.html',

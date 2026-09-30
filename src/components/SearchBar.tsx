@@ -10,6 +10,7 @@ import {
   type MouseEvent,
 } from 'react';
 
+import { MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
 import { IconSearch, IconX } from '../icons.ts';
 
 import classes from './SearchBar.module.css';
@@ -19,8 +20,8 @@ type SearchBarProps = {
   onQueryChange: (query: string) => void;
   onSearch: () => void;
   onClear: () => void;
-  isMobile?: boolean;
-  onClickOutside?: () => void;
+  isMobile: boolean;
+  onClickOutside: (() => void) | null;
 };
 
 export function SearchBar({
@@ -28,7 +29,7 @@ export function SearchBar({
   onQueryChange,
   onSearch,
   onClear,
-  isMobile = false,
+  isMobile,
   onClickOutside,
 }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +81,7 @@ export function SearchBar({
         onFocus={() => setIsFocused(true)}
         onBlur={handleBlur}
         autoComplete="off"
+        maxLength={MAX_SEARCH_LENGTH}
         size={isMobile ? 'sm' : 'md'}
         classNames={{
           root: clsx(classes.root, isMobile && classes.rootMobile),

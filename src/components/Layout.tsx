@@ -13,44 +13,17 @@ import { useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 
 import { site } from '../config.ts';
-import { IconBrandGithub, IconMessage, IconSearch } from '../icons.ts';
+import { IconSearch } from '../icons.ts';
 import { Footer } from './Footer.tsx';
 import { SearchBar } from './SearchBar.tsx';
+import { SocialLinks } from './SocialLinks.tsx';
 
 import classes from './Layout.module.css';
 
+const HEADER_HEIGHT = 60;
+const LOGO_SIZE = 35;
+
 const isSearchPath = (pathname: string) => pathname.startsWith('/search');
-
-type SocialLinksProps = { size: 'lg' | 'xl'; variant: 'subtle' | 'light'; iconSize: number };
-
-function SocialLinks({ size, variant, iconSize }: SocialLinksProps) {
-  return (
-    <>
-      <ActionIcon
-        component="a"
-        href={site.githubUrl}
-        target="_blank"
-        size={size}
-        variant={variant}
-        color="gray"
-        aria-label="GitHub"
-      >
-        <IconBrandGithub size={iconSize} />
-      </ActionIcon>
-      <ActionIcon
-        component="a"
-        href={site.contactUrl}
-        target="_blank"
-        size={size}
-        variant={variant}
-        color="gray"
-        aria-label="Contact"
-      >
-        <IconMessage size={iconSize} />
-      </ActionIcon>
-    </>
-  );
-}
 
 type LayoutProps = { children: ReactNode };
 
@@ -90,7 +63,7 @@ export function Layout({ children }: LayoutProps) {
   };
 
   return (
-    <AppShell padding="md" header={{ height: 60 }} classNames={{ main: classes.main }}>
+    <AppShell padding="md" header={{ height: HEADER_HEIGHT }} classNames={{ main: classes.main }}>
       <AppShell.Header className={classes.header}>
         <Container size="lg" h="100%">
           <Group justify="space-between" h="100%" gap="xl">
@@ -99,15 +72,22 @@ export function Layout({ children }: LayoutProps) {
                 <Image
                   src={site.logoUrl}
                   alt={site.name}
-                  width={35}
-                  height={35}
+                  width={LOGO_SIZE}
+                  height={LOGO_SIZE}
                   className={classes.logo}
                 />
               </Link>
             </Group>
 
             <Group gap="xl" className={classes.desktopOnly}>
-              <SearchBar query={query} onQueryChange={setQuery} onSearch={search} onClear={clear} />
+              <SearchBar
+                isMobile={false}
+                query={query}
+                onQueryChange={setQuery}
+                onSearch={search}
+                onClear={clear}
+                onClickOutside={null}
+              />
               <SocialLinks size="lg" variant="subtle" iconSize={22} />
             </Group>
 
