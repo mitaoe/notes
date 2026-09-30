@@ -1,16 +1,32 @@
-import { ActionIcon, Box, Button, Modal, Paper, Text } from '@mantine/core';
-import { useHotkeys, useMediaQuery, useTimeout } from '@mantine/hooks';
+import { ActionIcon, Box, Button, Group, Modal, Paper, Stack, Text } from '@mantine/core';
+import { useHotkeys, useMediaQuery } from '@mantine/hooks';
 import { clsx } from 'clsx';
-import { useState } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 
 import type { DriveItem } from '../../shared/drive.ts';
-import { downloadHref, previewHref } from '../api/drive.ts';
+import { previewHref } from '../api/drive.ts';
+import { useDownload } from '../hooks/useDownload.ts';
 import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '../icons.ts';
 
+import downloadClasses from '../styles/download.module.css';
 import classes from './FilePreview.module.css';
 
-const DOWNLOAD_FEEDBACK_MS = 500;
 const COMPACT_QUERY = '(max-width: 600px)';
+const API_ERROR_CONTENT_TYPE = 'application/json';
+const FRAME_SANDBOX = [
+  'allow-scripts',
+  'allow-same-origin',
+  'allow-popups',
+  'allow-popups-to-escape-sandbox',
+  'allow-downloads',
+  'allow-modals',
+  'allow-forms',
+].join(' ');
+
+type FrameState = 'loading' | 'loaded' | 'failed';
+
+const frameStateAfterLoad = (event: SyntheticEvent<HTMLIFrameElement>): FrameState =>
+  event.currentTarget.contentDocument?.contentType === API_ERROR_CONTENT_TYPE ? 'failed' : 'loaded';
 
 type FilePreviewProps = {
   file: DriveItem;
@@ -21,9 +37,8 @@ type FilePreviewProps = {
 
 export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps) {
   const compact = useMediaQuery(COMPACT_QUERY, false, { getInitialValueInEffect: false });
-  const [frameLoaded, setFrameLoaded] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const downloadFeedback = useTimeout(() => setDownloading(false), DOWNLOAD_FEEDBACK_MS);
+  const [frameState, setFrameState] = useState<FrameState>('loading');
+  const { downloading, download } = useDownload(file.id);
 
   const index = files.findIndex((candidate) => candidate.id === file.id);
   const previous = index > 0 ? (files[index - 1] ?? null) : null;
@@ -35,14 +50,7 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
   useHotkeys([
     ['ArrowRight', showNext],
     ['ArrowLeft', showPrevious],
-    ['Escape', onClose],
   ]);
-
-  const download = () => {
-    setDownloading(true);
-    window.open(downloadHref(file.id), '_blank');
-    downloadFeedback.start();
-  };
 
   const iconSize = compact ? 16 : 18;
   const chevronSize = compact ? 16 : 20;
@@ -112,7 +120,7 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
               className={clsx(
                 classes.actionButton,
                 classes.downloadButton,
-                downloading && classes.downloading,
+                downloading && downloadClasses.downloading,
               )}
               onClick={download}
             >
@@ -122,20 +130,33 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
         </Paper>
 
         <Box className={classes.viewer}>
-          {!frameLoaded && (
+          {frameState === 'loading' && (
             <Box className={classes.loadingOverlay}>
               <Text size="md" c="#fff" className={classes.loadingText}>
                 Loading PDF…
               </Text>
             </Box>
           )}
-          <iframe
-            src={previewHref(file.id)}
-            title={file.name}
-            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-forms"
-            className={classes.frame}
-            onLoad={() => setFrameLoaded(true)}
-          />
+          {frameState === 'failed' ? (
+            <Group justify="center" h="100%">
+              <Stack align="center" gap="xs">
+                <Text size="xl" c="#fff" className={classes.unavailableTitle}>
+                  Preview not available
+                </Text>
+                <Text size="sm" c="#fff" className={classes.unavailableDetail}>
+                  This file could not be loaded
+                </Text>
+              </Stack>
+            </Group>
+          ) : (
+            <iframe
+              src={previewHref(file.id)}
+              title={file.name}
+              sandbox={FRAME_SANDBOX}
+              className={classes.frame}
+              onLoad={(event) => setFrameState(frameStateAfterLoad(event))}
+            />
+          )}
         </Box>
       </Box>
     </Modal>

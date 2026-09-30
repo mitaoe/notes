@@ -50,6 +50,6 @@ describe('FilePreview', () => {
     const { onClose } = setup(pdf('a'));
     await userEvent.click(screen.getByRole('button', { name: 'Close preview' }));
     await userEvent.keyboard('{Escape}');
-    expect(onClose).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledTimes(2);
   });
 });

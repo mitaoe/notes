@@ -1,6 +1,5 @@
 .body {
   height: 100%;
-  padding: 0;
 }
 
 .container {
@@ -24,9 +23,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0;
   width: 100%;
-  padding: 0;
 }
 
 .actionButton {
@@ -42,29 +39,22 @@
 }
 
 .closeButton {
-  background-color: rgba(224, 49, 49, 0.15);
+  background-color: alpha(var(--mantine-color-red-8), 0.15);
   color: var(--mantine-color-red-4);
 
   &:hover {
-    background-color: rgba(224, 49, 49, 0.25);
+    background-color: alpha(var(--mantine-color-red-8), 0.25);
   }
 }
 
 .downloadButton {
-  background-color: rgba(9, 146, 104, 0.15);
+  background-color: alpha(var(--mantine-color-teal-8), 0.15);
   color: var(--mantine-color-teal-4);
-  opacity: 1;
-  transform: scale(1);
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: rgba(9, 146, 104, 0.25);
+    background-color: alpha(var(--mantine-color-teal-8), 0.25);
   }
-}
-
-.downloading {
-  opacity: 0.8;
-  transform: scale(0.95);
 }
 
 .titleArea {
@@ -94,13 +84,12 @@
 
 .navButton {
   flex-shrink: 0;
-  background-color: rgba(52, 58, 64, 0.5);
+  background-color: alpha(var(--mantine-color-gray-8), 0.5);
   color: var(--mantine-color-gray-4);
-  opacity: 1;
-}
 
-.navButton:disabled {
-  opacity: 0.5;
+  &:disabled {
+    opacity: 0.5;
+  }
 }
 
 .previous {
@@ -149,6 +138,14 @@
   font-weight: 500;
   letter-spacing: 1px;
   opacity: 0.8;
+}
+
+.unavailableTitle {
+  opacity: 0.8;
+}
+
+.unavailableDetail {
+  opacity: 0.7;
 }
 
 .frame {
