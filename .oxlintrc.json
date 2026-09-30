@@ -1,0 +1,24 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "react", "import", "jsx-a11y", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "options": {
+    "typeAware": true,
+    "typeCheck": true,
+    "denyWarnings": true,
+    "reportUnusedDisableDirectives": "error"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/iframe-missing-sandbox": "off",
+    "import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }],
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/only-export-components": ["error", { "allowConstantExport": true }]
+  },
+  "ignorePatterns": ["dist", "playwright-report", "test-results"]
+}
