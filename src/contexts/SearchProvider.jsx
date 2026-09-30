@@ -1,13 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useNavigate, useLocation } from 'react-router';
+import { useLocation } from 'react-router';
 import driveService from '../services/driveService';
 import { SearchContext } from './SearchContext';
 
 const SearchProvider = ({ children }) => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [searchQuery, setSearchQuery] = useState('');
   const [files, setFiles] = useState([]);
   const [error, setError] = useState(null);
   const [nextPageToken, setNextPageToken] = useState(null);
@@ -19,19 +17,9 @@ const SearchProvider = ({ children }) => {
   const submittedQuery = onSearchRoute
     ? (new URLSearchParams(location.search).get('q') || '').trim()
     : '';
-  const [prevSubmitted, setPrevSubmitted] = useState(submittedQuery);
-
-  if (submittedQuery !== prevSubmitted) {
-    setPrevSubmitted(submittedQuery);
-    if (submittedQuery) {
-      setSearchQuery(submittedQuery);
-    }
-  }
-
   if (location.pathname !== prevPathname) {
     setPrevPathname(location.pathname);
     if (!location.pathname.startsWith('/search')) {
-      setSearchQuery('');
       setFiles([]);
       setNextPageToken(null);
       setError(null);
@@ -78,22 +66,6 @@ const SearchProvider = ({ children }) => {
     })();
   }, [submittedQuery, runSearch]);
 
-  const performSearch = useCallback(() => {
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  }, [searchQuery, navigate]);
-
-  const clearSearch = useCallback(() => {
-    setSearchQuery('');
-    setFiles([]);
-    setNextPageToken(null);
-    setError(null);
-    if (location.pathname === '/search') {
-      navigate('/');
-    }
-  }, [navigate, location.pathname]);
-
   const loadMore = useCallback(() => {
     if (!nextPageToken) {
       return Promise.resolve();
@@ -102,15 +74,11 @@ const SearchProvider = ({ children }) => {
   }, [nextPageToken, runSearch, submittedQuery]);
 
   const contextValue = {
-    searchQuery,
-    setSearchQuery,
     submittedQuery,
     files,
     loading,
     error,
     hasMore: !!nextPageToken,
-    performSearch,
-    clearSearch,
     loadMore,
   };
 

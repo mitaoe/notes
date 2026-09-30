@@ -3,7 +3,7 @@ import { MantineProvider } from '@mantine/core';
 import { emotionTransform } from '@mantine/emotion';
 import { BrowserRouter as Router, Routes, Route } from 'react-router';
 import { Helmet } from 'react-helmet-async';
-import Layout from './components/Layout';
+import { Layout } from './components/Layout';
 import { Home } from './pages/Home';
 import Folder from './pages/Folder';
 import Search from './pages/Search';

@@ -1,0 +1,57 @@
+.form {
+  display: flex;
+}
+
+.root {
+  position: relative;
+  width: 300px;
+}
+
+.rootMobile {
+  width: 200px;
+}
+
+.input {
+  padding-left: 42px;
+  transition: all 0.3s ease-in-out;
+
+  &:focus {
+    border-color: var(--mantine-color-blue-5);
+  }
+}
+
+.inputFocused {
+  padding-left: 16px;
+}
+
+.searchIcon {
+  opacity: 0.6;
+  transform: translateX(0);
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.searchIconFocused {
+  opacity: 1;
+  transform: translateX(236px);
+}
+
+.searchIconFocusedMobile {
+  transform: translateX(138px);
+}
+
+.searchIcon:hover {
+  opacity: 0.8;
+}
+
+.clearIcon {
+  opacity: 1;
+  transform: translateX(0);
+  transition: all 0.3s ease-in-out;
+  color: rgba(201, 42, 42, 0.85);
+
+  &:hover {
+    background-color: rgba(201, 42, 42, 0.15);
+  }
+}
