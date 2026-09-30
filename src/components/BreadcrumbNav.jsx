@@ -2,7 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Paper, Breadcrumbs, Anchor, Box, ActionIcon, Group, rgba } from '@mantine/core';
 import { IconChevronRight, IconChevronLeft } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 export function BreadcrumbNav({ pathSegments }) {
   const navigate = useNavigate();

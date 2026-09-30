@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Group, Text, Button, Box, Loader, Stack, ThemeIcon, ActionIcon, rgba } from '@mantine/core';
 import { IconFolder, IconFile, IconPlayerPlay, IconPhoto, IconMusic, IconDownload, IconInbox, IconEye } from '@tabler/icons-react';
 import { useStyles } from './FileList.styles';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 import { BreadcrumbNav } from './BreadcrumbNav';
 import FilePreview from './FilePreview';
 

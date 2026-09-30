@@ -1,5 +1,5 @@
 import { Container, Title, Text, Button, Group } from '@mantine/core';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router';
 
 export function NotFound() {
   const navigate = useNavigate();

@@ -4,7 +4,7 @@ import { TextInput, ActionIcon, rgba } from '@mantine/core';
 import { IconSearch, IconX } from '@tabler/icons-react';
 import { useSearch } from '../contexts/SearchContext';
 import { useClickOutside } from '@mantine/hooks';
-import { useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router';
 
 const SearchBar = ({ isMobile = false, onSearchClose }) => {
   const location = useLocation();

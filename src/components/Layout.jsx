@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { AppShell, Container, Group, ActionIcon, Box, Burger, Drawer, Image, useMantineTheme, Stack } from '@mantine/core';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
 import SearchBar from './SearchBar';
