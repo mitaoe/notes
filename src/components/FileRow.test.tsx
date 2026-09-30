@@ -35,7 +35,7 @@ describe('FileRow', () => {
     await userEvent.click(screen.getByTitle('Preview'));
     expect(onPreview).toHaveBeenCalledWith(pdf);
     await userEvent.click(screen.getByTitle('Download'));
-    expect(open).toHaveBeenCalledWith('/api/download?id=p1', '_blank');
+    expect(open).toHaveBeenCalledWith('/api/download?id=p1', '_blank', 'noopener');
   });
 
   it('offers only download for other files and hides empty sizes', () => {

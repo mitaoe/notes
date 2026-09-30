@@ -1,33 +1,16 @@
 import { ActionIcon, Box, Text } from '@mantine/core';
-import { useTimeout } from '@mantine/hooks';
 import { clsx } from 'clsx';
-import { useState } from 'react';
 
 import { PDF_MIME_TYPE, isFolder, type DriveItem } from '../../shared/drive.ts';
-import { downloadHref } from '../api/drive.ts';
-import {
-  IconDownload,
-  IconEye,
-  IconFile,
-  IconFolder,
-  IconMusic,
-  IconPhoto,
-  IconPlayerPlay,
-} from '../icons.ts';
+import { useDownload } from '../hooks/useDownload.ts';
+import { IconDownload, IconEye } from '../icons.ts';
 import { formatFileSize } from '../lib/format.ts';
+import { FileIcon } from './FileIcon.tsx';
 
+import downloadClasses from '../styles/download.module.css';
 import classes from './FileRow.module.css';
 
-const DOWNLOAD_FEEDBACK_MS = 500;
-
-function FileIcon({ file }: { file: DriveItem }) {
-  if (isFolder(file)) return <IconFolder size={20} />;
-  const mimeType = file.mimeType.toLowerCase();
-  if (mimeType.includes('video')) return <IconPlayerPlay size={20} />;
-  if (mimeType.includes('image')) return <IconPhoto size={20} />;
-  if (mimeType.includes('audio')) return <IconMusic size={20} />;
-  return <IconFile size={20} />;
-}
+const ACTION_ICON_SIZE = 18;
 
 type FileRowProps = {
   file: DriveItem;
@@ -36,15 +19,8 @@ type FileRowProps = {
 };
 
 export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
-  const [downloading, setDownloading] = useState(false);
-  const downloadFeedback = useTimeout(() => setDownloading(false), DOWNLOAD_FEEDBACK_MS);
+  const { downloading, download } = useDownload(file.id);
   const folder = isFolder(file);
-
-  const download = () => {
-    setDownloading(true);
-    window.open(downloadHref(file.id), '_blank');
-    downloadFeedback.start();
-  };
 
   return (
     <Box className={classes.row}>
@@ -87,7 +63,7 @@ export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
                 className={classes.previewButton}
                 onClick={() => onPreview(file)}
               >
-                <IconEye size={18} />
+                <IconEye size={ACTION_ICON_SIZE} />
               </ActionIcon>
             )}
             <ActionIcon
@@ -95,10 +71,10 @@ export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
               size="lg"
               title="Download"
               disabled={downloading}
-              className={clsx(classes.downloadButton, downloading && classes.downloading)}
+              className={clsx(classes.downloadButton, downloading && downloadClasses.downloading)}
               onClick={download}
             >
-              <IconDownload size={18} />
+              <IconDownload size={ACTION_ICON_SIZE} />
             </ActionIcon>
           </Box>
         )}
