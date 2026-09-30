@@ -85,8 +85,7 @@ test('pdf preview', async ({ page }) => {
   await expect(page).toHaveScreenshot('preview.png');
 });
 
-test('focused search input', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'the inline search box is desktop only');
+test('focused search input', { tag: '@desktop-only' }, async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('syllabus.pdf')).toBeVisible();
   await page.getByPlaceholder('Search files...').click();
@@ -94,8 +93,7 @@ test('focused search input', async ({ page }, testInfo) => {
   await expect(page).toHaveScreenshot('search-focused.png');
 });
 
-test('mobile search opened', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', 'the search toggle is mobile only');
+test('mobile search opened', { tag: '@mobile-only' }, async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('syllabus.pdf')).toBeVisible();
   await page.locator('header button:has(.tabler-icon-search):visible').click();
@@ -103,8 +101,7 @@ test('mobile search opened', async ({ page }, testInfo) => {
   await expect(page).toHaveScreenshot('mobile-search-open.png');
 });
 
-test('mobile menu opened', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'mobile', 'the menu is mobile only');
+test('mobile menu opened', { tag: '@mobile-only' }, async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('syllabus.pdf')).toBeVisible();
   await page.locator('.mantine-Burger-root').click();
