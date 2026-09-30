@@ -1,68 +1,72 @@
 # MITAOE Notes Drive
 
-Welcome to MITAOE Notes Drive - your central hub for accessing academic notes and resources.
+MITAOE Notes Drive is a read-only index of the MITAOE notes Google Drive. Students browse folders, search across every folder, preview PDFs and download files without a Google account.
 
-## 📚 What You Can Do
+## Using the site
 
-### Browse Files and Folders
+### Browse files and folders
 
-- Navigate through different subject folders
-- Use the breadcrumb navigation at the top to track your location
-- View file details like name and size
-- Download files directly with a single click
+- Open a subject folder to see what it contains.
+- The breadcrumb trail at the top shows where you are; select any part of it to go back up.
+- Each file shows its name and size, with a download button next to it.
+- PDFs also have a preview button that opens them in the browser, where the arrow keys move between the PDFs in the folder.
 
-### Search for Notes
+### Search for notes
 
-- Use the search bar at the top to find specific notes
-- Search works across all folders
-- Results show matching files with direct download links
-- Quick access to your search results
+1. Type keywords in the search bar and press Enter or select the search icon.
+2. Search matches file and folder names across all folders.
+3. Select a folder in the results to open it, or download a file directly.
 
-### User Interface
+### Tips
 
-- Clean, easy-to-use design
-- Works on both desktop and mobile devices
-- Loading indicators show when content is being fetched
-- Clear error messages if something goes wrong
+- Specific keywords find notes faster.
+- Check the file size before downloading on mobile data.
+- The browser back button returns to the previous folder.
 
-## 🔍 How to Use
+### Having issues?
 
-### Finding Notes
+- Check your internet connection and refresh the page.
+- Use an up-to-date browser.
+- Clear the browser cache if a download does not start.
 
-1. Browse through folders by clicking on them
-2. Use the breadcrumb trail to go back to previous folders
-3. Click any file to download it
+## Development
 
-### Using Search
+The site is a React single-page app served by Vercel, with a small set of Vercel Functions that read the Drive through the Google Drive API.
 
-1. Type keywords in the search bar
-2. Press enter or click the search icon
-3. Click on any result to download
+### Requirements
 
-## 💡 Tips
+- The Node.js and pnpm versions pinned in `package.json` (`engines` and `packageManager`).
+- Docker, for the end-to-end and visual tests.
+- A Google OAuth client and refresh token with Drive access, in a `.env` file shaped like `.env.example`.
 
-- Use specific keywords when searching
-- Check the file size before downloading
-- You can use the back button to return to previous folders
-- The breadcrumb trail shows your current location
+### Getting started
 
-## ❓ Having Issues?
+```sh
+pnpm install
+cp .env.example .env
+pnpm dev
+```
 
-If you encounter any problems while using the site:
+`pnpm dev` serves the app and the functions in `api/` together, so browsing and search work locally against the real Drive.
 
-- Check your internet connection
-- Make sure you're using a modern web browser
-- Try refreshing the page
-- Clear your browser cache if files aren't downloading
+### Commands
 
-## 📱 Mobile Access
+| Command                  | What it does                                                     |
+| ------------------------ | ---------------------------------------------------------------- |
+| `pnpm dev`               | Starts the dev server with the API functions                     |
+| `pnpm build`             | Type-checks and builds the production bundle into `dist/`        |
+| `pnpm preview`           | Serves the production build                                      |
+| `pnpm typecheck`         | Type-checks the app, the API and the tooling                     |
+| `pnpm lint`              | Lints with oxlint, including type-aware rules                    |
+| `pnpm format`            | Formats the codebase with oxfmt                                  |
+| `pnpm format:check`      | Checks formatting without writing                                |
+| `pnpm test`              | Runs the unit and component tests with Vitest                    |
+| `pnpm playwright:server` | Starts the Playwright browser in Docker for the end-to-end tests |
+| `pnpm test:e2e`          | Runs the visual and navigation tests against that browser        |
 
-The site works on mobile devices:
+Run `pnpm playwright:server` in a separate terminal before `pnpm test:e2e`.
 
-- Swipe through files and folders
-- Tap to download
-- Search works the same as desktop
+### Further reading
 
----
-
-Made with ❤️ for MITAOE students
+- [ARCHITECTURE.md](ARCHITECTURE.md) explains how the app, the API and the Drive fit together.
+- [AGENTS.md](AGENTS.md) defines the folder structure, file naming and conventions for contributors and coding agents.
