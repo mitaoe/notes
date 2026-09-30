@@ -7,12 +7,13 @@ import { IconChevronLeft, IconChevronRight } from '../icons.ts';
 
 import classes from './BreadcrumbNav.module.css';
 
-const LONG_LABEL_LENGTH = 30;
+const LONG_SEGMENT_LENGTH = 30;
 const SCROLL_STEP_PX = 150;
 const SCROLL_EDGE_PX = 5;
 const SCROLL_TO_END_DELAY_MS = 100;
+const HOME_LABEL = 'Home';
 
-type Crumb = { label: string; path: string };
+type Crumb = { label: string; path: string; long: boolean };
 
 const decodeSegment = (segment: string) => {
   try {
@@ -25,10 +26,11 @@ const decodeSegment = (segment: string) => {
 const toCrumbs = (pathname: string): Crumb[] => {
   const segments = pathname.split('/').filter(Boolean);
   return [
-    { label: 'Home', path: '/' },
+    { label: HOME_LABEL, path: '/', long: false },
     ...segments.map((segment, index) => ({
       label: decodeSegment(segment),
       path: `/${segments.slice(0, index + 1).join('/')}`,
+      long: segment.length > LONG_SEGMENT_LENGTH,
     })),
   ];
 };
@@ -93,7 +95,7 @@ export function BreadcrumbNav({ pathname }: BreadcrumbNavProps) {
                 className={clsx(
                   classes.crumb,
                   index === crumbs.length - 1 && classes.current,
-                  crumb.label.length > LONG_LABEL_LENGTH && classes.long,
+                  crumb.long && classes.long,
                 )}
               >
                 {crumb.label}
