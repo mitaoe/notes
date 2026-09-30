@@ -47,7 +47,6 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
     }
   };
 
-  const pathSegments = location.pathname.split('/').filter(Boolean);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 600);
@@ -131,7 +130,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
   if (loading) {
     return (
       <>
-        <BreadcrumbNav pathSegments={pathSegments} />
+        <BreadcrumbNav pathname={location.pathname} />
         <Group justify="center" style={{ minHeight: 200 }}>
           <Loader size="lg" type="dots" />
         </Group>
@@ -141,7 +140,7 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
 
   return (
     <>
-      <BreadcrumbNav pathSegments={pathSegments} />
+      <BreadcrumbNav pathname={location.pathname} />
       <Box>
         {files.length === 0 ? (
           <Box className={classes.emptyStateWrapper}>
