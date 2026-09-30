@@ -1,6 +1,6 @@
 import { ActionIcon, Anchor, Box, Breadcrumbs, Group, Paper } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import classes from './BreadcrumbNav.module.css';
@@ -53,13 +53,13 @@ export function BreadcrumbNav({ pathname }: BreadcrumbNavProps) {
       if (viewport) viewport.scrollLeft = viewport.scrollWidth;
     }, SCROLL_TO_END_DELAY_MS);
     return () => window.clearTimeout(timer);
-  }, [pathname]);
+  }, []);
 
   useEffect(() => {
     updateScrollButtons();
     window.addEventListener('resize', updateScrollButtons);
     return () => window.removeEventListener('resize', updateScrollButtons);
-  }, [pathname, updateScrollButtons]);
+  }, [updateScrollButtons]);
 
   const scrollBy = (left: number) => viewportRef.current?.scrollBy({ left, behavior: 'smooth' });
 

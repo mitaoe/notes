@@ -34,7 +34,7 @@ export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }:
   if (loading) {
     return (
       <>
-        <BreadcrumbNav pathname={pathname} />
+        <BreadcrumbNav key={pathname} pathname={pathname} />
         <Group justify="center" className={classes.loading}>
           <Loader size="lg" type="dots" />
         </Group>
@@ -44,7 +44,7 @@ export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }:
 
   return (
     <>
-      <BreadcrumbNav pathname={pathname} />
+      <BreadcrumbNav key={pathname} pathname={pathname} />
       <Box>
         {files.length === 0 ? (
           <EmptyState />
