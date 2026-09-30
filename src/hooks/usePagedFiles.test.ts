@@ -1,0 +1,86 @@
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import type { DriveItem, DrivePage } from '../../shared/drive.ts';
+import { usePagedFiles, type PageLoader } from './usePagedFiles.ts';
+
+const item = (id: string): DriveItem => ({
+  id,
+  name: `${id}.pdf`,
+  mimeType: 'application/pdf',
+  size: 1,
+});
+
+const pages: Record<string, DrivePage> = {
+  'a:first': { files: [item('a1')], nextPageToken: 'a:second' },
+  'a:second': { files: [item('a2')], nextPageToken: null },
+  'b:first': { files: [item('b1')], nextPageToken: null },
+};
+
+const loader = () =>
+  vi.fn<PageLoader>(async (key, pageToken) => {
+    const page = pages[pageToken ?? `${key}:first`];
+    if (!page) throw new Error(`no page for ${key}`);
+    return page;
+  });
+
+describe('usePagedFiles', () => {
+  it('loads the first page and reports progress', async () => {
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles('a', load));
+
+    expect(result.current.loading).toBe(true);
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.files.map((file) => file.id)).toEqual(['a1']);
+    expect(result.current.hasMore).toBe(true);
+    expect(result.current.failed).toBe(false);
+  });
+
+  it('appends the next page on loadMore', async () => {
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles('a', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    await act(() => result.current.loadMore());
+
+    expect(result.current.files.map((file) => file.id)).toEqual(['a1', 'a2']);
+    expect(result.current.hasMore).toBe(false);
+  });
+
+  it('shows loading again and replaces the files when the key changes', async () => {
+    const load = loader();
+    const { result, rerender } = renderHook(({ key }) => usePagedFiles(key, load), {
+      initialProps: { key: 'a' },
+    });
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    rerender({ key: 'b' });
+
+    expect(result.current.loading).toBe(true);
+    expect(result.current.files).toEqual([]);
+    await waitFor(() => expect(result.current.files.map((file) => file.id)).toEqual(['b1']));
+  });
+
+  it('reports failure with an empty list', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles('missing', load));
+
+    await waitFor(() => expect(result.current.failed).toBe(true));
+    expect(result.current.files).toEqual([]);
+    expect(result.current.loading).toBe(false);
+  });
+
+  it('stays idle without a key', () => {
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles(null, load));
+
+    expect(result.current).toMatchObject({
+      loading: false,
+      failed: false,
+      hasMore: false,
+      files: [],
+    });
+    expect(load).not.toHaveBeenCalled();
+  });
+});

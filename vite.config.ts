@@ -15,9 +15,17 @@ export default defineConfig({
     projects: [
       {
         test: {
-          name: 'api',
+          name: 'node',
           environment: 'node',
-          include: ['api/_tests/**/*.test.ts', 'shared/**/*.test.ts'],
+          include: ['api/_tests/**/*.test.ts', 'shared/**/*.test.ts', 'vite/**/*.test.ts'],
+        },
+      },
+      {
+        test: {
+          name: 'web',
+          environment: 'jsdom',
+          include: ['src/**/*.test.{ts,tsx}'],
+          setupFiles: ['src/test/setup.ts'],
         },
       },
     ],
