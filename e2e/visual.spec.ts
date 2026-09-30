@@ -73,7 +73,7 @@ test('search failure', async ({ page }) => {
 
 test('not found page', async ({ page }) => {
   await page.goto('/404');
-  await expect(page.getByRole('button', { name: 'Back to Home' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Back to Home' })).toBeVisible();
   await matchPage(page, 'not-found');
 });
 

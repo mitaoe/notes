@@ -1,0 +1,9 @@
+.primary {
+  background-color: #1a73e8;
+  color: white;
+  font-weight: 500;
+
+  &:hover {
+    background-color: #1557b0;
+  }
+}

@@ -5,7 +5,7 @@ import { PDF_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
 import { BreadcrumbNav } from './BreadcrumbNav.tsx';
 import { EmptyState } from './EmptyState.tsx';
 import classes from './FileList.module.css';
-import FilePreview from './FilePreview';
+import { FilePreview } from './FilePreview.tsx';
 import { FileRow } from './FileRow.tsx';
 
 type FileListProps = {
@@ -29,12 +29,6 @@ export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }:
     } finally {
       setLoadingMore(false);
     }
-  };
-
-  const step = (offset: number) => {
-    if (previewFile === null) return;
-    const next = files[files.findIndex((file) => file.id === previewFile.id) + offset];
-    if (next) setPreviewFile(next);
   };
 
   if (loading) {
@@ -76,15 +70,15 @@ export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }:
         )}
       </Box>
 
-      <FilePreview
-        key={previewFile?.id}
-        opened={previewFile !== null}
-        onClose={() => setPreviewFile(null)}
-        file={previewFile}
-        files={files.filter((file) => file.mimeType === PDF_MIME_TYPE)}
-        onNext={() => step(1)}
-        onPrevious={() => step(-1)}
-      />
+      {previewFile && (
+        <FilePreview
+          key={previewFile.id}
+          file={previewFile}
+          files={files.filter((file) => file.mimeType === PDF_MIME_TYPE)}
+          onSelect={setPreviewFile}
+          onClose={() => setPreviewFile(null)}
+        />
+      )}
     </>
   );
 }
