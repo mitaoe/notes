@@ -1,7 +1,7 @@
 import { ActionIcon, Box, Button, Modal, Paper, Text } from '@mantine/core';
 import { useHotkeys, useMediaQuery, useTimeout } from '@mantine/hooks';
 import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '@tabler/icons-react';
-import clsx from 'clsx';
+import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { DriveItem } from '../../shared/drive.ts';
 import { downloadHref, previewHref } from '../api/drive.ts';
@@ -115,7 +115,13 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
               </Text>
             </Box>
           )}
-          <iframe src={previewHref(file.id)} title={file.name} className={classes.frame} onLoad={() => setFrameLoaded(true)} />
+          <iframe
+            src={previewHref(file.id)}
+            title={file.name}
+            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-downloads allow-modals allow-forms"
+            className={classes.frame}
+            onLoad={() => setFrameLoaded(true)}
+          />
         </Box>
       </Box>
     </Modal>
