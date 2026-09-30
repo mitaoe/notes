@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import type { Page, Route } from '@playwright/test';
-import { FOLDER_MIME_TYPE, findById, paginate, searchNodes, sortForListing, type FixtureNode } from '../fixtures/drive';
+import { FOLDER_MIME_TYPE, findById, paginate, searchNodes, sortForListing, type FixtureNode } from '../fixtures/drive.ts';
 
 export const FAILING_QUERY = 'boom';
 
