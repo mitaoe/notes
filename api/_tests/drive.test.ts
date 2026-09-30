@@ -1,6 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { FOLDER, ROOT_ID, folder, pdf, useFakeGoogle } from './fake-google.ts';
+import { FOLDER_MIME_TYPE } from '../../shared/drive.ts';
+import { TOKEN_URL } from '../_lib/google.ts';
+import { HttpError } from '../_lib/http.ts';
+import { ROOT_ID, TOKEN_LIFETIME_S, folder, pdf, useFakeGoogle } from './fake-google.ts';
 
 const loadDrive = () => import('../_lib/drive.ts');
 
@@ -9,11 +12,12 @@ const tree = [
   folder('journals', '00_journals', 'fy'),
   folder('quoted', "o'reilly & co", 'fy'),
   pdf('am', 'am_journal.pdf', 'journals'),
-  pdf('shared', 'shared.pdf', 'journals', { permissionIds: ['anyoneWithLink'] }),
-  pdf('binned', 'binned.pdf', 'journals', { trashed: true }),
+  pdf('shared', 'Shared_Journal.pdf', 'journals', { permissionIds: ['anyoneWithLink'] }),
+  pdf('public', 'public.pdf', 'journals', { permissionIds: ['anyone'] }),
+  pdf('binned', 'binned_journal.pdf', 'journals', { trashed: true }),
   {
     id: 'doc',
-    name: 'notes',
+    name: 'journal notes',
     mimeType: 'application/vnd.google-apps.document',
     parents: ['journals'],
   },
@@ -21,8 +25,15 @@ const tree = [
   folder('outside', 'outside', 'someone-elses-drive'),
 ];
 
+const tokenRequests = (requests: { url: URL }[]) =>
+  requests.filter((request) => request.url.href === TOKEN_URL);
+
 beforeEach(() => {
   vi.resetModules();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe('quote', () => {
@@ -44,6 +55,12 @@ describe('searchQuery', () => {
     expect(q).toContain("mimeType != 'application/vnd.google-apps.shortcut'");
   });
 
+  it('drops double quotes and query operators from terms', async () => {
+    const { searchQuery } = await loadDrive();
+    expect(searchQuery('"unit 1"')).toBe(searchQuery('unit 1'));
+    expect(searchQuery('a/b:c=d<e>f\\g!=h')).toBe(searchQuery('abcdefgh'));
+  });
+
   it('returns null when only separators are given', async () => {
     const { searchQuery } = await loadDrive();
     expect(searchQuery(' ,| () ')).toBeNull();
@@ -51,17 +68,29 @@ describe('searchQuery', () => {
 });
 
 describe('listFolder', () => {
-  it('resolves nested folder names and lists the last one', async () => {
+  it('resolves nested folder names and lists only visible items', async () => {
     const { requests } = useFakeGoogle(tree);
     const { listFolder, PAGE_SIZE } = await loadDrive();
 
     const page = await listFolder(['fy', '00_journals'], null);
 
-    expect(page?.files.map((file) => file.name)).toContain('am_journal.pdf');
+    expect(page?.files.map((file) => file.id).toSorted()).toEqual(['am', 'public', 'shared']);
     const listing = requests.at(-1)?.url;
-    expect(listing?.searchParams.get('q')).toMatch(/^'journals' in parents and trashed = false/);
     expect(listing?.searchParams.get('pageSize')).toBe(String(PAGE_SIZE));
     expect(listing?.searchParams.get('orderBy')).toBe('folder,name,modifiedTime desc');
+  });
+
+  it('looks folders up in a stable order', async () => {
+    const { requests } = useFakeGoogle(tree);
+    const { listFolder } = await loadDrive();
+
+    await listFolder(['fy'], null);
+
+    const lookup = requests.find(
+      (request) => request.url.searchParams.get('fields') === 'files(id)',
+    );
+    expect(lookup?.url.searchParams.get('orderBy')).toBe('createdTime');
+    expect(lookup?.url.searchParams.has('corpora')).toBe(false);
   });
 
   it('converts sizes to numbers and missing sizes to null', async () => {
@@ -73,7 +102,7 @@ describe('listFolder', () => {
     expect(page?.files).toContainEqual({
       id: 'journals',
       name: '00_journals',
-      mimeType: FOLDER,
+      mimeType: FOLDER_MIME_TYPE,
       size: null,
     });
     const files = await listFolder(['fy', '00_journals'], null);
@@ -99,6 +128,16 @@ describe('listFolder', () => {
     expect(requests.at(-1)?.url.searchParams.get('pageToken')).toBe('next-page');
   });
 
+  it('turns a rejected page token into a client error', async () => {
+    const { failNext } = useFakeGoogle(tree);
+    const { listFolder } = await loadDrive();
+    failNext('/files', 400);
+
+    await expect(listFolder([], 'stale-token')).rejects.toEqual(
+      new HttpError(400, 'pageToken is invalid'),
+    );
+  });
+
   it('reuses the access token and resolved folder ids', async () => {
     const { requests } = useFakeGoogle(tree);
     const { listFolder } = await loadDrive();
@@ -106,16 +145,46 @@ describe('listFolder', () => {
     await listFolder(['fy', '00_journals'], null);
     await listFolder(['fy', '00_journals'], 'next-page');
 
-    expect(
-      requests.filter((request) => request.url.hostname === 'oauth2.googleapis.com'),
-    ).toHaveLength(1);
+    expect(tokenRequests(requests)).toHaveLength(1);
     expect(
       requests.filter((request) => request.url.searchParams.get('fields') === 'files(id)'),
     ).toHaveLength(2);
   });
 });
 
+describe('access token', () => {
+  it('is shared by concurrent requests', async () => {
+    const { requests } = useFakeGoogle(tree);
+    const { listFolder } = await loadDrive();
+
+    await Promise.all([listFolder([], null), listFolder(['fy'], null)]);
+
+    expect(tokenRequests(requests)).toHaveLength(1);
+  });
+
+  it('is refreshed once it expires', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    const { requests } = useFakeGoogle(tree);
+    const { listFolder } = await loadDrive();
+
+    await listFolder([], null);
+    vi.setSystemTime(Date.now() + TOKEN_LIFETIME_S * 1000);
+    await listFolder([], null);
+
+    expect(tokenRequests(requests)).toHaveLength(2);
+  });
+});
+
 describe('searchFiles', () => {
+  it('matches names case-insensitively and hides what listings hide', async () => {
+    useFakeGoogle(tree);
+    const { searchFiles } = await loadDrive();
+
+    const page = await searchFiles('JOURNAL', null);
+
+    expect(page.files.map((file) => file.id).toSorted()).toEqual(['am', 'journals', 'shared']);
+  });
+
   it('skips the Drive call when there are no terms', async () => {
     const { fetchMock } = useFakeGoogle(tree);
     const { searchFiles } = await loadDrive();
@@ -140,6 +209,15 @@ describe('findFolderPath', () => {
     expect(await findFolderPath('outside')).toBeNull();
     expect(await findFolderPath(ROOT_ID)).toBeNull();
   });
+
+  it('retries the root lookup after a failure', async () => {
+    const { failNext } = useFakeGoogle(tree);
+    const { findFolderPath } = await loadDrive();
+    failNext('/files/root', 503);
+
+    await expect(findFolderPath('journals')).rejects.toThrow('/files/root failed');
+    expect(await findFolderPath('journals')).toBe('/fy/00_journals');
+  });
 });
 
 describe('shareFile', () => {
@@ -156,15 +234,13 @@ describe('shareFile', () => {
     expect(permission?.body).toEqual({ role: 'reader', type: 'anyone' });
   });
 
-  it('does not write when the file is already public', async () => {
+  it.each(['shared', 'public'])('does not write when %s is already public', async (id) => {
     const { requests } = useFakeGoogle(tree);
     const { shareFile } = await loadDrive();
 
-    expect(await shareFile('shared')).toBe(true);
+    expect(await shareFile(id)).toBe(true);
     expect(
-      requests.some(
-        (request) => request.method === 'POST' && request.url.hostname === 'www.googleapis.com',
-      ),
+      requests.some((request) => request.method === 'POST' && request.url.href !== TOKEN_URL),
     ).toBe(false);
   });
 

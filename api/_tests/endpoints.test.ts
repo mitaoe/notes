@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
 import { folder, pdf, useFakeGoogle } from './fake-google.ts';
 
 const tree = [
@@ -37,11 +38,28 @@ describe('GET /api/list', () => {
     );
   });
 
-  it('answers 404 for unknown and malformed paths', async () => {
+  it('answers a cacheable 404 for unknown and malformed paths', async () => {
     useFakeGoogle(tree);
     const { GET } = await import('../list.ts');
-    expect((await GET(get('/api/list?path=/nope'))).status).toBe(404);
-    expect((await GET(get(`/api/list?path=${encodeURIComponent('/%E0%A4%A')}`))).status).toBe(404);
+
+    const unknown = await GET(get('/api/list?path=/nope'));
+    const malformed = await GET(get(`/api/list?path=${encodeURIComponent('/%E0%A4%A')}`));
+
+    expect(unknown.status).toBe(404);
+    expect(unknown.headers.get('cache-control')).toContain('s-maxage=300');
+    expect(await unknown.json()).toEqual({ error: 'Folder not found' });
+    expect(malformed.status).toBe(404);
+  });
+
+  it('answers an uncached 400 for a rejected page token', async () => {
+    const { failNext } = useFakeGoogle(tree);
+    const { GET } = await import('../list.ts');
+    failNext('/files', 400);
+
+    const response = await GET(get('/api/list?path=/&pageToken=stale'));
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get('cache-control')).toBe('no-store');
   });
 
   it('answers 500 without caching when Drive fails', async () => {
@@ -68,18 +86,30 @@ describe('GET /api/search', () => {
     expect((await GET(get('/api/search'))).status).toBe(400);
   });
 
-  it('rejects overly long queries', async () => {
+  it('rejects queries longer than the shared limit', async () => {
     useFakeGoogle(tree);
     const { GET } = await import('../search.ts');
-    expect((await GET(get(`/api/search?q=${'a'.repeat(201)}`))).status).toBe(400);
+    const tooLong = await GET(get(`/api/search?q=${'a'.repeat(MAX_SEARCH_LENGTH + 1)}`));
+    const longest = await GET(get(`/api/search?q=${'a'.repeat(MAX_SEARCH_LENGTH)}`));
+    expect(tooLong.status).toBe(400);
+    expect(longest.status).toBe(200);
   });
 
-  it('returns matches', async () => {
+  it('returns the matching items', async () => {
     useFakeGoogle(tree);
     const { GET } = await import('../search.ts');
+
     const response = await GET(get('/api/search?q=journal'));
+
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toContain('s-maxage=300');
+    const body: unknown = await response.json();
+    expect(body).toMatchObject({
+      files: expect.arrayContaining([
+        expect.objectContaining({ id: 'journals' }),
+        expect.objectContaining({ id: 'am' }),
+      ]),
+    });
   });
 });
 
@@ -138,9 +168,11 @@ describe('GET /api/path', () => {
     expect((await GET(get('/api/path?id=../files'))).status).toBe(400);
   });
 
-  it('answers 404 for files', async () => {
+  it('answers a cacheable 404 for files', async () => {
     useFakeGoogle(tree);
     const { GET } = await import('../path.ts');
-    expect((await GET(get('/api/path?id=am'))).status).toBe(404);
+    const response = await GET(get('/api/path?id=am'));
+    expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toContain('s-maxage=3600');
   });
 });
