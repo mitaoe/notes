@@ -14,7 +14,7 @@ const toDriveItem = ({ id, name, mimeType, size }: FixtureNode): DriveItem => ({
 const json = (route: Route, body: unknown, status = 200) =>
   route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
 
-const page = (nodes: FixtureNode[], pageToken: string | null): DrivePage => {
+const toPage = (nodes: FixtureNode[], pageToken: string | null): DrivePage => {
   const { items, nextPageToken } = paginate(nodes, pageToken, PAGE_SIZE);
   return { files: items.map(toDriveItem), nextPageToken };
 };
@@ -37,12 +37,12 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
     const names = parseFolderPath(params.get('path') ?? '/');
     const folder = names === null ? null : findByPath(names);
     if (folder === null) return json(route, { error: 'Folder not found' }, 404);
-    return json(route, page(sortForListing(folder.children), params.get('pageToken')));
+    return json(route, toPage(sortForListing(folder.children), params.get('pageToken')));
   },
   search: (route, params) => {
     const query = params.get('q') ?? '';
     if (query === FAILING_QUERY) return json(route, { error: 'Something went wrong' }, 500);
-    return json(route, page(searchNodes(query), params.get('pageToken')));
+    return json(route, toPage(searchNodes(query), params.get('pageToken')));
   },
   path: (route, params) => {
     const folder = findById(params.get('id') ?? '');

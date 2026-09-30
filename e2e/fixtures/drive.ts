@@ -63,7 +63,7 @@ export const findByPath = (names: readonly string[]): FixtureNode | null => {
 };
 
 export const sortForListing = (nodes: FixtureNode[]) =>
-  [...nodes].sort((a, b) => {
+  nodes.toSorted((a, b) => {
     const aFolder = a.mimeType === FOLDER_MIME_TYPE ? 0 : 1;
     const bFolder = b.mimeType === FOLDER_MIME_TYPE ? 0 : 1;
     return aFolder - bFolder || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);

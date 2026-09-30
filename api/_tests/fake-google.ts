@@ -31,15 +31,18 @@ const inParents = /^'([^']+)' in parents/;
 
 const unescape = (value: string) => value.replace(/\\(.)/g, '$1');
 
+const respond = (body: unknown, status = 200) => Response.json(body, { status });
+
+type FakeFetch = (input: URL | string, init?: RequestInit) => Promise<Response>;
+
 export const useFakeGoogle = (files: FakeFile[]) => {
   vi.stubEnv('VITE_GOOGLE_CLIENT_ID', 'client-id');
   vi.stubEnv('VITE_GOOGLE_CLIENT_SECRET', 'client-secret');
   vi.stubEnv('VITE_GOOGLE_REFRESH_TOKEN', 'refresh-token');
 
   const requests: { method: string; url: URL; body: unknown }[] = [];
-  const respond = (body: unknown, status = 200) => Response.json(body, { status });
 
-  const fetchMock = vi.fn(async (input: URL | string, init: RequestInit = {}) => {
+  const fetchMock = vi.fn<FakeFetch>(async (input, init = {}) => {
     const url = new URL(input);
     const method = init.method ?? 'GET';
     requests.push({ method, url, body: typeof init.body === 'string' ? JSON.parse(init.body) : init.body });

@@ -39,7 +39,7 @@ describe('GET /api/list', () => {
 
   it('answers 500 without caching when Drive fails', async () => {
     useFakeGoogle(tree);
-    vi.stubGlobal('fetch', vi.fn(async () => new Response('boom', { status: 503 })));
+    vi.stubGlobal('fetch', vi.fn<() => Promise<Response>>(async () => new Response('boom', { status: 503 })));
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const { GET } = await import('../list.ts');
 
@@ -73,11 +73,16 @@ describe('GET /api/search', () => {
   });
 });
 
+const fileLinkEndpoints = {
+  download: () => import('../download.ts'),
+  preview: () => import('../preview.ts'),
+};
+
 describe.each([
   ['download', 'https://drive.google.com/uc?export=download&id=am'],
   ['preview', 'https://drive.google.com/file/d/am/preview'],
-])('GET /api/%s', (name, location) => {
-  const load = async () => (await import(`../${name}.ts`)) as { GET: (request: Request) => Promise<Response> };
+] as const)('GET /api/%s', (name, location) => {
+  const load = fileLinkEndpoints[name];
 
   it('shares the file and redirects to Google Drive with a CDN cache header', async () => {
     const { requests } = useFakeGoogle(tree);
