@@ -1,9 +1,15 @@
+import * as v from 'valibot';
+
 const TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const DRIVE_URL = 'https://www.googleapis.com/drive/v3';
 const TOKEN_EXPIRY_MARGIN_MS = 60_000;
 
+const TokenResponseSchema = v.object({
+  access_token: v.string(),
+  expires_in: v.number(),
+});
+
 type AccessToken = { value: string; expiresAt: number };
-type TokenResponse = { access_token: string; expires_in: number };
 type QueryParams = Record<string, string | number | boolean>;
 
 export class GoogleApiError extends Error {
@@ -36,7 +42,7 @@ const requestToken = async (): Promise<AccessToken> => {
     }),
   });
   if (!response.ok) throw new GoogleApiError(response.status, `Token refresh failed: ${await response.text()}`);
-  const body = (await response.json()) as TokenResponse;
+  const body = v.parse(TokenResponseSchema, await response.json());
   return { value: body.access_token, expiresAt: Date.now() + body.expires_in * 1000 - TOKEN_EXPIRY_MARGIN_MS };
 };
 
@@ -49,7 +55,15 @@ export const getAccessToken = async () => {
   return token.value;
 };
 
-const driveRequest = async <T>(method: 'GET' | 'POST', path: string, params: QueryParams, body: object | null) => {
+type DriveRequest<TSchema extends v.GenericSchema> = {
+  method: 'GET' | 'POST';
+  path: string;
+  params: QueryParams;
+  body: object | null;
+  schema: TSchema;
+};
+
+const driveRequest = async <TSchema extends v.GenericSchema>({ method, path, params, body, schema }: DriveRequest<TSchema>) => {
   const url = new URL(`${DRIVE_URL}${path}`);
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, String(value));
   const response = await fetch(url, {
@@ -61,9 +75,11 @@ const driveRequest = async <T>(method: 'GET' | 'POST', path: string, params: Que
     ...(body === null ? {} : { body: JSON.stringify(body) }),
   });
   if (!response.ok) throw new GoogleApiError(response.status, `Drive ${method} ${path} failed: ${await response.text()}`);
-  return (await response.json()) as T;
+  return v.parse(schema, await response.json());
 };
 
-export const driveGet = <T>(path: string, params: QueryParams) => driveRequest<T>('GET', path, params, null);
+export const driveGet = <TSchema extends v.GenericSchema>(path: string, params: QueryParams, schema: TSchema) =>
+  driveRequest({ method: 'GET', path, params, body: null, schema });
 
-export const drivePost = <T>(path: string, params: QueryParams, body: object) => driveRequest<T>('POST', path, params, body);
+export const drivePost = <TSchema extends v.GenericSchema>(path: string, params: QueryParams, body: object, schema: TSchema) =>
+  driveRequest({ method: 'POST', path, params, body, schema });

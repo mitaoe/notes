@@ -1,4 +1,4 @@
-import type { ApiError } from '../../shared/drive.ts';
+import type { ApiBody } from '../../shared/drive.ts';
 
 export const CACHE_CONTROL = {
   listing: 'public, max-age=0, s-maxage=300, stale-while-revalidate=86400',
@@ -19,7 +19,7 @@ export class HttpError extends Error {
   }
 }
 
-export const json = <T>(body: T, status: number, cacheControl: string) =>
+export const json = (body: ApiBody, status: number, cacheControl: string) =>
   Response.json(body, { status, headers: { 'Cache-Control': cacheControl } });
 
 export const redirect = (location: string, cacheControl: string) =>
@@ -43,8 +43,8 @@ export const handleGet = (handler: (params: URLSearchParams) => Promise<Response
   try {
     return await handler(new URL(request.url).searchParams);
   } catch (error) {
-    if (error instanceof HttpError) return json<ApiError>({ error: error.message }, error.status, CACHE_CONTROL.none);
+    if (error instanceof HttpError) return json({ error: error.message }, error.status, CACHE_CONTROL.none);
     console.error(error);
-    return json<ApiError>({ error: 'Something went wrong' }, 500, CACHE_CONTROL.none);
+    return json({ error: 'Something went wrong' }, 500, CACHE_CONTROL.none);
   }
 };
