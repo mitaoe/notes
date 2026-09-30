@@ -1,0 +1,81 @@
+export const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
+
+export type FixtureNode = {
+  id: string;
+  name: string;
+  mimeType: string;
+  size: number | null;
+  parentId: string | null;
+  children: FixtureNode[];
+};
+
+type Spec = { name: string; mimeType: string; size: number | null; children: Spec[] };
+
+const folder = (name: string, children: Spec[] = []): Spec => ({ name, mimeType: FOLDER_MIME_TYPE, size: null, children });
+const file = (name: string, mimeType: string, size: number): Spec => ({ name, mimeType, size, children: [] });
+
+const pdf = (name: string, size: number) => file(name, 'application/pdf', size);
+
+const subjects = ['00_journals', '01_cde', '02_phy', '03_foc', '04_eee', '05_sic', '06_son', '07_eds', '08_am', '09_ds', '10_bee', '11_ecs'];
+
+const tree: Spec = folder('root', [
+  folder('fy', subjects.map((name) =>
+    name === '00_journals'
+      ? folder(name, [
+          pdf('am_journal.pdf', 15770031),
+          pdf('am_journal_reference.pdf', 1701326),
+          pdf('eee_journal.pdf', 4890003),
+          file('lab_photo.png', 'image/png', 204800),
+          file('lecture_recording.mp4', 'video/mp4', 73400320),
+          file('viva_audio.mp3', 'audio/mpeg', 5242880),
+          file('question_bank.zip', 'application/zip', 1024),
+          pdf('phy_journal_with_a_really_long_name_that_needs_truncating_on_small_screens.pdf', 3120533),
+        ])
+      : folder(name),
+  )),
+  folder('sy', [folder("o'reilly & co #1", [pdf('chapter_1.pdf', 2048)])]),
+  folder('ty'),
+  pdf('syllabus.pdf', 524288),
+]);
+
+const build = (spec: Spec, parentId: string | null, path: string): FixtureNode => {
+  const id = parentId === null ? 'root' : `id-${path}`.replace(/[^a-zA-Z0-9-]/g, '_');
+  const node: FixtureNode = { id, name: spec.name, mimeType: spec.mimeType, size: spec.size, parentId, children: [] };
+  node.children = spec.children.map((child) => build(child, id, `${path}/${child.name}`));
+  return node;
+};
+
+export const root = build(tree, null, '');
+
+export const allNodes = (node: FixtureNode = root): FixtureNode[] =>
+  node.children.flatMap((child) => [child, ...allNodes(child)]);
+
+export const findById = (id: string): FixtureNode | null =>
+  id === root.id ? root : allNodes().find((node) => node.id === id) ?? null;
+
+export const findByPath = (path: string): FixtureNode | null => {
+  let node: FixtureNode | null = root;
+  for (const segment of path.split('/').filter(Boolean)) {
+    node = node.children.find((child) => child.name === segment && child.mimeType === FOLDER_MIME_TYPE) ?? null;
+    if (!node) return null;
+  }
+  return node;
+};
+
+export const sortForListing = (nodes: FixtureNode[]) =>
+  [...nodes].sort((a, b) => {
+    const aFolder = a.mimeType === FOLDER_MIME_TYPE ? 0 : 1;
+    const bFolder = b.mimeType === FOLDER_MIME_TYPE ? 0 : 1;
+    return aFolder - bFolder || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+  });
+
+export const searchNodes = (query: string) => {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  return sortForListing(allNodes().filter((node) => words.every((word) => node.name.toLowerCase().includes(word))));
+};
+
+export const paginate = <T>(items: T[], pageToken: string | null, pageSize: number) => {
+  const start = pageToken ? Number(pageToken) : 0;
+  const end = start + pageSize;
+  return { items: items.slice(start, end), nextPageToken: end < items.length ? String(end) : null };
+};
