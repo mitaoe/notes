@@ -9,6 +9,7 @@
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "vitest run",
     "test:e2e": "playwright test",
     "playwright:server": "docker run --rm --init -p 3000:3000 --add-host=hostmachine:host-gateway --workdir /home/pwuser --user pwuser mcr.microsoft.com/playwright:v1.63.0-noble npx -y playwright@1.63.0 run-server --port 3000 --host 0.0.0.0"
   },
@@ -44,7 +45,8 @@
     "postcss": "^8.5.28",
     "postcss-preset-mantine": "^1.18.0",
     "typescript": "^7.0.2",
-    "vite": "^8.3.1"
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
   },
   "packageManager": "pnpm@12.8.1"
 }
