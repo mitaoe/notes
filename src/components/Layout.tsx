@@ -9,6 +9,21 @@ import { SearchBar } from './SearchBar.tsx';
 
 const isSearchPath = (pathname: string) => pathname.startsWith('/search');
 
+type SocialLinksProps = { size: 'lg' | 'xl'; variant: 'subtle' | 'light'; iconSize: number };
+
+function SocialLinks({ size, variant, iconSize }: SocialLinksProps) {
+  return (
+    <>
+      <ActionIcon component="a" href={site.githubUrl} target="_blank" size={size} variant={variant} color="gray" aria-label="GitHub">
+        <IconBrandGithub size={iconSize} />
+      </ActionIcon>
+      <ActionIcon component="a" href={site.contactUrl} target="_blank" size={size} variant={variant} color="gray" aria-label="Contact">
+        <IconMessage size={iconSize} />
+      </ActionIcon>
+    </>
+  );
+}
+
 type LayoutProps = { children: ReactNode };
 
 export function Layout({ children }: LayoutProps) {
@@ -45,17 +60,6 @@ export function Layout({ children }: LayoutProps) {
     if (!isSearchPath(location.pathname) && !query.trim()) setMobileSearchOpened(false);
   };
 
-  const socialLinks = (size: 'lg' | 'xl', variant: 'subtle' | 'light', iconSize: number) => (
-    <>
-      <ActionIcon component="a" href={site.githubUrl} target="_blank" size={size} variant={variant} color="gray" aria-label="GitHub">
-        <IconBrandGithub size={iconSize} />
-      </ActionIcon>
-      <ActionIcon component="a" href={site.contactUrl} target="_blank" size={size} variant={variant} color="gray" aria-label="Contact">
-        <IconMessage size={iconSize} />
-      </ActionIcon>
-    </>
-  );
-
   return (
     <AppShell padding="md" header={{ height: 60 }} classNames={{ main: classes.main }}>
       <AppShell.Header className={classes.header}>
@@ -69,7 +73,7 @@ export function Layout({ children }: LayoutProps) {
 
             <Group gap="xl" className={classes.desktopOnly}>
               <SearchBar query={query} onQueryChange={setQuery} onSearch={search} onClear={clear} />
-              {socialLinks('lg', 'subtle', 22)}
+              <SocialLinks size="lg" variant="subtle" iconSize={22} />
             </Group>
 
             <Box className={classes.mobileOnly}>
@@ -110,7 +114,9 @@ export function Layout({ children }: LayoutProps) {
           classNames={{ content: classes.drawerContent }}
         >
           <Box p="md">
-            <Group mb="xl">{socialLinks('xl', 'light', 24)}</Group>
+            <Group mb="xl">
+              <SocialLinks size="xl" variant="light" iconSize={24} />
+            </Group>
           </Box>
         </Drawer>
 

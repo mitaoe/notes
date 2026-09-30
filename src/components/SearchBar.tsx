@@ -1,8 +1,8 @@
 import { ActionIcon, TextInput } from '@mantine/core';
 import { useClickOutside } from '@mantine/hooks';
 import { IconSearch, IconX } from '@tabler/icons-react';
-import clsx from 'clsx';
-import { useRef, useState, type FocusEvent, type FormEvent, type MouseEvent } from 'react';
+import { clsx } from 'clsx';
+import { useEffect, useRef, useState, type FocusEvent, type FormEvent, type MouseEvent } from 'react';
 import classes from './SearchBar.module.css';
 
 type SearchBarProps = {
@@ -18,6 +18,10 @@ export function SearchBar({ query, onQueryChange, onSearch, onClear, isMobile = 
   const inputRef = useRef<HTMLInputElement>(null);
   const searchIconRef = useRef<HTMLButtonElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    if (isMobile) inputRef.current?.focus();
+  }, [isMobile]);
 
   const formRef = useClickOutside<HTMLFormElement>(() => {
     setIsFocused(false);
@@ -60,7 +64,6 @@ export function SearchBar({ query, onQueryChange, onSearch, onClear, isMobile = 
         onFocus={() => setIsFocused(true)}
         onBlur={handleBlur}
         autoComplete="off"
-        autoFocus={isMobile}
         size={isMobile ? 'sm' : 'md'}
         classNames={{
           root: clsx(classes.root, isMobile && classes.rootMobile),

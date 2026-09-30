@@ -14,16 +14,17 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   const [loaded, setLoaded] = useState<LoadedPages | null>(null);
 
   useEffect(() => {
-    if (key === null) return;
     const controller = new AbortController();
-    loadPage(key, null, controller.signal).then(
-      (page) => setLoaded({ key, files: page.files, nextPageToken: page.nextPageToken, failed: false }),
-      (error: unknown) => {
-        if (controller.signal.aborted) return;
-        console.error(error);
-        setLoaded({ key, files: [], nextPageToken: null, failed: true });
-      },
-    );
+    if (key !== null) {
+      loadPage(key, null, controller.signal).then(
+        (page) => setLoaded({ key, files: page.files, nextPageToken: page.nextPageToken, failed: false }),
+        (error: unknown) => {
+          if (controller.signal.aborted) return;
+          console.error(error);
+          setLoaded({ key, files: [], nextPageToken: null, failed: true });
+        },
+      );
+    }
     return () => controller.abort();
   }, [key, loadPage]);
 

@@ -2,13 +2,15 @@ import { Anchor, Box, Container, Group, Text } from '@mantine/core';
 import { site } from '../config.ts';
 import classes from './Footer.module.css';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export function Footer() {
   return (
     <Box component="footer" py="md" mt="xl" className={classes.footer}>
       <Container size="lg">
         <Group justify="space-between" align="center" gap="xl">
           <Text size="sm" c="dimmed">
-            © {new Date().getFullYear()} {site.companyName}
+            © {CURRENT_YEAR} {site.companyName}
           </Text>
           <Group gap="md">
             <Anchor href="/privacy.html" target="_blank" size="sm">
