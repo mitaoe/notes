@@ -2,8 +2,9 @@ import * as v from 'valibot';
 
 export const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 export const PDF_MIME_TYPE = 'application/pdf';
+export const MAX_SEARCH_LENGTH = 200;
 
-export const DriveItemSchema = v.object({
+const DriveItemSchema = v.object({
   id: v.string(),
   name: v.string(),
   mimeType: v.string(),
@@ -19,7 +20,7 @@ export const FolderPathSchema = v.object({
   path: v.string(),
 });
 
-export const ApiErrorSchema = v.object({
+const ApiErrorSchema = v.object({
   error: v.string(),
 });
 

@@ -1,7 +1,9 @@
 import * as v from 'valibot';
 
-const TOKEN_URL = 'https://oauth2.googleapis.com/token';
-const DRIVE_URL = 'https://www.googleapis.com/drive/v3';
+import { StatusError } from '../../shared/status-error.ts';
+
+export const TOKEN_URL = 'https://oauth2.googleapis.com/token';
+export const DRIVE_URL = 'https://www.googleapis.com/drive/v3';
 const TOKEN_EXPIRY_MARGIN_MS = 60_000;
 
 const TokenResponseSchema = v.object({
@@ -12,15 +14,7 @@ const TokenResponseSchema = v.object({
 type AccessToken = { value: string; expiresAt: number };
 type QueryParams = Record<string, string | number | boolean>;
 
-export class GoogleApiError extends Error {
-  readonly status: number;
-
-  constructor(status: number, message: string) {
-    super(message);
-    this.name = 'GoogleApiError';
-    this.status = status;
-  }
-}
+export class GoogleApiError extends StatusError {}
 
 let token: AccessToken | null = null;
 let pendingToken: Promise<AccessToken> | null = null;

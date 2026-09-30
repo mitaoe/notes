@@ -1,4 +1,5 @@
 import type { ApiBody } from '../../shared/drive.ts';
+import { StatusError } from '../../shared/status-error.ts';
 
 export const CACHE_CONTROL = {
   listing: 'public, max-age=0, s-maxage=300, stale-while-revalidate=86400',
@@ -9,13 +10,12 @@ export const CACHE_CONTROL = {
 
 const DRIVE_ID_PATTERN = /^[\w-]+$/;
 
-export class HttpError extends Error {
-  readonly status: number;
+export class HttpError extends StatusError {
+  readonly cacheControl: string;
 
-  constructor(status: number, message: string) {
-    super(message);
-    this.name = 'HttpError';
-    this.status = status;
+  constructor(status: number, message: string, cacheControl: string = CACHE_CONTROL.none) {
+    super(status, message);
+    this.cacheControl = cacheControl;
   }
 }
 
@@ -47,8 +47,9 @@ export const handleGet =
     try {
       return await handler(new URL(request.url).searchParams);
     } catch (error) {
-      if (error instanceof HttpError)
-        return json({ error: error.message }, error.status, CACHE_CONTROL.none);
+      if (error instanceof HttpError) {
+        return json({ error: error.message }, error.status, error.cacheControl);
+      }
       console.error(error);
       return json({ error: 'Something went wrong' }, 500, CACHE_CONTROL.none);
     }
