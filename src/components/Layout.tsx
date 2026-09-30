@@ -1,5 +1,5 @@
 import { ActionIcon, AppShell, Box, Burger, Container, Drawer, Group, Image, Stack } from '@mantine/core';
-import { IconBrandGithub, IconMessage, IconSearch } from '@tabler/icons-react';
+import { IconBrandGithub, IconMessage, IconSearch } from '../icons.ts';
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { site } from '../config.ts';

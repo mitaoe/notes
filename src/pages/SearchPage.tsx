@@ -1,5 +1,5 @@
 import { Alert, Box, Text, Title } from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle } from '../icons.ts';
 import { useNavigate, useSearchParams } from 'react-router';
 import type { DriveItem } from '../../shared/drive.ts';
 import { fetchFolderPath, fetchSearch } from '../api/drive.ts';

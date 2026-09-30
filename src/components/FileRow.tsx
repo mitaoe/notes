@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Text } from '@mantine/core';
 import { useTimeout } from '@mantine/hooks';
-import { IconDownload, IconEye, IconFile, IconFolder, IconMusic, IconPhoto, IconPlayerPlay } from '@tabler/icons-react';
+import { IconDownload, IconEye, IconFile, IconFolder, IconMusic, IconPhoto, IconPlayerPlay } from '../icons.ts';
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import { PDF_MIME_TYPE, isFolder, type DriveItem } from '../../shared/drive.ts';

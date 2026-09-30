@@ -1,6 +1,6 @@
 import { ActionIcon, TextInput } from '@mantine/core';
 import { useClickOutside } from '@mantine/hooks';
-import { IconSearch, IconX } from '@tabler/icons-react';
+import { IconSearch, IconX } from '../icons.ts';
 import { clsx } from 'clsx';
 import { useEffect, useRef, useState, type FocusEvent, type FormEvent, type MouseEvent } from 'react';
 import classes from './SearchBar.module.css';

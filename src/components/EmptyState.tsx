@@ -1,5 +1,5 @@
 import { Box, Stack, Text, ThemeIcon } from '@mantine/core';
-import { IconInbox } from '@tabler/icons-react';
+import { IconInbox } from '../icons.ts';
 import classes from './EmptyState.module.css';
 
 export function EmptyState() {

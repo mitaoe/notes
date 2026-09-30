@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Button, Modal, Paper, Text } from '@mantine/core';
 import { useHotkeys, useMediaQuery, useTimeout } from '@mantine/hooks';
-import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '@tabler/icons-react';
+import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '../icons.ts';
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { DriveItem } from '../../shared/drive.ts';

@@ -1,0 +1,15 @@
+export { default as IconAlertCircle } from '@tabler/icons-react/dist/esm/icons/IconAlertCircle.mjs';
+export { default as IconBrandGithub } from '@tabler/icons-react/dist/esm/icons/IconBrandGithub.mjs';
+export { default as IconChevronLeft } from '@tabler/icons-react/dist/esm/icons/IconChevronLeft.mjs';
+export { default as IconChevronRight } from '@tabler/icons-react/dist/esm/icons/IconChevronRight.mjs';
+export { default as IconDownload } from '@tabler/icons-react/dist/esm/icons/IconDownload.mjs';
+export { default as IconEye } from '@tabler/icons-react/dist/esm/icons/IconEye.mjs';
+export { default as IconFile } from '@tabler/icons-react/dist/esm/icons/IconFile.mjs';
+export { default as IconFolder } from '@tabler/icons-react/dist/esm/icons/IconFolder.mjs';
+export { default as IconInbox } from '@tabler/icons-react/dist/esm/icons/IconInbox.mjs';
+export { default as IconMessage } from '@tabler/icons-react/dist/esm/icons/IconMessage.mjs';
+export { default as IconMusic } from '@tabler/icons-react/dist/esm/icons/IconMusic.mjs';
+export { default as IconPhoto } from '@tabler/icons-react/dist/esm/icons/IconPhoto.mjs';
+export { default as IconPlayerPlay } from '@tabler/icons-react/dist/esm/icons/IconPlayerPlay.mjs';
+export { default as IconSearch } from '@tabler/icons-react/dist/esm/icons/IconSearch.mjs';
+export { default as IconX } from '@tabler/icons-react/dist/esm/icons/IconX.mjs';

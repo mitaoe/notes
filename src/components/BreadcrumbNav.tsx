@@ -1,5 +1,5 @@
 import { ActionIcon, Anchor, Box, Breadcrumbs, Group, Paper } from '@mantine/core';
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
+import { IconChevronLeft, IconChevronRight } from '../icons.ts';
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
