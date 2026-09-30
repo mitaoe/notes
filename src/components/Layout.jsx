@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router';
 import { IconSearch, IconBrandGithub, IconMessage } from '@tabler/icons-react';
 import { config, uiConfig } from '../config';
 import SearchBar from './SearchBar';
-import Footer from './Footer';
+import { Footer } from './Footer';
 
 const Layout = ({ children }) => {
   const theme = useMantineTheme();
