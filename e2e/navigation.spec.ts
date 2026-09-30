@@ -1,0 +1,70 @@
+import { expect, test } from '@playwright/test';
+
+import { mockDriveApi } from './support/mock-api.ts';
+
+test.beforeEach(async ({ page }) => {
+  await mockDriveApi(page);
+});
+
+test('opening a folder from search results lands on its real path', async ({ page }) => {
+  await page.goto('/search?q=00_journals');
+  await page.getByRole('button', { name: '00_journals' }).click();
+
+  await expect(page).toHaveURL('/fy/00_journals');
+  await expect(page.getByText('am_journal.pdf', { exact: true })).toBeVisible();
+});
+
+test('breadcrumbs link back up the tree', async ({ page }) => {
+  await page.goto('/fy/00_journals');
+  await page.getByRole('link', { name: 'fy', exact: true }).click();
+
+  await expect(page).toHaveURL('/fy');
+  await expect(page.getByRole('button', { name: '00_journals' })).toBeVisible();
+});
+
+test('folders with special characters round-trip through the URL', async ({ page }) => {
+  await page.goto('/sy');
+  await page.getByRole('button', { name: "o'reilly & co #1" }).click();
+
+  await expect(page).toHaveURL(`/sy/${encodeURIComponent("o'reilly & co #1")}`);
+  await page.reload();
+  await expect(page.getByText('chapter_1.pdf')).toBeVisible();
+});
+
+test('load more appends the next page', async ({ page }) => {
+  await page.goto('/fy');
+  await expect(page.getByRole('button', { name: /^\d\d_/ })).toHaveCount(10);
+
+  await page.getByRole('button', { name: 'Load More' }).click();
+
+  await expect(page.getByRole('button', { name: /^\d\d_/ })).toHaveCount(12);
+});
+
+test('preview steps through PDFs only', async ({ page }) => {
+  await page.goto('/fy/00_journals');
+  await page.getByTitle('Preview').nth(2).click();
+  await expect(page.getByTitle('eee_journal.pdf')).toBeAttached();
+
+  await page.getByRole('button', { name: 'Next file' }).click();
+
+  await expect(page.getByTitle(/^phy_journal/)).toBeAttached();
+  await expect(page.getByRole('button', { name: 'Next file' })).toBeDisabled();
+});
+
+test('download requests the redirect endpoint for the file', async ({ page }) => {
+  await page.goto('/fy/00_journals');
+  const request = page
+    .context()
+    .waitForEvent('request', (candidate) => candidate.url().includes('/api/download'));
+
+  await page.getByTitle('Download').first().click();
+
+  const url = new URL((await request).url());
+  expect(url.pathname).toBe('/api/download');
+  expect(url.searchParams.get('id')).toBe('id-_fy_00_journals_am_journal_pdf');
+});
+
+test('an unknown search shows the empty state', async ({ page }) => {
+  await page.goto('/search?q=nothing-matches-this');
+  await expect(page.getByText('Looks rather empty here')).toBeVisible();
+});

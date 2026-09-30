@@ -83,16 +83,17 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
 };
 
 export const mockDriveApi = async (page: Page) => {
-  await page.route('**/api/*', (route) => {
+  const context = page.context();
+  await context.route('**/api/*', (route) => {
     const url = new URL(route.request().url());
     const handler = handlers[url.pathname.replace('/api/', '')];
     return handler ? handler(route, url.searchParams) : json(route, { error: 'Not found' }, 404);
   });
-  await page.route('https://drive.google.com/**', (route) =>
+  await context.route('https://drive.google.com/**', (route) =>
     route.fulfill({ contentType: 'text/html', body: PREVIEW_PAGE }),
   );
-  await page.route('https://img.icons8.com/**', (route) =>
+  await context.route('https://img.icons8.com/**', (route) =>
     route.fulfill({ contentType: 'image/x-icon', body: logo }),
   );
-  await page.route('**/_vercel/**', (route) => route.fulfill({ status: 404, body: '' }));
+  await context.route('**/_vercel/**', (route) => route.fulfill({ status: 404, body: '' }));
 };
