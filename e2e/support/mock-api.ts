@@ -3,10 +3,10 @@ import { readFileSync } from 'node:fs';
 import type { Page, Route } from '@playwright/test';
 
 import { PAGE_SIZE, downloadUrl } from '../../api/_lib/drive.ts';
-import type { DriveItem, DrivePage } from '../../shared/drive.ts';
+import { isFolder, type DriveItem, type DrivePage } from '../../shared/drive.ts';
 import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import {
-  FOLDER_MIME_TYPE,
+  BROKEN_PREVIEW_NAME,
   findById,
   findByPath,
   paginate,
@@ -50,12 +50,13 @@ const PREVIEW_PAGE =
 
 const findFile = (params: URLSearchParams) => {
   const file = findById(params.get('id') ?? '');
-  return file === null || file.mimeType === FOLDER_MIME_TYPE ? null : file;
+  return file === null || isFolder(file) ? null : file;
 };
 
 const handlers: Record<string, (route: Route, params: URLSearchParams) => Promise<void>> = {
   list: (route, params) => {
     const names = parseFolderPath(params.get('path') ?? '/');
+    if (names?.includes(FAILING_QUERY)) return json(route, { error: 'Something went wrong' }, 500);
     const folder = names === null ? null : findByPath(names);
     if (folder === null) return json(route, { error: 'Folder not found' }, 404);
     return json(route, toPage(sortForListing(folder.children), params.get('pageToken')));
@@ -67,8 +68,9 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
   },
   path: (route, params) => {
     const folder = findById(params.get('id') ?? '');
-    if (folder === null || folder.mimeType !== FOLDER_MIME_TYPE)
+    if (folder === null || !isFolder(folder)) {
       return json(route, { error: 'Folder not found' }, 404);
+    }
     return json(route, { path: pathOf(folder) });
   },
   download: (route, params) => {
@@ -77,7 +79,11 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
     return route.fulfill({ status: 302, headers: { Location: downloadUrl(file.id) } });
   },
   preview: (route, params) => {
-    if (findFile(params) === null) return json(route, { error: 'File not found' }, 404);
+    const file = findFile(params);
+    if (file === null) return json(route, { error: 'File not found' }, 404);
+    if (file.name === BROKEN_PREVIEW_NAME) {
+      return json(route, { error: 'Something went wrong' }, 500);
+    }
     return route.fulfill({ contentType: 'text/html', body: PREVIEW_PAGE });
   },
 };

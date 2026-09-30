@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { mockDriveApi } from './support/mock-api.ts';
+import { FAILING_QUERY, mockDriveApi } from './support/mock-api.ts';
 
 test.beforeEach(async ({ page }) => {
   await mockDriveApi(page);
@@ -62,6 +62,35 @@ test('download requests the redirect endpoint for the file', async ({ page }) =>
   const url = new URL((await request).url());
   expect(url.pathname).toBe('/api/download');
   expect(url.searchParams.get('id')).toBe('id-_fy_00_journals_am_journal_pdf');
+});
+
+test('a preview that fails to load says so', async ({ page }) => {
+  await page.goto('/fy/01_cde');
+  await page.getByTitle('Preview').click();
+
+  await expect(page.getByText('Preview not available')).toBeVisible();
+  await expect(page.getByText('This file could not be loaded')).toBeVisible();
+});
+
+test('an open preview does not follow the user to another folder', async ({ page }) => {
+  await page.goto('/fy');
+  await page.getByRole('button', { name: '00_journals' }).click();
+  await page.getByTitle('Preview').first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+
+  await page.goBack();
+
+  await expect(page).toHaveURL('/fy');
+  await expect(page.getByRole('button', { name: '00_journals' })).toBeVisible();
+  await expect(page.getByRole('dialog')).toBeHidden();
+});
+
+test('a folder that fails to load shows an error', async ({ page }) => {
+  await page.goto(`/${FAILING_QUERY}`);
+
+  await expect(
+    page.getByText('An error occurred while loading this folder. Please try again.'),
+  ).toBeVisible();
 });
 
 test('an unknown search shows the empty state', async ({ page }) => {

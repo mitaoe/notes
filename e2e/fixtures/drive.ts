@@ -1,4 +1,4 @@
-export const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
+import { FOLDER_MIME_TYPE } from '../../shared/drive.ts';
 
 export type FixtureNode = {
   id: string;
@@ -41,26 +41,26 @@ const subjects = [
   '11_ecs',
 ];
 
+export const BROKEN_PREVIEW_NAME = 'broken_preview.pdf';
+
+const subjectContents: Record<string, Spec[]> = {
+  '00_journals': [
+    pdf('am_journal.pdf', 15770031),
+    pdf('am_journal_reference.pdf', 1701326),
+    pdf('eee_journal.pdf', 4890003),
+    file('lab_photo.png', 'image/png', 204800),
+    file('lecture_recording.mp4', 'video/mp4', 73400320),
+    file('viva_audio.mp3', 'audio/mpeg', 5242880),
+    file('question_bank.zip', 'application/zip', 1024),
+    pdf('phy_journal_with_a_really_long_name_that_needs_truncating_on_small_screens.pdf', 3120533),
+  ],
+  '01_cde': [pdf(BROKEN_PREVIEW_NAME, 4096)],
+};
+
 const tree: Spec = folder('root', [
   folder(
     'fy',
-    subjects.map((name) =>
-      name === '00_journals'
-        ? folder(name, [
-            pdf('am_journal.pdf', 15770031),
-            pdf('am_journal_reference.pdf', 1701326),
-            pdf('eee_journal.pdf', 4890003),
-            file('lab_photo.png', 'image/png', 204800),
-            file('lecture_recording.mp4', 'video/mp4', 73400320),
-            file('viva_audio.mp3', 'audio/mpeg', 5242880),
-            file('question_bank.zip', 'application/zip', 1024),
-            pdf(
-              'phy_journal_with_a_really_long_name_that_needs_truncating_on_small_screens.pdf',
-              3120533,
-            ),
-          ])
-        : folder(name),
-    ),
+    subjects.map((name) => folder(name, subjectContents[name] ?? [])),
   ),
   folder('sy', [folder("o'reilly & co #1", [pdf('chapter_1.pdf', 2048)])]),
   folder('ty'),
