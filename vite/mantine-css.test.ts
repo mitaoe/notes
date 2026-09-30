@@ -52,19 +52,38 @@ const requiredStylesheets = () => {
   return stylesheets;
 };
 
+const GLOBAL_STYLESHEETS = new Set(['baseline', 'default-css-variables', 'global']);
+
 const importedStylesheets = () =>
-  new Set(
-    [
-      ...readFileSync(join(root, 'src', 'styles', 'mantine.css'), 'utf8').matchAll(
-        /@mantine\/core\/styles\/(\w+)\.css/g,
-      ),
-    ].map(([, name]) => name),
-  );
+  [
+    ...readFileSync(join(root, 'src', 'styles', 'mantine.css'), 'utf8').matchAll(
+      /@mantine\/core\/styles\/([\w-]+)\.css/g,
+    ),
+  ].map(([, name = '']) => name);
+
+const bundlePosition = (bundle: string, name: string) => {
+  const firstClass = readFileSync(join(mantine, 'styles', `${name}.css`), 'utf8').match(
+    /\.m_[0-9a-f]+/,
+  )?.[0];
+  return firstClass === undefined ? -1 : bundle.indexOf(firstClass);
+};
 
 describe('src/styles/mantine.css', () => {
   it('imports the stylesheet of every Mantine component in use and its dependencies', () => {
-    const imported = importedStylesheets();
+    const imported = new Set(importedStylesheets());
     const missing = [...requiredStylesheets()].filter((name) => !imported.has(name));
     expect(missing).toEqual([]);
+  });
+
+  it('imports the global stylesheets first and components in Mantine bundle order', () => {
+    const imported = importedStylesheets();
+    const globals = imported.slice(0, GLOBAL_STYLESHEETS.size);
+    const componentSheets = imported.slice(GLOBAL_STYLESHEETS.size);
+    const bundle = readFileSync(join(mantine, 'styles.css'), 'utf8');
+    const positions = componentSheets.map((name) => bundlePosition(bundle, name));
+
+    expect(globals).toEqual([...GLOBAL_STYLESHEETS]);
+    expect(positions).not.toContain(-1);
+    expect(positions).toEqual(positions.toSorted((a, b) => a - b));
   });
 });
