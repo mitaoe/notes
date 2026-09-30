@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import type { Page, Route } from '@playwright/test';
-import { PAGE_SIZE } from '../../api/_lib/drive.ts';
+import { PAGE_SIZE, downloadUrl } from '../../api/_lib/drive.ts';
 import type { DriveItem, DrivePage } from '../../shared/drive.ts';
 import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import { FOLDER_MIME_TYPE, findById, findByPath, paginate, searchNodes, sortForListing, type FixtureNode } from '../fixtures/drive.ts';
@@ -25,6 +25,13 @@ const pathOf = (node: FixtureNode) => {
   return toFolderPath(names);
 };
 
+const PREVIEW_PAGE = '<!doctype html><title>preview</title><body style="margin:0;background:#fff"></body>';
+
+const findFile = (params: URLSearchParams) => {
+  const file = findById(params.get('id') ?? '');
+  return file === null || file.mimeType === FOLDER_MIME_TYPE ? null : file;
+};
+
 const handlers: Record<string, (route: Route, params: URLSearchParams) => Promise<void>> = {
   list: (route, params) => {
     const names = parseFolderPath(params.get('path') ?? '/');
@@ -43,11 +50,13 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
     return json(route, { path: pathOf(folder) });
   },
   download: (route, params) => {
-    const id = params.get('fileId');
-    return json(route, {
-      downloadUrl: `https://drive.google.com/uc?export=download&id=${id}`,
-      previewUrl: `https://drive.google.com/file/d/${id}/preview`,
-    });
+    const file = findFile(params);
+    if (file === null) return json(route, { error: 'File not found' }, 404);
+    return route.fulfill({ status: 302, headers: { Location: downloadUrl(file.id) } });
+  },
+  preview: (route, params) => {
+    if (findFile(params) === null) return json(route, { error: 'File not found' }, 404);
+    return route.fulfill({ contentType: 'text/html', body: PREVIEW_PAGE });
   },
 };
 
@@ -57,9 +66,7 @@ export const mockDriveApi = async (page: Page) => {
     const handler = handlers[url.pathname.replace('/api/', '')];
     return handler ? handler(route, url.searchParams) : json(route, { error: 'Not found' }, 404);
   });
-  await page.route('https://drive.google.com/**', (route) =>
-    route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>preview</title><body style="margin:0;background:#fff"></body>' }),
-  );
+  await page.route('https://drive.google.com/**', (route) => route.fulfill({ contentType: 'text/html', body: PREVIEW_PAGE }));
   await page.route('https://img.icons8.com/**', (route) => route.fulfill({ contentType: 'image/x-icon', body: logo }));
   await page.route('**/_vercel/**', (route) => route.fulfill({ status: 404, body: '' }));
 };

@@ -34,4 +34,8 @@ export const fetchFolder = async (path: string, pageToken: string | null, signal
 export const fetchSearch = (query: string, pageToken: string | null, signal: AbortSignal | null) =>
   request<DrivePage>('/api/search', { q: query, pageToken }, signal);
 
+export const downloadHref = (fileId: string) => `/api/download?${new URLSearchParams({ id: fileId })}`;
+
+export const previewHref = (fileId: string) => `/api/preview?${new URLSearchParams({ id: fileId })}`;
+
 export const fetchFolderPath = async (folderId: string) => (await request<FolderPath>('/api/path', { id: folderId }, null)).path;

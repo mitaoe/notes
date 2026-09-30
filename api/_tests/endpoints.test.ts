@@ -73,6 +73,39 @@ describe('GET /api/search', () => {
   });
 });
 
+describe.each([
+  ['download', 'https://drive.google.com/uc?export=download&id=am'],
+  ['preview', 'https://drive.google.com/file/d/am/preview'],
+])('GET /api/%s', (name, location) => {
+  const load = async () => (await import(`../${name}.ts`)) as { GET: (request: Request) => Promise<Response> };
+
+  it('shares the file and redirects to Google Drive with a CDN cache header', async () => {
+    const { requests } = useFakeGoogle(tree);
+    const { GET } = await load();
+
+    const response = await GET(get(`/api/${name}?id=am`));
+
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toBe(location);
+    expect(response.headers.get('cache-control')).toContain('s-maxage=86400');
+    expect(requests.some((request) => request.url.pathname === '/drive/v3/files/am/permissions')).toBe(true);
+  });
+
+  it('answers 404 for folders and unknown files', async () => {
+    useFakeGoogle(tree);
+    const { GET } = await load();
+    expect((await GET(get(`/api/${name}?id=journals`))).status).toBe(404);
+    expect((await GET(get(`/api/${name}?id=missing`))).status).toBe(404);
+  });
+
+  it('requires a valid id', async () => {
+    useFakeGoogle(tree);
+    const { GET } = await load();
+    expect((await GET(get(`/api/${name}`))).status).toBe(400);
+    expect((await GET(get(`/api/${name}?id=a/b`))).status).toBe(400);
+  });
+});
+
 describe('GET /api/path', () => {
   it('returns the folder path', async () => {
     useFakeGoogle(tree);

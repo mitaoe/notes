@@ -6,6 +6,7 @@ import { useStyles } from './FileList.styles';
 import { useLocation } from 'react-router';
 import { BreadcrumbNav } from './BreadcrumbNav';
 import FilePreview from './FilePreview';
+import { downloadHref } from '../api/drive';
 
 function EmptyState() {
   return (
@@ -54,29 +55,16 @@ export function FileList({ files, loading, onLoadMore, hasMore, onFolderClick })
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleDownload = async (file) => {
-    try {
-      setDownloadingIds(prev => new Set(prev).add(file.id));
-      const response = await fetch(`/api/download?fileId=${file.id}&directLink=true`);
-      const metadata = await response.json();
-      
-      window.open(metadata.downloadUrl, '_blank');
-      
-      setTimeout(() => {
-        setDownloadingIds(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(file.id);
-          return newSet;
-        });
-      }, 500);
-    } catch (error) {
-      console.error('Error getting download URL:', error);
+  const handleDownload = (file) => {
+    setDownloadingIds(prev => new Set(prev).add(file.id));
+    window.open(downloadHref(file.id), '_blank');
+    setTimeout(() => {
       setDownloadingIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(file.id);
         return newSet;
       });
-    }
+    }, 500);
   };
 
   const handlePreview = (file) => {

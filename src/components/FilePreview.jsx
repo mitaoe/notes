@@ -3,6 +3,7 @@ import { Modal, Box, Group, Text, ActionIcon, Paper, Stack, Button, rgba } from 
 import { IconChevronLeft, IconChevronRight, IconX, IconDownload } from '@tabler/icons-react';
 import { useHotkeys } from '@mantine/hooks';
 import { useState, useEffect } from 'react';
+import { downloadHref, previewHref } from '../api/drive';
 
 const FilePreview = ({ 
   opened, 
@@ -14,7 +15,6 @@ const FilePreview = ({
 }) => {
   const isPdf = file?.mimeType === 'application/pdf';
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
 
@@ -30,33 +30,17 @@ const FilePreview = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleDownload = async (file) => {
-    try {
-      setIsDownloading(true);
-      const response = await fetch(`/api/download?fileId=${file.id}&directLink=true`);
-      const metadata = await response.json();
-      
-      window.open(metadata.downloadUrl, '_blank');
-      
-      setTimeout(() => {
-        setIsDownloading(false);
-      }, 500);
-    } catch (error) {
-      console.error('Error getting download URL:', error);
+  const handleDownload = (file) => {
+    setIsDownloading(true);
+    window.open(downloadHref(file.id), '_blank');
+    setTimeout(() => {
       setIsDownloading(false);
-    }
+    }, 500);
   };
 
-  useEffect(() => {
-    if (file && isPdf) {
-      fetch(`/api/download?fileId=${file.id}&directLink=true`)
-        .then(response => response.json())
-        .then(data => setPreviewUrl(data.previewUrl))
-        .catch(error => console.error('Error getting preview URL:', error));
-    }
-  }, [file, isPdf]);
-
   if (!file) return null;
+
+  const previewUrl = isPdf ? previewHref(file.id) : null;
 
   const previewableFiles = files?.filter(f => f.mimeType === 'application/pdf') || [];
   const currentIndex = previewableFiles.findIndex(f => f.id === file?.id);
