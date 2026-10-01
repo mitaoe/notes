@@ -28,7 +28,7 @@ describe('Layout', () => {
       '  unit 1  {Enter}',
     );
 
-    expect(location()).toHaveTextContent('/search?q=unit+1');
+    expect(location().textContent).toBe('/search?q=unit+1');
   });
 
   it('goes home when clearing on the search page', async () => {
@@ -37,7 +37,7 @@ describe('Layout', () => {
     await userEvent.type(screen.getByRole('textbox', { name: 'Search files' }), 'x');
     await userEvent.click(screen.getByRole('button', { name: 'Clear search' }));
 
-    expect(location()).toHaveTextContent(/^\/$/);
+    expect(location().textContent).toBe('/');
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
   });
 
@@ -48,7 +48,7 @@ describe('Layout', () => {
 
     await userEvent.click(screen.getByRole('link', { name: 'open fy' }));
 
-    expect(location()).toHaveTextContent('/fy');
+    expect(location().textContent).toBe('/fy');
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
   });
 
@@ -60,11 +60,11 @@ describe('Layout', () => {
       '/search',
     );
     await userEvent.type(screen.getByRole('textbox', { name: 'Search files' }), 'unit{Enter}');
-    expect(location()).toHaveTextContent('/search?q=unit');
+    expect(location().textContent).toBe('/search?q=unit');
 
     await userEvent.click(screen.getByRole('link', { name: 'open the search folder' }));
 
-    expect(location()).toHaveTextContent(/^\/search$/);
+    expect(location().textContent).toBe('/search');
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
   });
 
@@ -76,7 +76,7 @@ describe('Layout', () => {
 
     await userEvent.type(box, '{Enter}');
 
-    expect(location()).toHaveTextContent(`/search?q=${kept}`);
+    expect(location().textContent).toBe(`/search?q=${kept}`);
   });
 
   it('shows the query when a search link is opened directly', () => {

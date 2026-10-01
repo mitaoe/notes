@@ -40,7 +40,7 @@ describe('SearchPage', () => {
     await userEvent.click(folder);
 
     await vi.waitFor(() =>
-      expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/fy/00_journals'),
+      expect(screen.getByTestId(LOCATION_TEST_ID).textContent).toBe('/fy/00_journals'),
     );
   });
 
@@ -51,7 +51,7 @@ describe('SearchPage', () => {
     await userEvent.click(await screen.findByRole('button', { name: '00_journals' }));
 
     expect(await screen.findByText("This folder can't be opened here.")).toBeInTheDocument();
-    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=journals');
+    expect(screen.getByTestId(LOCATION_TEST_ID).textContent).toBe('/search?q=journals');
   });
 
   it('says on the row when opening the folder fails, and retries on the next click', async () => {
@@ -79,7 +79,7 @@ describe('SearchPage', () => {
     await userEvent.click(folder);
 
     await vi.waitFor(() =>
-      expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/fy/00_journals'),
+      expect(screen.getByTestId(LOCATION_TEST_ID).textContent).toBe('/fy/00_journals'),
     );
   });
 
@@ -166,7 +166,7 @@ describe('SearchPage', () => {
     await userEvent.click(screen.getByRole('link', { name: 'search' }));
 
     expect(await screen.findByRole('button', { name: '00_journals' })).toBeInTheDocument();
-    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=journals');
+    expect(screen.getByTestId(LOCATION_TEST_ID).textContent).toBe('/search?q=journals');
   });
 
   it('opens a top-level folder named search when there is no query', async () => {
@@ -200,7 +200,7 @@ describe('SearchPage', () => {
     await userEvent.type(screen.getByRole('textbox', { name: 'Search files' }), 'x{Enter}');
     await act(async () => answers.at(0)?.(Response.json({ path: '/fy/00_journals' })));
 
-    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=journalsx');
+    expect(screen.getByTestId(LOCATION_TEST_ID).textContent).toBe('/search?q=journalsx');
   });
 
   it('shows a failed Load More next to the button, under the results', async () => {
