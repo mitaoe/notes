@@ -110,5 +110,5 @@ One component per file. A file exports the things it is named after, plus the ty
 
 - Branch names are `<type>/<short-slug>`, for example `fix/search-paging`.
 - Commits follow Conventional Commits: `type(scope): description`, imperative, at most 50 characters, subject only. Types: `feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`.
-- Keep commits small and self-contained, each one passing the checks above.
+- Pull requests are squash-merged, so the branch's final state is what has to pass the checks above. Keep commits small and focused anyway, so the review can follow them one at a time.
 - Pull request titles use the same prefix with a readable summary. The description has a Description section with the context and a list of the changes, then Behaviour changes, Verification and References where they apply.
