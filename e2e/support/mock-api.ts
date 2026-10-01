@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 
 import type { Page, Route } from '@playwright/test';
 
-import { PAGE_SIZE, downloadUrl } from '../../api/_lib/drive.ts';
+import { PAGE_SIZE, downloadUrl, previewUrl } from '../../api/_lib/drive.ts';
 import { isFolder, type DriveItem, type DrivePage } from '../../shared/drive.ts';
 import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import {
@@ -84,7 +84,7 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
     if (file.name === BROKEN_PREVIEW_NAME) {
       return json(route, { error: 'Something went wrong' }, 500);
     }
-    return route.fulfill({ contentType: 'text/html', body: PREVIEW_PAGE });
+    return route.fulfill({ status: 302, headers: { Location: previewUrl(file.id) } });
   },
 };
 
