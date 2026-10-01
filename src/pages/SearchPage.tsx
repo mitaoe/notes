@@ -34,7 +34,7 @@ export function SearchPage() {
     openingFolder.current = controller;
     try {
       const path = await fetchFolderPath(folder.id, controller.signal);
-      await navigate(path);
+      await navigate(path ?? routes.notFound);
     } catch (error) {
       if (controller.signal.aborted) return;
       console.error(error);

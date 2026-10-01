@@ -51,7 +51,7 @@ test('empty folder', async ({ page }) => {
 
 test('unknown folder', async ({ page }) => {
   await page.goto('/not-a-real-folder');
-  await expect(page.getByText('Looks rather empty here')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Back to Home' })).toBeVisible();
   await matchPage(page, 'folder-unknown');
 });
 

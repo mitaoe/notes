@@ -6,14 +6,17 @@ export type PageLoader = (
   key: string,
   pageToken: string | null,
   signal: AbortSignal | null,
-) => Promise<DrivePage>;
+) => Promise<DrivePage | null>;
 
 type LoadedPages = {
   key: string;
   files: DriveItem[];
   nextPageToken: string | null;
   failed: boolean;
+  missing: boolean;
 };
+
+const NO_PAGE: DrivePage = { files: [], nextPageToken: null };
 
 export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   const [loaded, setLoaded] = useState<LoadedPages | null>(null);
@@ -24,12 +27,13 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
       loadPage(key, null, controller.signal).then(
         (page) => {
           if (controller.signal.aborted) return;
-          setLoaded({ key, files: page.files, nextPageToken: page.nextPageToken, failed: false });
+          const { files, nextPageToken } = page ?? NO_PAGE;
+          setLoaded({ key, files, nextPageToken, failed: false, missing: page === null });
         },
         (error: unknown) => {
           if (controller.signal.aborted) return;
           console.error(error);
-          setLoaded({ key, files: [], nextPageToken: null, failed: true });
+          setLoaded({ key, files: [], nextPageToken: null, failed: true, missing: false });
         },
       );
     }
@@ -46,7 +50,7 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
         previous !== null && previous.key === key ? change(previous) : previous,
       );
     try {
-      const page = await loadPage(key, nextPageToken, null);
+      const page = (await loadPage(key, nextPageToken, null)) ?? NO_PAGE;
       update((previous) => ({
         ...previous,
         files: [...previous.files, ...page.files],
@@ -63,6 +67,7 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
     files: current?.files ?? [],
     loading: key !== null && current === null,
     failed: current?.failed ?? false,
+    missing: current?.missing ?? false,
     hasMore: nextPageToken !== null,
     loadMore,
   };

@@ -46,7 +46,7 @@ sequenceDiagram
   end
 ```
 
-The function resolves the path one folder at a time and remembers resolved folder IDs for a few minutes per warm instance, so "Load More" on a deep folder usually costs a single Drive call. An unknown path answers 404, and the web app shows the same empty state as an empty folder.
+The function resolves the path one folder at a time and remembers resolved folder IDs for a few minutes per warm instance, so "Load More" on a deep folder usually costs a single Drive call. An unknown path answers 404, and the web app shows its not found page at that URL.
 
 ### Downloading or previewing a file
 

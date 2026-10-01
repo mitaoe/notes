@@ -1,11 +1,9 @@
 import * as v from 'valibot';
 
-import { DrivePageSchema, FolderPathSchema, type DrivePage } from '../../shared/drive.ts';
+import { DrivePageSchema, FolderPathSchema } from '../../shared/drive.ts';
 import { StatusError } from '../../shared/status-error.ts';
 
 export class ApiRequestError extends StatusError {}
-
-const EMPTY_PAGE: DrivePage = { files: [], nextPageToken: null };
 
 const request = async <TSchema extends v.GenericSchema>(
   path: string,
@@ -23,18 +21,17 @@ const request = async <TSchema extends v.GenericSchema>(
   return v.parse(schema, await response.json());
 };
 
-export const fetchFolder = async (
-  path: string,
-  pageToken: string | null,
-  signal: AbortSignal | null,
-) => {
+const nullIfNotFound = async <T>(response: Promise<T>) => {
   try {
-    return await request('/api/list', { path, pageToken }, signal, DrivePageSchema);
+    return await response;
   } catch (error) {
-    if (error instanceof ApiRequestError && error.status === 404) return EMPTY_PAGE;
+    if (error instanceof ApiRequestError && error.status === 404) return null;
     throw error;
   }
 };
+
+export const fetchFolder = (path: string, pageToken: string | null, signal: AbortSignal | null) =>
+  nullIfNotFound(request('/api/list', { path, pageToken }, signal, DrivePageSchema));
 
 export const fetchSearch = (query: string, pageToken: string | null, signal: AbortSignal | null) =>
   request('/api/search', { q: query, pageToken }, signal, DrivePageSchema);
@@ -45,5 +42,9 @@ export const downloadHref = (fileId: string) =>
 export const previewHref = (fileId: string) =>
   `/api/preview?${new URLSearchParams({ id: fileId })}`;
 
-export const fetchFolderPath = async (folderId: string, signal: AbortSignal | null) =>
-  (await request('/api/path', { id: folderId }, signal, FolderPathSchema)).path;
+export const fetchFolderPath = async (folderId: string, signal: AbortSignal | null) => {
+  const folderPath = await nullIfNotFound(
+    request('/api/path', { id: folderId }, signal, FolderPathSchema),
+  );
+  return folderPath?.path ?? null;
+};

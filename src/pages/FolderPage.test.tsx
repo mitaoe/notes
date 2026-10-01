@@ -13,6 +13,19 @@ const listing = {
 };
 
 describe('FolderPage', () => {
+  it('shows the not found page for a folder that does not exist', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async () =>
+        Response.json({ error: 'Folder not found' }, { status: 404 }),
+      ),
+    );
+    renderWithProviders(<FolderPage />, '/not-a-real-folder');
+
+    expect(await screen.findByRole('link', { name: 'Back to Home' })).toBeInTheDocument();
+    expect(screen.queryByText('Looks rather empty here')).not.toBeInTheDocument();
+  });
+
   it('loads the folder again from its breadcrumb after a failure', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.stubGlobal(

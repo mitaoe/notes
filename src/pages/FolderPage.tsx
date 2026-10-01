@@ -7,6 +7,7 @@ import { fetchFolder } from '../api/drive.ts';
 import { ErrorAlert } from '../components/ErrorAlert.tsx';
 import { FileList } from '../components/FileList.tsx';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
+import { NotFoundPage } from './NotFoundPage.tsx';
 
 import classes from './Page.module.css';
 
@@ -16,7 +17,12 @@ const FOLDER_EMPTY =
 
 export function FolderPage() {
   const { pathname } = useLocation();
-  const { files, loading, failed, hasMore, loadMore } = usePagedFiles(pathname, fetchFolder);
+  const { files, loading, failed, missing, hasMore, loadMore } = usePagedFiles(
+    pathname,
+    fetchFolder,
+  );
+
+  if (missing) return <NotFoundPage />;
 
   const folderHref = (folder: DriveItem) =>
     toFolderPath([...(parseFolderPath(pathname) ?? []), folder.name]);

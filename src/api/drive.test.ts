@@ -45,9 +45,9 @@ describe('fetchFolder', () => {
     expect(requestedUrl(fetchMock).searchParams.has('pageToken')).toBe(false);
   });
 
-  it('treats a missing folder as empty', async () => {
+  it('returns null for a missing folder', async () => {
     stubFetch({ error: 'Folder not found' }, 404);
-    expect(await fetchFolder('/nope', null, null)).toEqual({ files: [], nextPageToken: null });
+    expect(await fetchFolder('/nope', null, null)).toBeNull();
   });
 
   it('throws on server errors', async () => {
@@ -75,6 +75,16 @@ describe('fetchFolderPath', () => {
   it('returns the resolved path', async () => {
     stubFetch({ path: '/fy/00_journals' });
     expect(await fetchFolderPath('abc', null)).toBe('/fy/00_journals');
+  });
+
+  it('returns null for a folder it cannot place', async () => {
+    stubFetch({ error: 'Folder not found' }, 404);
+    expect(await fetchFolderPath('abc', null)).toBeNull();
+  });
+
+  it('throws on server errors', async () => {
+    stubFetch({ error: 'Something went wrong' }, 500);
+    await expect(fetchFolderPath('abc', null)).rejects.toBeInstanceOf(ApiRequestError);
   });
 });
 

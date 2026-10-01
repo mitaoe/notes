@@ -14,17 +14,18 @@ const item = (id: string): DriveItem => ({
 const pageA: DrivePage = { files: [item('a1')], nextPageToken: 'a:second' };
 const pageB: DrivePage = { files: [item('b1')], nextPageToken: null };
 
-const pages: Record<string, DrivePage> = {
+const pages: Record<string, DrivePage | null> = {
   'a:first': pageA,
   'a:second': { files: [item('a2')], nextPageToken: null },
   'b:first': pageB,
   'c:first': { files: [item('c1')], nextPageToken: 'c:missing' },
+  'gone:first': null,
 };
 
 const loader = () =>
   vi.fn<PageLoader>(async (key, pageToken) => {
     const page = pages[pageToken ?? `${key}:first`];
-    if (!page) throw new Error(`no page for ${key}`);
+    if (page === undefined) throw new Error(`no page for ${key}`);
     return page;
   });
 
@@ -109,6 +110,14 @@ describe('usePagedFiles', () => {
     expect(result.current.failed).toBe(true);
   });
 
+  it('reports a key the loader cannot find as missing', async () => {
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles('gone', load));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current).toMatchObject({ missing: true, failed: false, files: [] });
+  });
+
   it('stays idle without a key', () => {
     const load = loader();
     const { result } = renderHook(() => usePagedFiles(null, load));
@@ -116,6 +125,7 @@ describe('usePagedFiles', () => {
     expect(result.current).toMatchObject({
       loading: false,
       failed: false,
+      missing: false,
       hasMore: false,
       files: [],
     });
