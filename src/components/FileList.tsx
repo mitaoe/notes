@@ -1,4 +1,5 @@
 import { Box, Button, Group, Loader, Stack } from '@mantine/core';
+import { clsx } from 'clsx';
 import { useState } from 'react';
 import { useLocation } from 'react-router';
 
@@ -8,6 +9,7 @@ import { EmptyState } from './EmptyState.tsx';
 import { FilePreview } from './FilePreview.tsx';
 import { FileRow } from './FileRow.tsx';
 
+import buttonClasses from '../styles/buttons.module.css';
 import classes from './FileList.module.css';
 
 type FileListProps = {
@@ -68,7 +70,7 @@ export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }:
               variant="light"
               loading={loadingMore}
               loaderProps={{ size: 'xs', type: 'dots' }}
-              className={classes.loadMore}
+              className={clsx(buttonClasses.primary, classes.loadMore)}
               onClick={() => void loadMore()}
             >
               Load More

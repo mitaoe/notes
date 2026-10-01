@@ -7,6 +7,5 @@
 }
 
 .loadMore {
-  composes: primary from '../styles/buttons.module.css';
   min-width: 140px;
 }

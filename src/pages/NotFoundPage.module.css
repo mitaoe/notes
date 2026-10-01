@@ -2,7 +2,3 @@
   padding-top: 4rem;
   text-align: center;
 }
-
-.homeButton {
-  composes: primary from '../styles/buttons.module.css';
-}

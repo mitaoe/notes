@@ -1,6 +1,7 @@
 import { Button, Container, Group, Text, Title } from '@mantine/core';
 import { Link } from 'react-router';
 
+import buttonClasses from '../styles/buttons.module.css';
 import classes from './NotFoundPage.module.css';
 
 export function NotFoundPage() {
@@ -13,7 +14,7 @@ export function NotFoundPage() {
         The page you&apos;re looking for doesn&apos;t exist.
       </Text>
       <Group justify="center">
-        <Button component={Link} to="/" className={classes.homeButton}>
+        <Button component={Link} to="/" className={buttonClasses.primary}>
           Back to Home
         </Button>
       </Group>
