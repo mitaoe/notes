@@ -137,7 +137,7 @@
   position: absolute;
   top: 32px;
   left: 50%;
-  z-index: 2;
+  z-index: 3;
   width: min(480px, calc(100% - 32px));
   transform: translateX(-50%);
 }

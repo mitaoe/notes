@@ -104,6 +104,22 @@ test('a failed load more shows its error beside the button', async ({ page }) =>
   await expect(page.getByText('unit_0.pdf')).toBeVisible();
 });
 
+test('a failed next page shows its error over the preview', async ({ page }) => {
+  await page.goto(`/sy/${LOAD_MORE_FAILS_NAME}`);
+  await page.getByTitle('Preview').last().click();
+  await page.getByRole('button', { name: 'Next file' }).click();
+
+  const alert = page.getByRole('dialog').getByRole('alert');
+  await expect(alert).toContainText("Couldn't load more files.");
+  const onTop = await alert.evaluate((element) => {
+    const { left, top, width, height } = element.getBoundingClientRect();
+    return element.contains(
+      element.ownerDocument.elementFromPoint(left + width / 2, top + height / 2),
+    );
+  });
+  expect(onTop).toBe(true);
+});
+
 test('an unknown search shows the empty state', async ({ page }) => {
   await page.goto('/search?q=nothing-matches-this');
   await expect(page.getByText('Looks rather empty here')).toBeVisible();
