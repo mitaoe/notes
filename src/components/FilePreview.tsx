@@ -132,7 +132,7 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
         <Box className={classes.viewer}>
           {frameState === 'loading' && (
             <Box className={classes.loadingOverlay}>
-              <Text size="md" c="#fff" className={classes.loadingText}>
+              <Text size="md" c="white" className={classes.loadingText}>
                 Loading PDF…
               </Text>
             </Box>
@@ -140,10 +140,10 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
           {frameState === 'failed' ? (
             <Group justify="center" h="100%">
               <Stack align="center" gap="xs">
-                <Text size="xl" c="#fff" className={classes.unavailableTitle}>
+                <Text size="xl" c="white" className={classes.unavailableTitle}>
                   Preview not available
                 </Text>
-                <Text size="sm" c="#fff" className={classes.unavailableDetail}>
+                <Text size="sm" c="white" className={classes.unavailableDetail}>
                   This file could not be loaded
                 </Text>
               </Stack>
