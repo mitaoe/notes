@@ -29,6 +29,7 @@ describe('FolderPage', () => {
       '/fy',
     );
     expect(await screen.findByText(/error occurred while loading this folder/)).toBeInTheDocument();
+    expect(screen.queryByText('Looks rather empty here')).not.toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('link', { name: 'fy' }));
 

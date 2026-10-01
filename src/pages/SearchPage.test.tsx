@@ -66,6 +66,7 @@ describe('SearchPage', () => {
     expect(
       screen.getByText('An error occurred while searching. Please try again.'),
     ).toBeInTheDocument();
+    expect(screen.queryByText('Looks rather empty here')).not.toBeInTheDocument();
   });
 
   it('searches again when the same search is submitted after a failure', async () => {

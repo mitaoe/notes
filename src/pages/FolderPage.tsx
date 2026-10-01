@@ -25,6 +25,7 @@ export function FolderPage() {
       <FileList
         files={files}
         loading={loading}
+        failed={failed}
         hasMore={hasMore}
         onLoadMore={loadMore}
         folderOpener={{ href: folderHref }}

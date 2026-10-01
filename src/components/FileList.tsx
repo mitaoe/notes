@@ -15,12 +15,20 @@ import classes from './FileList.module.css';
 type FileListProps = {
   files: DriveItem[];
   loading: boolean;
+  failed: boolean;
   hasMore: boolean;
   onLoadMore: () => Promise<void>;
   folderOpener: FolderOpener;
 };
 
-export function FileList({ files, loading, hasMore, onLoadMore, folderOpener }: FileListProps) {
+export function FileList({
+  files,
+  loading,
+  failed,
+  hasMore,
+  onLoadMore,
+  folderOpener,
+}: FileListProps) {
   const { pathname } = useLocation();
   const [previewFile, setPreviewFile] = useState<DriveItem | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -50,9 +58,8 @@ export function FileList({ files, loading, hasMore, onLoadMore, folderOpener }: 
     <>
       <BreadcrumbNav pathname={pathname} />
       <Box>
-        {files.length === 0 ? (
-          <EmptyState />
-        ) : (
+        {files.length === 0 && !failed && <EmptyState />}
+        {files.length > 0 && (
           <Stack gap="xs">
             {files.map((file) => (
               <FileRow

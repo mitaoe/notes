@@ -53,6 +53,7 @@ export function SearchPage() {
       <FileList
         files={files}
         loading={loading}
+        failed={failed}
         hasMore={hasMore}
         onLoadMore={loadMore}
         folderOpener={{ onOpen: (folder) => void openFolder(folder) }}
