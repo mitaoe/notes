@@ -4,7 +4,9 @@ import { IconInbox } from '../icons.ts';
 
 import classes from './EmptyState.module.css';
 
-export function EmptyState() {
+type EmptyStateProps = { message: string };
+
+export function EmptyState({ message }: EmptyStateProps) {
   return (
     <Box className={classes.wrapper}>
       <Stack align="center" gap="xs" py={50}>
@@ -15,7 +17,7 @@ export function EmptyState() {
           Looks rather empty here
         </Text>
         <Text size="sm" c="dimmed" ta="center" px="lg">
-          Much like a professor&apos;s office during exam week, this folder appears to be vacant.
+          {message}
         </Text>
       </Stack>
     </Box>

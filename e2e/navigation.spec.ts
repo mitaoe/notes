@@ -96,4 +96,5 @@ test('a folder that fails to load shows an error', async ({ page }) => {
 test('an unknown search shows the empty state', async ({ page }) => {
   await page.goto('/search?q=nothing-matches-this');
   await expect(page.getByText('Looks rather empty here')).toBeVisible();
+  await expect(page.getByText(/nothing here matches your search/)).toBeVisible();
 });

@@ -11,6 +11,8 @@ import { usePagedFiles } from '../hooks/usePagedFiles.ts';
 import classes from './Page.module.css';
 
 const FOLDER_ERROR = 'An error occurred while loading this folder. Please try again.';
+const FOLDER_EMPTY =
+  "Much like a professor's office during exam week, this folder appears to be vacant.";
 
 export function FolderPage() {
   const { pathname } = useLocation();
@@ -26,6 +28,7 @@ export function FolderPage() {
         files={files}
         loading={loading}
         failed={failed}
+        emptyMessage={FOLDER_EMPTY}
         hasMore={hasMore}
         onLoadMore={loadMore}
         folderOpener={{ href: folderHref }}

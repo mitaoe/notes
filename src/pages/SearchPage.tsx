@@ -13,6 +13,8 @@ import { usePagedFiles } from '../hooks/usePagedFiles.ts';
 import classes from './Page.module.css';
 
 const SEARCH_ERROR = 'An error occurred while searching. Please try again.';
+const SEARCH_EMPTY =
+  "Much like a professor's office during exam week, nothing here matches your search.";
 
 export function SearchPage() {
   const navigate = useNavigate();
@@ -54,6 +56,7 @@ export function SearchPage() {
         files={files}
         loading={loading}
         failed={failed}
+        emptyMessage={SEARCH_EMPTY}
         hasMore={hasMore}
         onLoadMore={loadMore}
         folderOpener={{ onOpen: (folder) => void openFolder(folder) }}

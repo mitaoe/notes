@@ -16,6 +16,7 @@ type FileListProps = {
   files: DriveItem[];
   loading: boolean;
   failed: boolean;
+  emptyMessage: string;
   hasMore: boolean;
   onLoadMore: () => Promise<void>;
   folderOpener: FolderOpener;
@@ -25,6 +26,7 @@ export function FileList({
   files,
   loading,
   failed,
+  emptyMessage,
   hasMore,
   onLoadMore,
   folderOpener,
@@ -58,7 +60,7 @@ export function FileList({
     <>
       <BreadcrumbNav pathname={pathname} />
       <Box>
-        {files.length === 0 && !failed && <EmptyState />}
+        {files.length === 0 && !failed && <EmptyState message={emptyMessage} />}
         {files.length > 0 && (
           <Stack gap="xs">
             {files.map((file) => (
