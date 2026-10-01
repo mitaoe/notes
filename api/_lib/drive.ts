@@ -85,6 +85,8 @@ const toDriveItem = ({ id, name, mimeType, size }: DriveFile): DriveItem => ({
   size: size === undefined ? null : Number(size),
 });
 
+const rejectedPageToken = () => new HttpError(400, 'pageToken is invalid');
+
 const listFiles = async (q: string, pageToken: string | null): Promise<DrivePage> => {
   const params = {
     ...ALL_DRIVES,
@@ -102,7 +104,7 @@ const listFiles = async (q: string, pageToken: string | null): Promise<DrivePage
     return { files: result.files.map(toDriveItem), nextPageToken: result.nextPageToken ?? null };
   } catch (error) {
     if (pageToken !== null && error instanceof GoogleApiError && error.status === 400) {
-      throw new HttpError(400, 'pageToken is invalid');
+      throw rejectedPageToken();
     }
     throw error;
   }
@@ -146,7 +148,7 @@ export const listFolder = async (names: readonly string[], pageToken: string | n
   const currentId = await resolveFolderId(names, false);
   if (currentId === folderId) return page;
   if (currentId === null) return null;
-  if (pageToken !== null) throw new HttpError(400, 'pageToken is invalid');
+  if (pageToken !== null) throw rejectedPageToken();
   return listFiles(folderContentsQuery(currentId), null);
 };
 
@@ -200,8 +202,10 @@ const collectFolderNames = async (
 export const findFolderPath = async (folderId: string) => {
   const names = await collectFolderNames(folderId, await getRootFolderId(), []);
   if (names === null || !isAddressable(names)) return null;
-  if ((await resolveFolderId(names, true)) !== folderId) return null;
-  return toFolderPath(names);
+  const leadsHere =
+    (await resolveFolderId(names, true)) === folderId ||
+    (await resolveFolderId(names, false)) === folderId;
+  return leadsHere ? toFolderPath(names) : null;
 };
 
 const isVisibleFile = (file: DriveMetadata) =>

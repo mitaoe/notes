@@ -285,6 +285,20 @@ describe('findFolderPath', () => {
     expect(await findFolderPath('inside')).toBeNull();
   });
 
+  it('finds a folder that replaced a remembered one of the same name', async () => {
+    const files = tree.map((file) => ({ ...file }));
+    useFakeGoogle(files);
+    const { findFolderPath, listFolder } = await loadDrive();
+    await listFolder(['fy', '00_journals'], null);
+
+    for (const file of files) {
+      if (file.id === 'journals' || file.parents.includes('journals')) file.trashed = true;
+    }
+    files.push(folder('journals-2', '00_journals', 'fy'));
+
+    expect(await findFolderPath('journals-2')).toBe('/fy/00_journals');
+  });
+
   it('returns null for a folder whose path opens an older namesake', async () => {
     useFakeGoogle([...tree, folder('newer', '00_journals', 'fy')]);
     const { findFolderPath } = await loadDrive();
