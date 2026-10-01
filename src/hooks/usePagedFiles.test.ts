@@ -1,13 +1,13 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { DriveItem, DrivePage } from '../../shared/drive.ts';
+import { PDF_MIME_TYPE, type DriveItem, type DrivePage } from '../../shared/drive.ts';
 import { usePagedFiles, type PageLoader } from './usePagedFiles.ts';
 
 const item = (id: string): DriveItem => ({
   id,
   name: `${id}.pdf`,
-  mimeType: 'application/pdf',
+  mimeType: PDF_MIME_TYPE,
   size: 1,
 });
 

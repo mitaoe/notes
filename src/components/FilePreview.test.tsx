@@ -2,14 +2,14 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import type { DriveItem } from '../../shared/drive.ts';
+import { PDF_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
 import { renderWithProviders } from '../test/render.tsx';
 import { FilePreview } from './FilePreview.tsx';
 
 const pdf = (id: string): DriveItem => ({
   id,
   name: `${id}.pdf`,
-  mimeType: 'application/pdf',
+  mimeType: PDF_MIME_TYPE,
   size: 1,
 });
 const files = [pdf('a'), pdf('b'), pdf('c')];

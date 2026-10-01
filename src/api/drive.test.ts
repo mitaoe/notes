@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 import { describe, expect, it, vi } from 'vitest';
 
+import { PDF_MIME_TYPE } from '../../shared/drive.ts';
 import {
   ApiRequestError,
   downloadHref,
@@ -11,7 +12,7 @@ import {
 } from './drive.ts';
 
 const page = {
-  files: [{ id: 'a', name: 'a.pdf', mimeType: 'application/pdf', size: 3 }],
+  files: [{ id: 'a', name: 'a.pdf', mimeType: PDF_MIME_TYPE, size: 3 }],
   nextPageToken: 'next',
 };
 

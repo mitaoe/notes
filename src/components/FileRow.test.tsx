@@ -2,12 +2,12 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { FOLDER_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
+import { FOLDER_MIME_TYPE, PDF_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
 import { renderWithProviders } from '../test/render.tsx';
 import { FileRow } from './FileRow.tsx';
 
 const folder: DriveItem = { id: 'f1', name: 'fy', mimeType: FOLDER_MIME_TYPE, size: null };
-const pdf: DriveItem = { id: 'p1', name: 'notes.pdf', mimeType: 'application/pdf', size: 1701326 };
+const pdf: DriveItem = { id: 'p1', name: 'notes.pdf', mimeType: PDF_MIME_TYPE, size: 1701326 };
 const image: DriveItem = { id: 'i1', name: 'lab.png', mimeType: 'image/png', size: 0 };
 
 const setup = (file: DriveItem) => {

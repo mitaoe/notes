@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { FOLDER_MIME_TYPE, MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
+import { FOLDER_MIME_TYPE, MAX_SEARCH_LENGTH, PDF_MIME_TYPE } from '../../shared/drive.ts';
 import { folder, pdf, useFakeGoogle } from './fake-google.ts';
 
 const tree = [
@@ -25,7 +25,7 @@ describe('GET /api/list', () => {
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toContain('s-maxage=300');
     expect(await response.json()).toEqual({
-      files: [{ id: 'am', name: 'am_journal.pdf', mimeType: 'application/pdf', size: 2048 }],
+      files: [{ id: 'am', name: 'am_journal.pdf', mimeType: PDF_MIME_TYPE, size: 2048 }],
       nextPageToken: null,
     });
   });

@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-import { FOLDER_MIME_TYPE } from '../../shared/drive.ts';
+import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../../shared/drive.ts';
 import { DRIVE_URL, TOKEN_URL } from '../_lib/google.ts';
 
 type FakeFile = {
@@ -31,7 +31,7 @@ export const pdf = (
 ): FakeFile => ({
   id,
   name,
-  mimeType: 'application/pdf',
+  mimeType: PDF_MIME_TYPE,
   parents: [parent],
   size: '2048',
   ...extra,

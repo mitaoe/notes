@@ -1,4 +1,4 @@
-import { FOLDER_MIME_TYPE } from '../../shared/drive.ts';
+import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../../shared/drive.ts';
 
 const WORD_START = /(?<![\p{L}\p{N}])[\p{L}\p{N}]/gu;
 
@@ -26,7 +26,7 @@ const file = (name: string, mimeType: string, size: number): Spec => ({
   children: [],
 });
 
-const pdf = (name: string, size: number) => file(name, 'application/pdf', size);
+const pdf = (name: string, size: number) => file(name, PDF_MIME_TYPE, size);
 
 const subjects = [
   '00_journals',
