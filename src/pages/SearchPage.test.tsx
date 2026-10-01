@@ -36,7 +36,7 @@ describe('SearchPage', () => {
     renderWithProviders(<SearchPage />, '/search?q=journals');
 
     const folder = await screen.findByRole('button', { name: '00_journals' });
-    expect(document.title).toBe('Search: journals | MITAoE Notes');
+    expect(document.title).toBe('Search: journals | MITAOE Notes');
     await userEvent.click(folder);
 
     await vi.waitFor(() =>

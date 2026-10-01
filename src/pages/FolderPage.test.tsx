@@ -26,7 +26,7 @@ describe('FolderPage', () => {
 
     expect(await screen.findByRole('link', { name: 'Back to Home' })).toBeInTheDocument();
     expect(screen.queryByText('Looks rather empty here')).not.toBeInTheDocument();
-    await vi.waitFor(() => expect(document.title).toBe('Page not found | MITAoE Notes'));
+    await vi.waitFor(() => expect(document.title).toBe('Page not found | MITAOE Notes'));
     expect(document.head.querySelector('meta[name="robots"]')).toHaveAttribute(
       'content',
       'noindex',
@@ -117,6 +117,6 @@ describe('FolderPage', () => {
 
     expect(await screen.findByText('syllabus.pdf')).toBeInTheDocument();
     expect(screen.queryByText(/error occurred while loading this folder/)).not.toBeInTheDocument();
-    expect(document.title).toBe('fy | MITAoE Notes');
+    expect(document.title).toBe('fy | MITAOE Notes');
   });
 });
