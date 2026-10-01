@@ -110,10 +110,10 @@ const listFiles = async (q: string, pageToken: string | null): Promise<DrivePage
 
 const folderIds = new Map<string, { id: string; expiresAt: number }>();
 
-const findChildFolderId = async (parentId: string, name: string) => {
+const findChildFolderId = async (parentId: string, name: string, useCache: boolean) => {
   const key = `${parentId}/${name}`;
   const cached = folderIds.get(key);
-  if (cached && cached.expiresAt > Date.now()) return cached.id;
+  if (useCache && cached && cached.expiresAt > Date.now()) return cached.id;
 
   const result = await driveGet(
     '/files',
@@ -127,19 +127,27 @@ const findChildFolderId = async (parentId: string, name: string) => {
     v.object({ files: v.array(DriveIdSchema) }),
   );
   const id = result.files[0]?.id ?? null;
-  if (id !== null) folderIds.set(key, { id, expiresAt: Date.now() + FOLDER_ID_TTL_MS });
+  if (id === null) folderIds.delete(key);
+  else folderIds.set(key, { id, expiresAt: Date.now() + FOLDER_ID_TTL_MS });
   return id;
 };
 
-const resolveFolderId = (names: readonly string[]) =>
+const resolveFolderId = (names: readonly string[], useCache: boolean) =>
   names.reduce<Promise<string | null>>(async (parentId, name) => {
     const resolvedParentId = await parentId;
-    return resolvedParentId === null ? null : findChildFolderId(resolvedParentId, name);
+    return resolvedParentId === null ? null : findChildFolderId(resolvedParentId, name, useCache);
   }, Promise.resolve(ROOT_FOLDER_ID));
 
 export const listFolder = async (names: readonly string[], pageToken: string | null) => {
-  const folderId = await resolveFolderId(names);
-  return folderId === null ? null : listFiles(folderContentsQuery(folderId), pageToken);
+  const folderId = await resolveFolderId(names, true);
+  if (folderId === null) return null;
+  const page = await listFiles(folderContentsQuery(folderId), pageToken);
+  if (page.files.length > 0 || names.length === 0) return page;
+  const currentId = await resolveFolderId(names, false);
+  if (currentId === folderId) return page;
+  if (currentId === null) return null;
+  if (pageToken !== null) throw new HttpError(400, 'pageToken is invalid');
+  return listFiles(folderContentsQuery(currentId), null);
 };
 
 export const searchFiles = async (text: string, pageToken: string | null): Promise<DrivePage> => {
@@ -191,7 +199,7 @@ const collectFolderNames = async (
 
 export const findFolderPath = async (folderId: string) => {
   const names = await collectFolderNames(folderId, await getRootFolderId(), []);
-  if (names === null || (await resolveFolderId(names)) !== folderId) return null;
+  if (names === null || (await resolveFolderId(names, true)) !== folderId) return null;
   return toFolderPath(names);
 };
 

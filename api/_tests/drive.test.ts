@@ -160,6 +160,45 @@ describe('listFolder', () => {
     await expect(failure).rejects.not.toBeInstanceOf(HttpError);
   });
 
+  it('checks the path again when a remembered folder lists nothing', async () => {
+    const files = tree.map((file) => ({ ...file }));
+    useFakeGoogle(files);
+    const { listFolder } = await loadDrive();
+    await listFolder(['fy', '00_journals'], null);
+
+    for (const file of files) {
+      if (file.id === 'journals' || file.parents.includes('journals')) file.trashed = true;
+    }
+
+    expect(await listFolder(['fy', '00_journals'], 'next-page')).toBeNull();
+  });
+
+  it('starts a replaced folder from its first page', async () => {
+    const files = tree.map((file) => ({ ...file }));
+    useFakeGoogle(files);
+    const { listFolder } = await loadDrive();
+    await listFolder(['fy', '00_journals'], null);
+
+    for (const file of files) {
+      if (file.id === 'journals' || file.parents.includes('journals')) file.trashed = true;
+    }
+    files.push(folder('journals-2', '00_journals', 'fy'), pdf('new', 'new.pdf', 'journals-2'));
+
+    await expect(listFolder(['fy', '00_journals'], 'next-page')).rejects.toMatchObject({
+      status: 400,
+    });
+    expect((await listFolder(['fy', '00_journals'], null))?.files.map((file) => file.id)).toEqual([
+      'new',
+    ]);
+  });
+
+  it('lists an empty folder as empty', async () => {
+    useFakeGoogle([...tree, folder('ty', 'ty')]);
+    const { listFolder } = await loadDrive();
+
+    expect(await listFolder(['ty'], null)).toEqual({ files: [], nextPageToken: null });
+  });
+
   it('reuses the access token and resolved folder ids', async () => {
     const { requests } = useFakeGoogle(tree);
     const { listFolder } = await loadDrive();
