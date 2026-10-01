@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { DriveItem, DrivePage } from '../../shared/drive.ts';
-import { RejectedPageTokenError } from '../api/drive.ts';
+import { FIRST_PAGE, RejectedPageTokenError, type PageRequest } from '../api/drive.ts';
 
 export type LoadGoal = (files: DriveItem[]) => boolean;
 
@@ -9,8 +9,8 @@ const ONE_PAGE: LoadGoal = () => true;
 
 export type PageLoader = (
   key: string,
-  pageToken: string | null,
-  signal: AbortSignal | null,
+  page: PageRequest,
+  signal: AbortSignal,
 ) => Promise<DrivePage | null>;
 
 type LoadedPages = {
@@ -21,24 +21,31 @@ type LoadedPages = {
   missing: boolean;
 };
 
-const NO_PAGE: DrivePage = { files: [], nextPageToken: null };
+const NO_FILES: DriveItem[] = [];
 
 export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   const [loaded, setLoaded] = useState<LoadedPages | null>(null);
+  const keyRequests = useRef<AbortController | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
+    keyRequests.current = controller;
     if (key !== null) {
-      loadPage(key, null, controller.signal).then(
+      loadPage(key, FIRST_PAGE, controller.signal).then(
         (page) => {
           if (controller.signal.aborted) return;
-          const { files, nextPageToken } = page ?? NO_PAGE;
-          setLoaded({ key, files, nextPageToken, failed: false, missing: page === null });
+          setLoaded({
+            key,
+            files: page?.files ?? NO_FILES,
+            nextPageToken: page?.nextPageToken ?? null,
+            failed: false,
+            missing: page === null,
+          });
         },
         (error: unknown) => {
           if (controller.signal.aborted) return;
           console.error(error);
-          setLoaded({ key, files: [], nextPageToken: null, failed: true, missing: false });
+          setLoaded({ key, files: NO_FILES, nextPageToken: null, failed: true, missing: false });
         },
       );
     }
@@ -46,40 +53,67 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   }, [key, loadPage]);
 
   const current = loaded !== null && loaded.key === key ? loaded : null;
-  const files = current?.files ?? NO_PAGE.files;
+  const files = current?.files ?? NO_FILES;
   const nextPageToken = current?.nextPageToken ?? null;
 
   const loadMore = useCallback(
     async (goal: LoadGoal | null): Promise<DriveItem[] | null> => {
-      if (key === null || nextPageToken === null) return files;
+      const signal = keyRequests.current?.signal;
+      if (key === null || nextPageToken === null || signal === undefined) return files;
       const reached = goal ?? ONE_PAGE;
       const update = (change: (previous: LoadedPages) => LoadedPages) =>
         setLoaded((previous) =>
           previous !== null && previous.key === key ? change(previous) : previous,
         );
-      const loadFrom = async (
-        pageToken: string | null,
+      const show = (listed: DriveItem[], next: string | null) =>
+        update((previous) => ({ ...previous, files: listed, nextPageToken: next, failed: false }));
+      const collect = async (
+        page: PageRequest,
         listed: DriveItem[],
         done: LoadGoal,
-      ): Promise<DriveItem[]> => {
-        const page = await loadPage(key, pageToken, null);
-        if (page === null) {
-          update((previous) => ({ ...previous, files: [], nextPageToken: null, missing: true }));
-          return [];
-        }
-        const { files: pageFiles, nextPageToken: next } = page;
-        const all = [...listed, ...pageFiles];
-        update((previous) => ({ ...previous, files: all, nextPageToken: next, failed: false }));
-        return done(all) || next === null ? all : loadFrom(next, all, done);
+        onPage: (listed: DriveItem[], next: string | null) => void,
+      ): Promise<DrivePage | null> => {
+        signal.throwIfAborted();
+        const result = await loadPage(key, page, signal);
+        if (result === null) return null;
+        const all = [...listed, ...result.files];
+        onPage(all, result.nextPageToken);
+        return done(all) || result.nextPageToken === null
+          ? { files: all, nextPageToken: result.nextPageToken }
+          : collect({ pageToken: result.nextPageToken, rejectedToken: null }, all, done, onPage);
+      };
+      const restart = async (rejectedToken: string) => {
+        const restarted = await collect(
+          { pageToken: null, rejectedToken },
+          [],
+          (all) => all.length > files.length && reached(all),
+          () => {},
+        );
+        if (restarted !== null) show(restarted.files, restarted.nextPageToken);
+        return restarted;
       };
       try {
-        try {
-          return await loadFrom(nextPageToken, files, reached);
-        } catch (error) {
-          if (!(error instanceof RejectedPageTokenError)) throw error;
-          return await loadFrom(null, [], (all) => all.length > files.length && reached(all));
+        const result = await collect(
+          { pageToken: nextPageToken, rejectedToken: null },
+          files,
+          reached,
+          show,
+        ).catch((error: unknown) => {
+          if (error instanceof RejectedPageTokenError) return restart(error.pageToken);
+          throw error;
+        });
+        if (result === null) {
+          update((previous) => ({
+            ...previous,
+            files: NO_FILES,
+            nextPageToken: null,
+            missing: true,
+          }));
+          return NO_FILES;
         }
+        return result.files;
       } catch (error) {
+        if (signal.aborted) return null;
         console.error(error);
         update((previous) => ({ ...previous, failed: true }));
         return null;

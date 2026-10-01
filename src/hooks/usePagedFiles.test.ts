@@ -29,7 +29,7 @@ const pages: Record<string, DrivePage | null> = {
 };
 
 const loader = () =>
-  vi.fn<PageLoader>(async (key, pageToken) => {
+  vi.fn<PageLoader>(async (key, { pageToken }) => {
     const page = pages[pageToken ?? `${key}:first`];
     if (page === undefined) throw new Error(`no page for ${key}`);
     return page;
@@ -37,19 +37,28 @@ const loader = () =>
 
 const ids = (files: DriveItem[] | null | undefined) => files?.map((file) => file.id);
 
-const refreshedLoader = (refreshed: DrivePage | null) => {
-  let firstPages = 0;
-  return vi.fn<PageLoader>(async (_key, pageToken) => {
-    if (pageToken === 'stale') throw new RejectedPageTokenError('rejected');
+const REJECTED = new Error('400');
+
+const unresolved = () => {};
+
+const deferred = () => {
+  let resolve: (page: DrivePage) => void = unresolved;
+  const promise = new Promise<DrivePage>((settle) => {
+    resolve = settle;
+  });
+  return { promise, resolve: (page: DrivePage) => resolve(page) };
+};
+
+const refreshedLoader = (refreshed: DrivePage | null) =>
+  vi.fn<PageLoader>(async (_key, { pageToken, rejectedToken }) => {
+    if (pageToken === 'stale') throw new RejectedPageTokenError(pageToken, { cause: REJECTED });
     if (pageToken === null) {
-      firstPages += 1;
-      return firstPages === 1 ? { files: [item('s1')], nextPageToken: 'stale' } : refreshed;
+      return rejectedToken === null ? { files: [item('s1')], nextPageToken: 'stale' } : refreshed;
     }
     const page = pages[pageToken];
     if (page === undefined) throw new Error(`no page ${pageToken}`);
     return page;
   });
-};
 
 describe('usePagedFiles', () => {
   it('loads the first page and reports progress', async () => {
@@ -155,6 +164,11 @@ describe('usePagedFiles', () => {
 
     const loaded = await act(() => result.current.loadMore(null));
 
+    expect(load).toHaveBeenCalledWith(
+      's',
+      { pageToken: null, rejectedToken: 'stale' },
+      expect.any(AbortSignal),
+    );
     expect(ids(loaded)).toEqual(['s1', 'd2']);
     expect(ids(result.current.files)).toEqual(['s1', 'd2']);
     expect(result.current.failed).toBe(false);
@@ -192,6 +206,72 @@ describe('usePagedFiles', () => {
     await act(() => result.current.loadMore(null));
 
     expect(result.current).toMatchObject({ missing: true, failed: false, files: [] });
+  });
+
+  it('keeps showing the loaded files until a restart has caught up', async () => {
+    const second = deferred();
+    const load = vi.fn<PageLoader>(async (_key, { pageToken, rejectedToken }) => {
+      if (pageToken === 'stale') throw new RejectedPageTokenError(pageToken, { cause: REJECTED });
+      if (pageToken === 'fresh') return second.promise;
+      if (rejectedToken !== null) return { files: [item('s1')], nextPageToken: 'fresh' };
+      return { files: [item('s1'), item('s2')], nextPageToken: 'stale' };
+    });
+    const { result } = renderHook(() => usePagedFiles('s', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    let loading: Promise<DriveItem[] | null> = Promise.resolve(null);
+    act(() => {
+      loading = result.current.loadMore(null);
+    });
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(4));
+
+    expect(ids(result.current.files)).toEqual(['s1', 's2']);
+    await act(async () => {
+      second.resolve({ files: [item('s2'), item('s3')], nextPageToken: null });
+      await loading;
+    });
+    expect(ids(result.current.files)).toEqual(['s1', 's2', 's3']);
+  });
+
+  it('keeps the loaded files when a restart fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const load = vi.fn<PageLoader>(async (_key, { pageToken, rejectedToken }) => {
+      if (pageToken === 'stale') throw new RejectedPageTokenError(pageToken, { cause: REJECTED });
+      if (pageToken === 'fresh') throw new Error('500');
+      if (rejectedToken !== null) return { files: [item('s1')], nextPageToken: 'fresh' };
+      return { files: [item('s1'), item('s2')], nextPageToken: 'stale' };
+    });
+    const { result } = renderHook(() => usePagedFiles('s', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    const loaded = await act(() => result.current.loadMore(null));
+
+    expect(loaded).toBeNull();
+    expect(ids(result.current.files)).toEqual(['s1', 's2']);
+    expect(result.current.failed).toBe(true);
+  });
+
+  it('stops loading pages once the page is gone', async () => {
+    const second = deferred();
+    const load = vi.fn<PageLoader>(async (_key, { pageToken }) => {
+      if (pageToken === 'd:second') return second.promise;
+      return pages[pageToken ?? 'd:first'] ?? null;
+    });
+    const { result, unmount } = renderHook(() => usePagedFiles('d', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    let loading: Promise<DriveItem[] | null> = Promise.resolve([]);
+    act(() => {
+      loading = result.current.loadMore(() => false);
+    });
+    await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
+    const signal = load.mock.calls[1]?.[2];
+    unmount();
+    second.resolve({ files: [item('d2')], nextPageToken: 'd:third' });
+
+    expect(await loading).toBeNull();
+    expect(signal?.aborted).toBe(true);
+    expect(load).toHaveBeenCalledTimes(2);
   });
 
   it('reports failure when the token is rejected again after a restart', async () => {

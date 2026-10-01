@@ -5,7 +5,19 @@ import { StatusError } from '../../shared/status-error.ts';
 
 export class ApiRequestError extends StatusError {}
 
-export class RejectedPageTokenError extends Error {}
+export class RejectedPageTokenError extends Error {
+  readonly pageToken: string;
+
+  constructor(pageToken: string, options: ErrorOptions) {
+    super('The page token was rejected', options);
+    this.name = new.target.name;
+    this.pageToken = pageToken;
+  }
+}
+
+export type PageRequest = { pageToken: string | null; rejectedToken: string | null };
+
+export const FIRST_PAGE: PageRequest = { pageToken: null, rejectedToken: null };
 
 const request = async <TSchema extends v.GenericSchema>(
   path: string,
@@ -32,30 +44,32 @@ const nullIfNotFound = async <T>(response: Promise<T>) => {
   }
 };
 
-const rejectingPageToken = async <T>(pageToken: string | null, response: Promise<T>) => {
+const requestPage = async (
+  path: string,
+  params: Record<string, string>,
+  { pageToken, rejectedToken }: PageRequest,
+  signal: AbortSignal | null,
+) => {
   try {
-    return await response;
+    return await request(
+      path,
+      { ...params, pageToken, rejected: rejectedToken },
+      signal,
+      DrivePageSchema,
+    );
   } catch (error) {
     if (pageToken !== null && error instanceof ApiRequestError && error.status === 400) {
-      throw new RejectedPageTokenError('The page token was rejected', { cause: error });
+      throw new RejectedPageTokenError(pageToken, { cause: error });
     }
     throw error;
   }
 };
 
-export const fetchFolder = (path: string, pageToken: string | null, signal: AbortSignal | null) =>
-  nullIfNotFound(
-    rejectingPageToken(
-      pageToken,
-      request('/api/list', { path, pageToken }, signal, DrivePageSchema),
-    ),
-  );
+export const fetchFolder = (path: string, page: PageRequest, signal: AbortSignal | null) =>
+  nullIfNotFound(requestPage('/api/list', { path }, page, signal));
 
-export const fetchSearch = (query: string, pageToken: string | null, signal: AbortSignal | null) =>
-  rejectingPageToken(
-    pageToken,
-    request('/api/search', { q: query, pageToken }, signal, DrivePageSchema),
-  );
+export const fetchSearch = (query: string, page: PageRequest, signal: AbortSignal | null) =>
+  requestPage('/api/search', { q: query }, page, signal);
 
 export const downloadHref = (fileId: string) =>
   `/api/download?${new URLSearchParams({ id: fileId })}`;

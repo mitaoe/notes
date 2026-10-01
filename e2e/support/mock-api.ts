@@ -65,25 +65,23 @@ const findFile = (params: URLSearchParams) => {
   return file === null || isFolder(file) ? null : file;
 };
 
-type MockState = { staleTokenRejected: boolean };
+const EXPIRED_TOKEN = 'expired';
 
-type Handler = (route: Route, params: URLSearchParams, state: MockState) => Promise<void>;
-
-const handlers: Record<string, Handler> = {
-  list: (route, params, state) => {
+const handlers: Record<string, (route: Route, params: URLSearchParams) => Promise<void>> = {
+  list: (route, params) => {
     const names = parseFolderPath(params.get('path') ?? '/');
-    const paging = params.get('pageToken') !== null;
+    const pageToken = params.get('pageToken');
     if (names?.includes(FAILING_NAME)) return json(route, { error: 'Something went wrong' }, 500);
-    if (names?.includes(LOAD_MORE_FAILS_NAME) && paging) {
+    if (names?.includes(LOAD_MORE_FAILS_NAME) && pageToken !== null) {
       return json(route, { error: 'Something went wrong' }, 500);
     }
-    if (names?.includes(STALE_TOKEN_NAME) && paging && !state.staleTokenRejected) {
-      state.staleTokenRejected = true;
-      return json(route, { error: 'pageToken is invalid' }, 400);
-    }
+    if (pageToken === EXPIRED_TOKEN) return json(route, { error: 'pageToken is invalid' }, 400);
     const folder = names === null ? null : findByPath(names);
     if (folder === null) return json(route, { error: 'Folder not found' }, 404);
-    return json(route, toPage(sortForListing(folder.children), params.get('pageToken')));
+    const page = toPage(sortForListing(folder.children), pageToken);
+    const servesExpiredToken =
+      names?.includes(STALE_TOKEN_NAME) && pageToken === null && !params.has('rejected');
+    return json(route, servesExpiredToken ? { ...page, nextPageToken: EXPIRED_TOKEN } : page);
   },
   search: (route, params) => {
     const query = params.get('q') ?? '';
@@ -112,13 +110,10 @@ const handlers: Record<string, Handler> = {
 
 export const mockDriveApi = async (page: Page) => {
   const context = page.context();
-  const state: MockState = { staleTokenRejected: false };
   await context.route('**/api/*', (route) => {
     const url = new URL(route.request().url());
     const handler = handlers[url.pathname.replace('/api/', '')];
-    return handler
-      ? handler(route, url.searchParams, state)
-      : json(route, { error: 'Not found' }, 404);
+    return handler ? handler(route, url.searchParams) : json(route, { error: 'Not found' }, 404);
   });
   await context.route('https://img.icons8.com/**', (route) =>
     route.fulfill({ contentType: 'image/x-icon', body: logo }),
