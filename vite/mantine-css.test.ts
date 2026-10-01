@@ -69,10 +69,14 @@ const bundlePosition = (bundle: string, name: string) => {
 };
 
 describe('src/styles/mantine.css', () => {
-  it('imports the stylesheet of every Mantine component in use and its dependencies', () => {
+  it('imports exactly the stylesheets of the Mantine components in use and their dependencies', () => {
     const imported = new Set(importedStylesheets());
-    const missing = [...requiredStylesheets()].filter((name) => !imported.has(name));
-    expect(missing).toEqual([]);
+    const required = requiredStylesheets();
+    const missing = [...required].filter((name) => !imported.has(name));
+    const unused = [...imported].filter(
+      (name) => !required.has(name) && !GLOBAL_STYLESHEETS.has(name),
+    );
+    expect({ missing, unused }).toEqual({ missing: [], unused: [] });
   });
 
   it('imports the global stylesheets first and components in Mantine bundle order', () => {
