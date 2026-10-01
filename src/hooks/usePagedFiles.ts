@@ -58,8 +58,9 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
 
   const loadMore = useCallback(
     async (goal: LoadGoal | null): Promise<DriveItem[] | null> => {
-      const signal = keyRequests.current?.signal;
-      if (key === null || nextPageToken === null || signal === undefined) return files;
+      const requests = keyRequests.current;
+      if (key === null || nextPageToken === null || requests === null) return files;
+      const { signal } = requests;
       const reached = goal ?? ONE_PAGE;
       const update = (change: (previous: LoadedPages) => LoadedPages) =>
         setLoaded((previous) =>

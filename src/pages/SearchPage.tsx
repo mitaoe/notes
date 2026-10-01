@@ -30,7 +30,10 @@ export function SearchPage() {
   const errorMessage = tooLong ? SEARCH_TOO_LONG : SEARCH_ERROR;
   const openingFolder = useRef<AbortController | null>(null);
   const [opening, setOpening] = useState<FolderOpening | null>(null);
-  usePageTitle(`Search: ${query?.slice(0, MAX_SEARCH_LENGTH)}`, query !== null);
+  usePageTitle(
+    query === null ? null : `Search: ${query.slice(0, MAX_SEARCH_LENGTH)}`,
+    query !== null,
+  );
 
   useEffect(() => {
     const pending = openingFolder;
