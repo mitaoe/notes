@@ -24,7 +24,7 @@ export function FolderPage() {
     fetchFolder,
   );
   const names = parseFolderPath(pathname) ?? [];
-  usePageTitle(missing ? NOT_FOUND_TITLE : (names.at(-1) ?? null));
+  usePageTitle(missing ? NOT_FOUND_TITLE : (names.at(-1) ?? null), true);
 
   if (missing) return <NotFoundPage />;
 
