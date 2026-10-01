@@ -21,6 +21,8 @@ const pages: Record<string, DrivePage | null> = {
   'b:first': pageB,
   'c:first': { files: [item('c1')], nextPageToken: 'c:missing' },
   'gone:first': null,
+  'e:first': { files: [item('e1')], nextPageToken: 'e:gone' },
+  'e:gone': null,
   'd:first': { files: [item('d1')], nextPageToken: 'd:second' },
   'd:second': { files: [item('d2')], nextPageToken: 'd:third' },
   'd:third': { files: [item('d3')], nextPageToken: null },
@@ -170,6 +172,16 @@ describe('usePagedFiles', () => {
 
     expect(ids(loaded)).toEqual(['s1', 'd2', 'd3']);
     expect(result.current.hasMore).toBe(false);
+  });
+
+  it('reports the folder as missing when a later page finds it gone', async () => {
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles('e', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    await act(() => result.current.loadMore(null));
+
+    expect(result.current).toMatchObject({ missing: true, failed: false, files: [] });
   });
 
   it('reports the folder as missing when it is gone on a restart', async () => {

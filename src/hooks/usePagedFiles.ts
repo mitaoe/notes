@@ -5,7 +5,7 @@ import { RejectedPageTokenError } from '../api/drive.ts';
 
 export type LoadGoal = (files: DriveItem[]) => boolean;
 
-const ANY_PAGE: LoadGoal = () => true;
+const ONE_PAGE: LoadGoal = () => true;
 
 export type PageLoader = (
   key: string,
@@ -52,7 +52,7 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   const loadMore = useCallback(
     async (goal: LoadGoal | null): Promise<DriveItem[] | null> => {
       if (key === null || nextPageToken === null) return files;
-      const reached = goal ?? ANY_PAGE;
+      const reached = goal ?? ONE_PAGE;
       const update = (change: (previous: LoadedPages) => LoadedPages) =>
         setLoaded((previous) =>
           previous !== null && previous.key === key ? change(previous) : previous,
@@ -63,11 +63,11 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
         done: LoadGoal,
       ): Promise<DriveItem[]> => {
         const page = await loadPage(key, pageToken, null);
-        if (page === null && pageToken === null) {
+        if (page === null) {
           update((previous) => ({ ...previous, files: [], nextPageToken: null, missing: true }));
           return [];
         }
-        const { files: pageFiles, nextPageToken: next } = page ?? NO_PAGE;
+        const { files: pageFiles, nextPageToken: next } = page;
         const all = [...listed, ...pageFiles];
         update((previous) => ({ ...previous, files: all, nextPageToken: next, failed: false }));
         return done(all) || next === null ? all : loadFrom(next, all, done);
