@@ -3,6 +3,7 @@ import * as v from 'valibot';
 export const FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder';
 export const PDF_MIME_TYPE = 'application/pdf';
 export const MAX_SEARCH_LENGTH = 200;
+export const FILE_LINK_ERROR_TITLE = 'File unavailable';
 
 const DriveItemSchema = v.object({
   id: v.string(),

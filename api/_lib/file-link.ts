@@ -1,3 +1,4 @@
+import { FILE_LINK_ERROR_TITLE } from '../../shared/drive.ts';
 import { shareFile } from './drive.ts';
 import {
   CACHE_CONTROL,
@@ -25,9 +26,9 @@ const errorPage: ErrorResponder = (error) =>
       '<meta charset="utf-8">',
       '<meta name="viewport" content="width=device-width, initial-scale=1">',
       '<meta name="color-scheme" content="dark">',
-      '<title>File unavailable</title>',
+      `<title>${FILE_LINK_ERROR_TITLE}</title>`,
       `<style>${ERROR_PAGE_STYLE}</style>`,
-      '<h1>File unavailable</h1>',
+      `<h1>${FILE_LINK_ERROR_TITLE}</h1>`,
       `<p>${ERROR_MESSAGES.get(error.status) ?? FALLBACK_MESSAGE}</p>`,
       '<p><a href="/">Back to the notes</a></p>',
     ].join(''),

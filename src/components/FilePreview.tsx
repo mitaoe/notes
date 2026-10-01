@@ -3,7 +3,7 @@ import { useHotkeys, useMediaQuery } from '@mantine/hooks';
 import { clsx } from 'clsx';
 import { useState, type SyntheticEvent } from 'react';
 
-import type { DriveItem } from '../../shared/drive.ts';
+import { FILE_LINK_ERROR_TITLE, type DriveItem } from '../../shared/drive.ts';
 import { previewHref } from '../api/drive.ts';
 import { useDownload } from '../hooks/useDownload.ts';
 import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '../icons.ts';
@@ -25,7 +25,7 @@ const FRAME_SANDBOX = [
 type FrameState = 'loading' | 'loaded' | 'failed';
 
 const frameStateAfterLoad = (event: SyntheticEvent<HTMLIFrameElement>): FrameState =>
-  event.currentTarget.contentDocument === null ? 'loaded' : 'failed';
+  event.currentTarget.contentDocument?.title === FILE_LINK_ERROR_TITLE ? 'failed' : 'loaded';
 
 type FilePreviewProps = {
   file: DriveItem;

@@ -2,8 +2,13 @@ import { readFileSync } from 'node:fs';
 
 import type { Page, Route } from '@playwright/test';
 
-import { PAGE_SIZE, downloadUrl, previewUrl } from '../../api/_lib/drive.ts';
-import { isFolder, type DriveItem, type DrivePage } from '../../shared/drive.ts';
+import { PAGE_SIZE } from '../../api/_lib/drive.ts';
+import {
+  FILE_LINK_ERROR_TITLE,
+  isFolder,
+  type DriveItem,
+  type DrivePage,
+} from '../../shared/drive.ts';
 import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import {
   BROKEN_PREVIEW_NAME,
@@ -49,7 +54,7 @@ const pathOf = (node: FixtureNode) => {
 const PREVIEW_PAGE =
   '<!doctype html><title>preview</title><body style="margin:0;background:#fff"></body>';
 
-const FILE_ERROR_PAGE = '<!doctype html><title>File unavailable</title><h1>File unavailable</h1>';
+const FILE_ERROR_PAGE = `<!doctype html><title>${FILE_LINK_ERROR_TITLE}</title>`;
 
 const fileError = (route: Route, status: number) =>
   route.fulfill({ status, contentType: 'text/html', body: FILE_ERROR_PAGE });
@@ -85,13 +90,13 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
   download: (route, params) => {
     const file = findFile(params);
     if (file === null) return fileError(route, 404);
-    return route.fulfill({ status: 302, headers: { Location: downloadUrl(file.id) } });
+    return route.fulfill({ status: 204 });
   },
   preview: (route, params) => {
     const file = findFile(params);
     if (file === null) return fileError(route, 404);
     if (file.name === BROKEN_PREVIEW_NAME) return fileError(route, 500);
-    return route.fulfill({ status: 302, headers: { Location: previewUrl(file.id) } });
+    return route.fulfill({ contentType: 'text/html', body: PREVIEW_PAGE });
   },
 };
 
@@ -102,9 +107,6 @@ export const mockDriveApi = async (page: Page) => {
     const handler = handlers[url.pathname.replace('/api/', '')];
     return handler ? handler(route, url.searchParams) : json(route, { error: 'Not found' }, 404);
   });
-  await context.route('https://drive.google.com/**', (route) =>
-    route.fulfill({ contentType: 'text/html', body: PREVIEW_PAGE }),
-  );
   await context.route('https://img.icons8.com/**', (route) =>
     route.fulfill({ contentType: 'image/x-icon', body: logo }),
   );
