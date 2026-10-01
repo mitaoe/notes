@@ -16,7 +16,7 @@ import {
   type FixtureNode,
 } from '../fixtures/drive.ts';
 
-export const FAILING_QUERY = 'boom';
+export const FAILING_NAME = 'boom';
 
 const logo = readFileSync(new URL('../../public/favicon.ico', import.meta.url));
 
@@ -62,7 +62,7 @@ const findFile = (params: URLSearchParams) => {
 const handlers: Record<string, (route: Route, params: URLSearchParams) => Promise<void>> = {
   list: (route, params) => {
     const names = parseFolderPath(params.get('path') ?? '/');
-    if (names?.includes(FAILING_QUERY)) return json(route, { error: 'Something went wrong' }, 500);
+    if (names?.includes(FAILING_NAME)) return json(route, { error: 'Something went wrong' }, 500);
     if (names?.includes(LOAD_MORE_FAILS_NAME) && params.get('pageToken') !== null) {
       return json(route, { error: 'Something went wrong' }, 500);
     }
@@ -72,7 +72,7 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
   },
   search: (route, params) => {
     const query = params.get('q') ?? '';
-    if (query === FAILING_QUERY) return json(route, { error: 'Something went wrong' }, 500);
+    if (query === FAILING_NAME) return json(route, { error: 'Something went wrong' }, 500);
     return json(route, toPage(searchNodes(query), params.get('pageToken')));
   },
   path: (route, params) => {

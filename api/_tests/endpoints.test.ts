@@ -69,7 +69,7 @@ describe('GET /api/list', () => {
       'fetch',
       vi.fn<() => Promise<Response>>(async () => new Response('boom', { status: 503 })),
     );
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     const { GET } = await import('../list.ts');
 
     const response = await GET(get('/api/list?path=/'));

@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 
-import { FAILING_QUERY, mockDriveApi } from './support/mock-api.ts';
+import { FAILING_NAME, mockDriveApi } from './support/mock-api.ts';
 
 test.beforeEach(async ({ page }) => {
   await page.clock.setFixedTime(new Date('2026-01-15T12:00:00Z'));
@@ -68,7 +68,7 @@ test('search without results', async ({ page }) => {
 });
 
 test('search failure', async ({ page }) => {
-  await page.goto(`/search?q=${FAILING_QUERY}`);
+  await page.goto(`/search?q=${FAILING_NAME}`);
   await expect(page.getByText('Search failed')).toBeVisible();
   await matchPage(page, 'search-error');
 });

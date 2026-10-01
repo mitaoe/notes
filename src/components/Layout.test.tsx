@@ -18,7 +18,7 @@ const renderLayout = (route = '/') =>
 
 const location = () => screen.getByTestId(LOCATION_TEST_ID);
 
-describe('Layout search', () => {
+describe('Layout', () => {
   it('navigates to the search page with the trimmed query', async () => {
     renderLayout();
 

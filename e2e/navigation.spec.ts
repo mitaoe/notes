@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import { LOAD_MORE_FAILS_NAME } from './fixtures/drive.ts';
-import { FAILING_QUERY, mockDriveApi } from './support/mock-api.ts';
+import { FAILING_NAME, mockDriveApi } from './support/mock-api.ts';
 
 test.beforeEach(async ({ page }) => {
   await mockDriveApi(page);
@@ -87,7 +87,7 @@ test('an open preview does not follow the user to another folder', async ({ page
 });
 
 test('a folder that fails to load shows an error', async ({ page }) => {
-  await page.goto(`/${FAILING_QUERY}`);
+  await page.goto(`/${FAILING_NAME}`);
 
   await expect(
     page.getByText('An error occurred while loading this folder. Please try again.'),
