@@ -173,6 +173,26 @@ describe('listFolder', () => {
     expect(await listFolder(['fy', '00_journals'], 'next-page')).toBeNull();
   });
 
+  it('finds a folder inside a replaced remembered parent', async () => {
+    const files = tree.map((file) => ({ ...file }));
+    useFakeGoogle(files);
+    const { listFolder } = await loadDrive();
+    await listFolder(['fy'], null);
+
+    for (const file of files) {
+      if (file.id === 'fy' || file.parents.includes('fy')) file.trashed = true;
+    }
+    files.push(
+      folder('fy-2', 'fy', ROOT_ID),
+      folder('sub', 'sub', 'fy-2'),
+      pdf('inner', 'inner.pdf', 'sub'),
+    );
+
+    expect((await listFolder(['fy', 'sub'], null))?.files.map((file) => file.id)).toEqual([
+      'inner',
+    ]);
+  });
+
   it('starts a replaced folder from its first page', async () => {
     const files = tree.map((file) => ({ ...file }));
     useFakeGoogle(files);

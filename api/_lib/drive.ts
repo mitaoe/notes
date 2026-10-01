@@ -141,7 +141,7 @@ const resolveFolderId = (names: readonly string[], useCache: boolean) =>
   }, Promise.resolve(ROOT_FOLDER_ID));
 
 export const listFolder = async (names: readonly string[], pageToken: string | null) => {
-  const folderId = await resolveFolderId(names, true);
+  const folderId = (await resolveFolderId(names, true)) ?? (await resolveFolderId(names, false));
   if (folderId === null) return null;
   const page = await listFiles(folderContentsQuery(folderId), pageToken);
   if (page.files.length > 0 || names.length === 0) return page;
