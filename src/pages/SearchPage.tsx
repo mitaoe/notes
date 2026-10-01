@@ -1,6 +1,6 @@
 import { Box, Title } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import type { DriveItem } from '../../shared/drive.ts';
 import { fetchFolderPath, fetchSearch } from '../api/drive.ts';
@@ -9,6 +9,8 @@ import { FileList } from '../components/FileList.tsx';
 import type { FolderOpening } from '../components/FileRow.tsx';
 import { SearchTitle } from '../components/SearchTitle.tsx';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
+import { useSearchQuery } from '../hooks/useSearchQuery.ts';
+import { FolderPage } from './FolderPage.tsx';
 
 import classes from './Page.module.css';
 
@@ -18,9 +20,8 @@ const SEARCH_EMPTY =
 
 export function SearchPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const query = (searchParams.get('q') ?? '').trim();
-  const { files, loading, failed, hasMore, loadMore } = usePagedFiles(query || null, fetchSearch);
+  const query = useSearchQuery();
+  const { files, loading, failed, hasMore, loadMore } = usePagedFiles(query, fetchSearch);
   const openingFolder = useRef<AbortController | null>(null);
   const [opening, setOpening] = useState<FolderOpening | null>(null);
 
@@ -46,13 +47,13 @@ export function SearchPage() {
     }
   };
 
+  if (query === null) return <FolderPage />;
+
   return (
     <Box className={classes.page}>
-      {query && (
-        <Title order={2} mb="xl" className={classes.searchTitle}>
-          <SearchTitle query={query} loading={loading} failed={failed} empty={files.length === 0} />
-        </Title>
-      )}
+      <Title order={2} mb="xl" className={classes.searchTitle}>
+        <SearchTitle query={query} loading={loading} failed={failed} empty={files.length === 0} />
+      </Title>
 
       {failed && <ErrorAlert message={SEARCH_ERROR} />}
 

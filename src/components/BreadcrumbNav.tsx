@@ -3,6 +3,7 @@ import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 
+import { routes } from '../config.ts';
 import { IconChevronLeft, IconChevronRight } from '../icons.ts';
 
 import classes from './BreadcrumbNav.module.css';
@@ -26,7 +27,7 @@ const decodeSegment = (segment: string) => {
 const toCrumbs = (pathname: string): Crumb[] => {
   const segments = pathname.split('/').filter(Boolean);
   return [
-    { label: HOME_LABEL, path: '/', long: false },
+    { label: HOME_LABEL, path: routes.home, long: false },
     ...segments.map((segment, index) => ({
       label: decodeSegment(segment),
       path: `/${segments.slice(0, index + 1).join('/')}`,
@@ -35,9 +36,9 @@ const toCrumbs = (pathname: string): Crumb[] => {
   ];
 };
 
-type BreadcrumbNavProps = { pathname: string };
+type BreadcrumbNavProps = { pathname: string; search: string };
 
-export function BreadcrumbNav({ pathname }: BreadcrumbNavProps) {
+export function BreadcrumbNav({ pathname, search }: BreadcrumbNavProps) {
   const viewportRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -90,7 +91,7 @@ export function BreadcrumbNav({ pathname }: BreadcrumbNavProps) {
               <Anchor
                 key={crumb.path}
                 component={Link}
-                to={crumb.path}
+                to={index === crumbs.length - 1 ? `${crumb.path}${search}` : crumb.path}
                 title={crumb.label}
                 className={clsx(
                   classes.crumb,

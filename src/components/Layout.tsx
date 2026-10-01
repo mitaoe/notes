@@ -10,9 +10,10 @@ import {
   Stack,
 } from '@mantine/core';
 import { useState, type ReactNode } from 'react';
-import { Link, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate } from 'react-router';
 
 import { routes, site } from '../config.ts';
+import { useSearchQuery } from '../hooks/useSearchQuery.ts';
 import { IconSearch } from '../icons.ts';
 import { Footer } from './Footer.tsx';
 import { SearchBar } from './SearchBar.tsx';
@@ -28,12 +29,12 @@ type LayoutProps = { children: ReactNode };
 export function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
 
-  const onSearchPage = useMatch(routes.search) !== null;
-  const submittedQuery = onSearchPage ? (searchParams.get('q') ?? '').trim() : '';
+  const searchQuery = useSearchQuery();
+  const onSearchPage = searchQuery !== null;
+  const submittedQuery = searchQuery ?? '';
   const [query, setQuery] = useState(submittedQuery);
   const [previous, setPrevious] = useState({ pathname: location.pathname, submittedQuery });
 
@@ -53,7 +54,7 @@ export function Layout({ children }: LayoutProps) {
 
   const clear = () => {
     setQuery('');
-    if (onSearchPage) void navigate('/');
+    if (onSearchPage) void navigate(routes.home);
   };
 
   const closeMobileSearch = () => {
@@ -66,7 +67,7 @@ export function Layout({ children }: LayoutProps) {
         <Container size="lg" h="100%">
           <Group justify="space-between" h="100%" gap="xl">
             <Group gap="xl">
-              <Link to="/" className={classes.logoLink}>
+              <Link to={routes.home} className={classes.logoLink}>
                 <Image
                   src={site.logoUrl}
                   alt={site.name}

@@ -8,6 +8,6 @@ export const site = {
 } as const;
 
 export const routes = {
+  home: '/',
   search: '/search',
-  notFound: '/404',
 } as const;

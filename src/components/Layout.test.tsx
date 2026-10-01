@@ -68,14 +68,17 @@ describe('Layout search', () => {
     expect(screen.getByRole('button', { name: 'Open search' })).toBeInTheDocument();
   });
 
-  it('treats a folder named like the search page as a folder', async () => {
-    renderLayout('/search_notes');
+  it.each(['/search_notes', '/search', '/search?q=%20'])(
+    'treats %s as a folder, not the search page',
+    async (route) => {
+      renderLayout(route);
 
-    await userEvent.click(screen.getByRole('button', { name: 'Open search' }));
-    await userEvent.click(screen.getByText('page text'));
+      await userEvent.click(screen.getByRole('button', { name: 'Open search' }));
+      await userEvent.click(screen.getByText('page text'));
 
-    expect(screen.getByRole('button', { name: 'Open search' })).toBeInTheDocument();
-  });
+      expect(screen.getByRole('button', { name: 'Open search' })).toBeInTheDocument();
+    },
+  );
 
   it('keeps the mobile search open when clicking elsewhere with a query', async () => {
     renderLayout();

@@ -135,6 +135,36 @@ describe('SearchPage', () => {
     expect(screen.queryByText('Search failed')).not.toBeInTheDocument();
   });
 
+  it('searches again from the search breadcrumb after a failure', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn<typeof fetch>()
+        .mockResolvedValueOnce(Response.json({ error: 'Something went wrong' }, { status: 500 }))
+        .mockResolvedValueOnce(Response.json(results)),
+    );
+    renderInLayout('/search?q=journals');
+    expect(await screen.findByText('Search failed')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('link', { name: 'search' }));
+
+    expect(await screen.findByRole('button', { name: '00_journals' })).toBeInTheDocument();
+    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=journals');
+  });
+
+  it('opens a top-level folder named search when there is no query', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => Response.json(results));
+    vi.stubGlobal('fetch', fetchMock);
+    renderWithProviders(<SearchPage />, '/search');
+
+    expect(await screen.findByRole('link', { name: '00_journals' })).toHaveAttribute(
+      'href',
+      '/search/00_journals',
+    );
+    expect(fetchMock).toHaveBeenCalledWith('/api/list?path=%2Fsearch', expect.anything());
+  });
+
   it('drops a pending folder lookup when another search starts', async () => {
     const answers: ((response: Response) => void)[] = [];
     vi.stubGlobal(

@@ -31,7 +31,7 @@ export function FileList({
   onLoadMore,
   folderOpener,
 }: FileListProps) {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const [previewFile, setPreviewFile] = useState<DriveItem | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
 
@@ -48,7 +48,7 @@ export function FileList({
   if (loading) {
     return (
       <>
-        <BreadcrumbNav pathname={pathname} />
+        <BreadcrumbNav pathname={pathname} search={search} />
         <Group justify="center" className={classes.loading}>
           <Loader size="lg" type="dots" />
         </Group>
@@ -58,7 +58,7 @@ export function FileList({
 
   return (
     <>
-      <BreadcrumbNav pathname={pathname} />
+      <BreadcrumbNav pathname={pathname} search={search} />
       <Box>
         {files.length === 0 && !failed && <EmptyState message={emptyMessage} />}
         {files.length > 0 && (
