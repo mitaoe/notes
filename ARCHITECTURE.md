@@ -136,4 +136,6 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 
 Vercel builds each deployment with `pnpm build` and deploys `dist/` plus one function per `.ts` file directly in `api/` whose name does not start with `_`. `vercel.json` rewrites every non-API path to `index.html` so client routes load directly, marks the content-hashed files in `/assets` as immutable, and sends `X-Content-Type-Options: nosniff` on every response.
 
+Because the same `index.html` serves every route, it carries no `rel="canonical"` link and no `og:url`: one static value would tell search engines and link previews that every folder is the home page. Without them, Google chooses the canonical URL itself. `public/sitemap.xml` lists only the home page, since folders are reached through it and the search page has nothing to index without a query.
+
 CI (`.github/workflows/ci.yml`) runs formatting, lint, type-checking, unit tests and the build in one job, and the Playwright suite in another.
