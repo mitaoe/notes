@@ -11,20 +11,29 @@ const pdf: DriveItem = { id: 'p1', name: 'notes.pdf', mimeType: 'application/pdf
 const image: DriveItem = { id: 'i1', name: 'lab.png', mimeType: 'image/png', size: 0 };
 
 const setup = (file: DriveItem) => {
-  const handlers = {
-    onOpenFolder: vi.fn<(folder: DriveItem) => void>(),
-    onPreview: vi.fn<(file: DriveItem) => void>(),
-  };
-  renderWithProviders(<FileRow file={file} {...handlers} />);
-  return handlers;
+  const onOpen = vi.fn<(folder: DriveItem) => void>();
+  const onPreview = vi.fn<(file: DriveItem) => void>();
+  renderWithProviders(<FileRow file={file} folderOpener={{ onOpen }} onPreview={onPreview} />);
+  return { onOpen, onPreview };
 };
 
 describe('FileRow', () => {
-  it('opens folders', async () => {
-    const { onOpenFolder } = setup(folder);
+  it('opens folders through the callback', async () => {
+    const { onOpen } = setup(folder);
     await userEvent.click(screen.getByRole('button', { name: 'fy' }));
-    expect(onOpenFolder).toHaveBeenCalledWith(folder);
+    expect(onOpen).toHaveBeenCalledWith(folder);
     expect(screen.queryByTitle('Download')).not.toBeInTheDocument();
+  });
+
+  it('links folders when their path is known', () => {
+    renderWithProviders(
+      <FileRow
+        file={folder}
+        folderOpener={{ href: (target) => `/${target.name}` }}
+        onPreview={vi.fn<(file: DriveItem) => void>()}
+      />,
+    );
+    expect(screen.getByRole('link', { name: 'fy' })).toHaveAttribute('href', '/fy');
   });
 
   it('shows size, preview and download for PDFs', async () => {

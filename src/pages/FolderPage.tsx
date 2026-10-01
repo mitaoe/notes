@@ -1,5 +1,5 @@
 import { Box } from '@mantine/core';
-import { useLocation, useNavigate } from 'react-router';
+import { useLocation } from 'react-router';
 
 import type { DriveItem } from '../../shared/drive.ts';
 import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
@@ -14,12 +14,10 @@ const FOLDER_ERROR = 'An error occurred while loading this folder. Please try ag
 
 export function FolderPage() {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const { files, loading, failed, hasMore, loadMore } = usePagedFiles(pathname, fetchFolder);
 
-  const openFolder = (folder: DriveItem) => {
-    void navigate(toFolderPath([...(parseFolderPath(pathname) ?? []), folder.name]));
-  };
+  const folderHref = (folder: DriveItem) =>
+    toFolderPath([...(parseFolderPath(pathname) ?? []), folder.name]);
 
   return (
     <Box className={classes.page}>
@@ -30,7 +28,7 @@ export function FolderPage() {
         loading={loading}
         hasMore={hasMore}
         onLoadMore={loadMore}
-        onFolderClick={openFolder}
+        folderOpener={{ href: folderHref }}
       />
     </Box>
   );

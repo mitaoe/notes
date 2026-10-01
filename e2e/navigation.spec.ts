@@ -19,12 +19,12 @@ test('breadcrumbs link back up the tree', async ({ page }) => {
   await page.getByRole('link', { name: 'fy', exact: true }).click();
 
   await expect(page).toHaveURL('/fy');
-  await expect(page.getByRole('button', { name: '00_journals' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '00_journals' })).toBeVisible();
 });
 
 test('folders with special characters round-trip through the URL', async ({ page }) => {
   await page.goto('/sy');
-  await page.getByRole('button', { name: "o'reilly & co #1" }).click();
+  await page.getByRole('link', { name: "o'reilly & co #1" }).click();
 
   await expect(page).toHaveURL(`/sy/${encodeURIComponent("o'reilly & co #1")}`);
   await page.reload();
@@ -33,11 +33,11 @@ test('folders with special characters round-trip through the URL', async ({ page
 
 test('load more appends the next page', async ({ page }) => {
   await page.goto('/fy');
-  await expect(page.getByRole('button', { name: /^\d\d_/ })).toHaveCount(10);
+  await expect(page.getByRole('link', { name: /^\d\d_/ })).toHaveCount(10);
 
   await page.getByRole('button', { name: 'Load More' }).click();
 
-  await expect(page.getByRole('button', { name: /^\d\d_/ })).toHaveCount(12);
+  await expect(page.getByRole('link', { name: /^\d\d_/ })).toHaveCount(12);
 });
 
 test('preview steps through PDFs only', async ({ page }) => {
@@ -74,14 +74,14 @@ test('a preview that fails to load says so', async ({ page }) => {
 
 test('an open preview does not follow the user to another folder', async ({ page }) => {
   await page.goto('/fy');
-  await page.getByRole('button', { name: '00_journals' }).click();
+  await page.getByRole('link', { name: '00_journals' }).click();
   await page.getByTitle('Preview').first().click();
   await expect(page.getByRole('dialog')).toBeVisible();
 
   await page.goBack();
 
   await expect(page).toHaveURL('/fy');
-  await expect(page.getByRole('button', { name: '00_journals' })).toBeVisible();
+  await expect(page.getByRole('link', { name: '00_journals' })).toBeVisible();
   await expect(page.getByRole('dialog')).toBeHidden();
 });
 

@@ -55,7 +55,7 @@ export function SearchPage() {
         loading={loading}
         hasMore={hasMore}
         onLoadMore={loadMore}
-        onFolderClick={(folder) => void openFolder(folder)}
+        folderOpener={{ onOpen: (folder) => void openFolder(folder) }}
       />
     </Box>
   );

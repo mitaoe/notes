@@ -7,7 +7,7 @@ import { PDF_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
 import { BreadcrumbNav } from './BreadcrumbNav.tsx';
 import { EmptyState } from './EmptyState.tsx';
 import { FilePreview } from './FilePreview.tsx';
-import { FileRow } from './FileRow.tsx';
+import { FileRow, type FolderOpener } from './FileRow.tsx';
 
 import buttonClasses from '../styles/buttons.module.css';
 import classes from './FileList.module.css';
@@ -17,10 +17,10 @@ type FileListProps = {
   loading: boolean;
   hasMore: boolean;
   onLoadMore: () => Promise<void>;
-  onFolderClick: (folder: DriveItem) => void;
+  folderOpener: FolderOpener;
 };
 
-export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }: FileListProps) {
+export function FileList({ files, loading, hasMore, onLoadMore, folderOpener }: FileListProps) {
   const { pathname } = useLocation();
   const [previewFile, setPreviewFile] = useState<DriveItem | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -58,7 +58,7 @@ export function FileList({ files, loading, hasMore, onLoadMore, onFolderClick }:
               <FileRow
                 key={file.id}
                 file={file}
-                onOpenFolder={onFolderClick}
+                folderOpener={folderOpener}
                 onPreview={setPreviewFile}
               />
             ))}

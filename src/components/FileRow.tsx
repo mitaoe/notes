@@ -1,5 +1,6 @@
 import { ActionIcon, Box, Text } from '@mantine/core';
 import { clsx } from 'clsx';
+import { Link } from 'react-router';
 
 import { PDF_MIME_TYPE, isFolder, type DriveItem } from '../../shared/drive.ts';
 import { useDownload } from '../hooks/useDownload.ts';
@@ -12,13 +13,17 @@ import classes from './FileRow.module.css';
 
 const ACTION_ICON_SIZE = 18;
 
+export type FolderOpener =
+  | { href: (folder: DriveItem) => string }
+  | { onOpen: (folder: DriveItem) => void };
+
 type FileRowProps = {
   file: DriveItem;
-  onOpenFolder: (folder: DriveItem) => void;
+  folderOpener: FolderOpener;
   onPreview: (file: DriveItem) => void;
 };
 
-export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
+export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
   const { downloading, download } = useDownload(file.id);
   const folder = isFolder(file);
 
@@ -31,15 +36,26 @@ export function FileRow({ file, onOpenFolder, onPreview }: FileRowProps) {
           </Box>
           <Box className={classes.names}>
             {folder ? (
-              <Text
-                component="button"
-                type="button"
-                truncate
-                className={clsx(classes.name, classes.folderName)}
-                onClick={() => onOpenFolder(file)}
-              >
-                {file.name}
-              </Text>
+              'href' in folderOpener ? (
+                <Text
+                  component={Link}
+                  to={folderOpener.href(file)}
+                  truncate
+                  className={clsx(classes.name, classes.folderName)}
+                >
+                  {file.name}
+                </Text>
+              ) : (
+                <Text
+                  component="button"
+                  type="button"
+                  truncate
+                  className={clsx(classes.name, classes.folderName)}
+                  onClick={() => folderOpener.onOpen(file)}
+                >
+                  {file.name}
+                </Text>
+              )
             ) : (
               <>
                 <Text size="md" fw={500} truncate className={clsx(classes.name, classes.fileName)}>
