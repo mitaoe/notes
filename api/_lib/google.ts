@@ -36,7 +36,7 @@ const requestToken = async (): Promise<AccessToken> => {
     }),
   });
   if (!response.ok)
-    throw new GoogleApiError(response.status, `Token refresh failed: ${await response.text()}`);
+    throw new Error(`Token refresh failed with ${response.status}: ${await response.text()}`);
   const body = v.parse(TokenResponseSchema, await response.json());
   return {
     value: body.access_token,

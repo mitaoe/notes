@@ -143,6 +143,17 @@ describe('listFolder', () => {
     );
   });
 
+  it('reports a failed token refresh as a server error, not a bad page token', async () => {
+    const { failNext } = useFakeGoogle(tree);
+    const { listFolder } = await loadDrive();
+    failNext(TOKEN_URL, 400);
+
+    const failure = listFolder([], 'next-page');
+
+    await expect(failure).rejects.toThrow('Token refresh failed with 400');
+    await expect(failure).rejects.not.toBeInstanceOf(HttpError);
+  });
+
   it('reuses the access token and resolved folder ids', async () => {
     const { requests } = useFakeGoogle(tree);
     const { listFolder } = await loadDrive();

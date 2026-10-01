@@ -104,6 +104,11 @@ export const useFakeGoogle = (files: FakeFile[]) => {
       body: typeof init.body === 'string' ? JSON.parse(init.body) : init.body,
     });
 
+    const tokenFailure = failures.get(TOKEN_URL);
+    if (url.href === TOKEN_URL && tokenFailure !== undefined) {
+      failures.delete(TOKEN_URL);
+      return respond({ error: 'invalid_grant' }, tokenFailure);
+    }
     if (url.href === TOKEN_URL) {
       return respond({ access_token: `token-${requests.length}`, expires_in: TOKEN_LIFETIME_S });
     }
