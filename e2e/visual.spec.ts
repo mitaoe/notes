@@ -98,15 +98,15 @@ test('focused search input', { tag: '@desktop-only' }, async ({ page }) => {
 test('mobile search opened', { tag: '@mobile-only' }, async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('syllabus.pdf')).toBeVisible();
-  await page.locator('header button:has(.tabler-icon-search):visible').click();
-  await expect(page.locator('input[placeholder="Search files..."]:visible')).toBeFocused();
+  await page.getByRole('button', { name: 'Open search' }).click();
+  await expect(page.getByRole('textbox', { name: 'Search files' })).toBeFocused();
   await expect(page).toHaveScreenshot('mobile-search-open.png');
 });
 
 test('mobile menu opened', { tag: '@mobile-only' }, async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('syllabus.pdf')).toBeVisible();
-  await page.locator('.mantine-Burger-root').click();
+  await page.getByRole('button', { name: 'Toggle menu' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page).toHaveScreenshot('mobile-menu-open.png');
 });
