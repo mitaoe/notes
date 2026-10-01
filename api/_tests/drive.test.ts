@@ -224,6 +224,17 @@ describe('listFolder', () => {
     expect(await listFolder(['ty'], null)).toEqual({ files: [], nextPageToken: null });
   });
 
+  it('rechecks only the remembered steps of a path', async () => {
+    const { requests } = useFakeGoogle(tree);
+    const { listFolder } = await loadDrive();
+    await listFolder(['fy'], null);
+    const before = folderLookups(requests).length;
+
+    expect(await listFolder(['fy', 'nope'], null)).toBeNull();
+
+    expect(folderLookups(requests).slice(before)).toEqual(['nope', 'fy']);
+  });
+
   it('looks a path up only once when nothing was remembered', async () => {
     const { requests } = useFakeGoogle([
       ...tree,
