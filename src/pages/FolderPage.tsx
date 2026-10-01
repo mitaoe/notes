@@ -9,7 +9,7 @@ import { FileList } from '../components/FileList.tsx';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
 import { NotFoundPage } from './NotFoundPage.tsx';
 
-import classes from './Page.module.css';
+import pageClasses from '../styles/page.module.css';
 
 const FOLDER_ERROR = 'An error occurred while loading this folder. Please try again.';
 const FOLDER_EMPTY =
@@ -28,7 +28,7 @@ export function FolderPage() {
     toFolderPath([...(parseFolderPath(pathname) ?? []), folder.name]);
 
   return (
-    <Box className={classes.page}>
+    <Box className={pageClasses.page}>
       {failed && files.length === 0 && <ErrorAlert message={FOLDER_ERROR} />}
       <FileList
         files={files}

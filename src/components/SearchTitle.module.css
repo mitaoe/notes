@@ -1,8 +1,4 @@
-.page {
-  padding-top: 2rem;
-}
-
-.searchTitle {
+.title {
   display: flex;
   flex-wrap: wrap;
   align-items: center;

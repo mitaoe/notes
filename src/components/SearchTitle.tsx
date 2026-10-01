@@ -1,30 +1,27 @@
-import { Text } from '@mantine/core';
+import { Text, Title } from '@mantine/core';
+
+import classes from './SearchTitle.module.css';
 
 type SearchTitleProps = { query: string; loading: boolean; failed: boolean; empty: boolean };
 
 export function SearchTitle({ query, loading, failed, empty }: SearchTitleProps) {
-  if (loading) {
-    return (
-      <Text span fw={400} c="dimmed">
-        Searching...
-      </Text>
-    );
-  }
-  if (failed && empty) {
-    return (
-      <Text span fw={400} c="red">
-        Search failed
-      </Text>
-    );
-  }
+  const status = loading ? 'Searching...' : failed && empty ? 'Search failed' : null;
   return (
-    <>
-      <Text span c="dimmed">
-        {empty ? 'No items found matching ' : 'Results for '}
-      </Text>
-      <Text span fw={500}>
-        &quot;{query}&quot;
-      </Text>
-    </>
+    <Title order={2} mb="xl" className={classes.title}>
+      {status !== null ? (
+        <Text span fw={400} c={loading ? 'dimmed' : 'red'}>
+          {status}
+        </Text>
+      ) : (
+        <>
+          <Text span c="dimmed">
+            {empty ? 'No items found matching ' : 'Results for '}
+          </Text>
+          <Text span fw={500}>
+            &quot;{query}&quot;
+          </Text>
+        </>
+      )}
+    </Title>
   );
 }

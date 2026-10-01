@@ -1,4 +1,4 @@
-import { Box, Title } from '@mantine/core';
+import { Box } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
@@ -12,7 +12,7 @@ import { usePagedFiles } from '../hooks/usePagedFiles.ts';
 import { useSearchQuery } from '../hooks/useSearchQuery.ts';
 import { FolderPage } from './FolderPage.tsx';
 
-import classes from './Page.module.css';
+import pageClasses from '../styles/page.module.css';
 
 const SEARCH_ERROR = 'An error occurred while searching. Please try again.';
 const SEARCH_TOO_LONG = `Searches are limited to ${MAX_SEARCH_LENGTH} characters. Shorten the search and try again.`;
@@ -55,10 +55,8 @@ export function SearchPage() {
   if (query === null) return <FolderPage />;
 
   return (
-    <Box className={classes.page}>
-      <Title order={2} mb="xl" className={classes.searchTitle}>
-        <SearchTitle query={query} loading={loading} failed={failed} empty={files.length === 0} />
-      </Title>
+    <Box className={pageClasses.page}>
+      <SearchTitle query={query} loading={loading} failed={failed} empty={files.length === 0} />
 
       {failed && files.length === 0 && <ErrorAlert message={errorMessage} />}
 
