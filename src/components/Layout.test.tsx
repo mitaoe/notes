@@ -11,6 +11,7 @@ const renderLayout = (route = '/') =>
   renderWithProviders(
     <Layout>
       <Link to="/fy">open fy</Link>
+      <p>page text</p>
     </Layout>,
     route,
   );
@@ -61,9 +62,21 @@ describe('Layout search', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Open search' }));
     expect(screen.getAllByRole('textbox', { name: 'Search files' })).toHaveLength(2);
 
-    await userEvent.click(screen.getByRole('link', { name: 'open fy' }));
+    await userEvent.click(screen.getByText('page text'));
 
+    expect(screen.getAllByRole('textbox', { name: 'Search files' })).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Open search' })).toBeInTheDocument();
+  });
+
+  it('keeps the mobile search open when clicking elsewhere with a query', async () => {
+    renderLayout();
+
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search files' }), 'unit');
+    await userEvent.click(screen.getByRole('button', { name: 'Open search' }));
+    await userEvent.click(screen.getByText('page text'));
+
+    expect(screen.getAllByRole('textbox', { name: 'Search files' })).toHaveLength(2);
+    expect(screen.queryByRole('button', { name: 'Open search' })).not.toBeInTheDocument();
   });
 
   it('renders the footer links', () => {
