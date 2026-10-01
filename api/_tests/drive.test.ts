@@ -181,15 +181,17 @@ describe('access token', () => {
 });
 
 describe('searchFiles', () => {
-  it('returns the items whose names start with the terms', async () => {
+  it('returns the items with a word starting with every term', async () => {
     useFakeGoogle(tree);
     expect(await searchIds('00_jour')).toEqual(['journals']);
-    expect(await searchIds('Shared')).toEqual(['shared']);
+    expect(await searchIds('journal')).toEqual(['journals', 'am', 'shared']);
+    expect(await searchIds('shared JOURNAL')).toEqual(['shared']);
+    expect(await searchIds('ournal')).toEqual([]);
   });
 
   it('hides what listings hide', async () => {
     useFakeGoogle(tree);
-    expect(await searchIds('journal')).toEqual([]);
+    expect(await searchIds('notes')).toEqual([]);
     expect(await searchIds('binned')).toEqual([]);
     expect(await searchIds('.password')).toEqual([]);
   });

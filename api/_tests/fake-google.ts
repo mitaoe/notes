@@ -43,14 +43,23 @@ const CLAUSE = new RegExp(
   'y',
 );
 
+const WORD_START = /(?<![\p{L}\p{N}])[\p{L}\p{N}]/gu;
+
 const unescape = (value: string) => value.replace(/\\(.)/g, '$1');
+
+const startsNameOrWord = (name: string, term: string) => {
+  const lowerName = name.toLowerCase();
+  const lowerTerm = term.toLowerCase();
+  const starts = [0, ...Array.from(lowerName.matchAll(WORD_START), (match) => match.index)];
+  return starts.some((start) => lowerName.startsWith(lowerTerm, start));
+};
 
 type Predicate = (file: FakeFile) => boolean;
 
 const compare = (field: 'name' | 'mimeType', operator: string, value: string): Predicate => {
   if (operator === '=') return (file) => file[field] === value;
   if (operator === '!=') return (file) => file[field] !== value;
-  return (file) => file[field].toLowerCase().startsWith(value.toLowerCase());
+  return (file) => startsNameOrWord(file[field], value);
 };
 
 const parseQuery = (q: string): Predicate[] => {

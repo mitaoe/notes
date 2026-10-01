@@ -1,5 +1,7 @@
 import { FOLDER_MIME_TYPE } from '../../shared/drive.ts';
 
+const WORD_START = /(?<![\p{L}\p{N}])[\p{L}\p{N}]/gu;
+
 export type FixtureNode = {
   id: string;
   name: string;
@@ -107,10 +109,17 @@ export const sortForListing = (nodes: FixtureNode[]) =>
     return aFolder - bFolder || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
   });
 
+const startsNameOrWord = (name: string, term: string) =>
+  [0, ...Array.from(name.matchAll(WORD_START), (match) => match.index)].some((start) =>
+    name.startsWith(term, start),
+  );
+
 export const searchNodes = (query: string) => {
-  const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
   return sortForListing(
-    allNodes().filter((node) => words.every((word) => node.name.toLowerCase().includes(word))),
+    allNodes().filter((node) =>
+      terms.every((term) => startsNameOrWord(node.name.toLowerCase(), term)),
+    ),
   );
 };
 
