@@ -38,6 +38,18 @@ describe('FileRow', () => {
     expect(screen.getByRole('link', { name: 'fy' })).toHaveAttribute('href', '/fy');
   });
 
+  it('says a folder without a path cannot be opened here', () => {
+    renderWithProviders(
+      <FileRow
+        file={folder}
+        folderOpener={{ href: () => null }}
+        onPreview={vi.fn<(file: DriveItem) => void>()}
+      />,
+    );
+    expect(screen.queryByRole('link', { name: 'fy' })).not.toBeInTheDocument();
+    expect(screen.getByText("This folder can't be opened here.")).toBeInTheDocument();
+  });
+
   it('shows size, preview and download for PDFs', async () => {
     const open = vi.spyOn(window, 'open').mockImplementation(() => null);
     const { onPreview } = setup(pdf);

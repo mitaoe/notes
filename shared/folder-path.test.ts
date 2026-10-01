@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseFolderPath, toFolderPath } from './folder-path.ts';
+import { isAddressable, parseFolderPath, toFolderPath } from './folder-path.ts';
 
 describe('toFolderPath', () => {
   it('encodes each folder name as its own segment', () => {
@@ -21,5 +21,13 @@ describe('parseFolderPath', () => {
 
   it('returns null for malformed escapes', () => {
     expect(parseFolderPath('/%E0%A4%A')).toBeNull();
+  });
+});
+
+describe('isAddressable', () => {
+  it('rejects names a URL treats as dot segments', () => {
+    expect(isAddressable(['fy', '...', '.notes'])).toBe(true);
+    expect(isAddressable(['fy', '.'])).toBe(false);
+    expect(isAddressable(['..', 'notes'])).toBe(false);
   });
 });

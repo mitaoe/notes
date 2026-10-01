@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { PDF_MIME_TYPE } from '../../shared/drive.ts';
+import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../../shared/drive.ts';
 import { Layout } from '../components/Layout.tsx';
 import { renderWithProviders } from '../test/render.tsx';
 import { FolderPage } from './FolderPage.tsx';
@@ -15,6 +15,26 @@ const listing = {
 };
 
 describe('FolderPage', () => {
+  it('links folders by path, except those a URL cannot address', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async () =>
+        Response.json({
+          files: [
+            { id: 'notes', name: 'notes', mimeType: FOLDER_MIME_TYPE, size: null },
+            { id: 'dots', name: '..', mimeType: FOLDER_MIME_TYPE, size: null },
+          ],
+          nextPageToken: null,
+        }),
+      ),
+    );
+    renderWithProviders(<FolderPage />, '/fy');
+
+    expect(await screen.findByRole('link', { name: 'notes' })).toHaveAttribute('href', '/fy/notes');
+    expect(screen.queryByRole('link', { name: '..' })).not.toBeInTheDocument();
+    expect(screen.getByText("This folder can't be opened here.")).toBeInTheDocument();
+  });
+
   it('shows the not found page for a folder that does not exist', async () => {
     vi.stubGlobal(
       'fetch',

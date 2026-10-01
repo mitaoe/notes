@@ -1,3 +1,8 @@
+const DOT_SEGMENTS = new Set(['.', '..']);
+
+export const isAddressable = (names: readonly string[]) =>
+  names.every((name) => !DOT_SEGMENTS.has(name));
+
 export const toFolderPath = (names: readonly string[]) =>
   `/${names.map(encodeURIComponent).join('/')}`;
 

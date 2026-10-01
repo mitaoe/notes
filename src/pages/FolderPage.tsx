@@ -2,7 +2,7 @@ import { Box } from '@mantine/core';
 import { useLocation } from 'react-router';
 
 import type { DriveItem } from '../../shared/drive.ts';
-import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
+import { isAddressable, parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import { fetchFolder } from '../api/drive.ts';
 import { ErrorAlert } from '../components/ErrorAlert.tsx';
 import { FileList } from '../components/FileList.tsx';
@@ -28,7 +28,10 @@ export function FolderPage() {
 
   if (missing) return <NotFoundPage />;
 
-  const folderHref = (folder: DriveItem) => toFolderPath([...names, folder.name]);
+  const folderHref = (folder: DriveItem) => {
+    const path = [...names, folder.name];
+    return isAddressable(path) ? toFolderPath(path) : null;
+  };
 
   return (
     <Box className={pageClasses.page}>

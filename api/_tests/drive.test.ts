@@ -277,6 +277,14 @@ describe('findFolderPath', () => {
     expect(await findFolderPath(ROOT_ID)).toBeNull();
   });
 
+  it('returns null for a folder named like a dot segment', async () => {
+    useFakeGoogle([...tree, folder('dots', '..', 'fy'), folder('inside', 'notes', 'dots')]);
+    const { findFolderPath } = await loadDrive();
+
+    expect(await findFolderPath('dots')).toBeNull();
+    expect(await findFolderPath('inside')).toBeNull();
+  });
+
   it('returns null for a folder whose path opens an older namesake', async () => {
     useFakeGoogle([...tree, folder('newer', '00_journals', 'fy')]);
     const { findFolderPath } = await loadDrive();

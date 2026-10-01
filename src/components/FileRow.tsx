@@ -21,7 +21,7 @@ const OPENING_NOTES = {
 export type FolderOpening = { folderId: string; status: keyof typeof OPENING_NOTES };
 
 export type FolderOpener =
-  | { href: (folder: DriveItem) => string }
+  | { href: (folder: DriveItem) => string | null }
   | { onOpen: (folder: DriveItem) => void; opening: FolderOpening | null };
 
 type FileRowProps = {
@@ -35,6 +35,7 @@ export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
   const folder = isFolder(file);
   const opening = 'opening' in folderOpener ? folderOpener.opening : null;
   const openingStatus = opening?.folderId === file.id ? opening.status : null;
+  const href = folder && 'href' in folderOpener ? folderOpener.href(file) : null;
 
   return (
     <Box className={classes.row}>
@@ -46,14 +47,25 @@ export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
           <Box className={classes.names}>
             {folder ? (
               'href' in folderOpener ? (
-                <Text
-                  component={Link}
-                  to={folderOpener.href(file)}
-                  truncate
-                  className={clsx(classes.name, classes.folderName)}
-                >
-                  {file.name}
-                </Text>
+                href === null ? (
+                  <>
+                    <Text truncate c="dimmed" className={classes.name}>
+                      {file.name}
+                    </Text>
+                    <Text size="xs" c="red">
+                      {OPENING_NOTES.unavailable}
+                    </Text>
+                  </>
+                ) : (
+                  <Text
+                    component={Link}
+                    to={href}
+                    truncate
+                    className={clsx(classes.name, classes.folderName)}
+                  >
+                    {file.name}
+                  </Text>
+                )
               ) : (
                 <>
                   <Text

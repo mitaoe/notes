@@ -1,7 +1,7 @@
 import * as v from 'valibot';
 
 import { FOLDER_MIME_TYPE, isFolder, type DriveItem, type DrivePage } from '../../shared/drive.ts';
-import { toFolderPath } from '../../shared/folder-path.ts';
+import { isAddressable, toFolderPath } from '../../shared/folder-path.ts';
 import { GoogleApiError, driveGet, drivePost } from './google.ts';
 import { HttpError } from './http.ts';
 
@@ -199,7 +199,8 @@ const collectFolderNames = async (
 
 export const findFolderPath = async (folderId: string) => {
   const names = await collectFolderNames(folderId, await getRootFolderId(), []);
-  if (names === null || (await resolveFolderId(names, true)) !== folderId) return null;
+  if (names === null || !isAddressable(names)) return null;
+  if ((await resolveFolderId(names, true)) !== folderId) return null;
   return toFolderPath(names);
 };
 
