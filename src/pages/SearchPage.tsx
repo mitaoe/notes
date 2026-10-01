@@ -2,7 +2,7 @@ import { Box } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import { MAX_SEARCH_LENGTH, type DriveItem } from '../../shared/drive.ts';
+import { MAX_SEARCH_LENGTH, limitSearch, type DriveItem } from '../../shared/drive.ts';
 import { fetchFolderPath, fetchSearch } from '../api/drive.ts';
 import { ErrorAlert } from '../components/ErrorAlert.tsx';
 import { FileList } from '../components/FileList.tsx';
@@ -30,10 +30,7 @@ export function SearchPage() {
   const errorMessage = tooLong ? SEARCH_TOO_LONG : SEARCH_ERROR;
   const openingFolder = useRef<AbortController | null>(null);
   const [opening, setOpening] = useState<FolderOpening | null>(null);
-  usePageTitle(
-    query === null ? null : `Search: ${query.slice(0, MAX_SEARCH_LENGTH)}`,
-    query !== null,
-  );
+  usePageTitle(query === null ? null : `Search: ${limitSearch(query)}`, query !== null);
 
   useEffect(() => {
     const pending = openingFolder;

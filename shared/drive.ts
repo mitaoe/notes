@@ -5,6 +5,13 @@ export const PDF_MIME_TYPE = 'application/pdf';
 export const MAX_SEARCH_LENGTH = 200;
 export const FILE_LINK_ERROR_TITLE = 'File unavailable';
 
+const TRAILING_HIGH_SURROGATE = /[\uD800-\uDBFF]$/;
+
+export const limitSearch = (text: string) => {
+  const limited = text.slice(0, MAX_SEARCH_LENGTH);
+  return TRAILING_HIGH_SURROGATE.test(limited) ? limited.slice(0, -1) : limited;
+};
+
 const DriveItemSchema = v.object({
   id: v.string(),
   name: v.string(),

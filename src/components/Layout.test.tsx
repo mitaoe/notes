@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { Link } from 'react-router';
 import { describe, expect, it, vi } from 'vitest';
 
+import { MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
 import { LOCATION_TEST_ID } from '../test/CurrentLocation.tsx';
 import { renderWithProviders } from '../test/render.tsx';
 import { Layout } from './Layout.tsx';
@@ -27,7 +28,7 @@ describe('Layout', () => {
       '  unit 1  {Enter}',
     );
 
-    expect(location()).toHaveTextContent('/search?q=unit%201');
+    expect(location()).toHaveTextContent('/search?q=unit+1');
   });
 
   it('goes home when clearing on the search page', async () => {
@@ -65,6 +66,17 @@ describe('Layout', () => {
 
     expect(location()).toHaveTextContent(/^\/search$/);
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
+  });
+
+  it('submits a search cut at the limit without splitting a character', async () => {
+    const kept = 'a'.repeat(MAX_SEARCH_LENGTH - 1);
+    renderLayout(`/search?${new URLSearchParams({ q: `${kept}\u{1F600}b` })}`);
+    const box = screen.getByRole('textbox', { name: 'Search files' });
+    expect(box).toHaveValue(kept);
+
+    await userEvent.type(box, '{Enter}');
+
+    expect(location()).toHaveTextContent(`/search?q=${kept}`);
   });
 
   it('shows the query when a search link is opened directly', () => {
