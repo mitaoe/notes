@@ -233,6 +233,29 @@ describe('usePagedFiles', () => {
     expect(ids(result.current.files)).toEqual(['s1', 's2', 's3']);
   });
 
+  it('restarts past the pages already shown when a later token is rejected', async () => {
+    const load = vi.fn<PageLoader>(async (_key, { pageToken, rejectedToken }) => {
+      if (pageToken === 'stale') throw new RejectedPageTokenError(pageToken, { cause: REJECTED });
+      if (pageToken === null) {
+        return rejectedToken === null
+          ? { files: [item('s1')], nextPageToken: 'second' }
+          : { files: [item('s1')], nextPageToken: 'fresh-second' };
+      }
+      if (pageToken === 'second') return { files: [item('s2')], nextPageToken: 'stale' };
+      if (pageToken === 'fresh-second') return { files: [item('s2')], nextPageToken: 'third' };
+      return { files: [item('s3')], nextPageToken: null };
+    });
+    const { result } = renderHook(() => usePagedFiles('s', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    const loaded = await act(() =>
+      result.current.loadMore((files) => files.some((file) => file.id === 's3')),
+    );
+
+    expect(ids(loaded)).toEqual(['s1', 's2', 's3']);
+    expect(ids(result.current.files)).toEqual(['s1', 's2', 's3']);
+  });
+
   it('keeps the loaded files when a restart fails', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     const load = vi.fn<PageLoader>(async (_key, { pageToken, rejectedToken }) => {

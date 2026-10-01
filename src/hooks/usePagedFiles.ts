@@ -65,8 +65,11 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
         setLoaded((previous) =>
           previous !== null && previous.key === key ? change(previous) : previous,
         );
-      const show = (listed: DriveItem[], next: string | null) =>
+      let shown = files.length;
+      const show = (listed: DriveItem[], next: string | null) => {
+        shown = listed.length;
         update((previous) => ({ ...previous, files: listed, nextPageToken: next, failed: false }));
+      };
       const collect = async (
         page: PageRequest,
         listed: DriveItem[],
@@ -86,7 +89,7 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
         const restarted = await collect(
           { pageToken: null, rejectedToken },
           [],
-          (all) => all.length > files.length && reached(all),
+          (all) => all.length > shown && reached(all),
           () => {},
         );
         if (restarted !== null) show(restarted.files, restarted.nextPageToken);
