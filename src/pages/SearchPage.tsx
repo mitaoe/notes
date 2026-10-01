@@ -51,7 +51,6 @@ export function SearchPage() {
       {failed && <ErrorAlert message={SEARCH_ERROR} />}
 
       <FileList
-        key={query}
         files={files}
         loading={loading}
         hasMore={hasMore}

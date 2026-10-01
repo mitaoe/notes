@@ -23,7 +23,6 @@ export function FolderPage() {
     <Box className={classes.page}>
       {failed && <ErrorAlert message={FOLDER_ERROR} />}
       <FileList
-        key={pathname}
         files={files}
         loading={loading}
         hasMore={hasMore}
