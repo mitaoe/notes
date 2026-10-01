@@ -139,9 +139,9 @@ const folderResolver = () => {
   ): Promise<FolderResolution> => {
     const key = `${parentId}/${name}`;
     if (lookedUp.has(key)) return { id: lookedUp.get(key) ?? null, remembered: false };
-    const remembered = folderIds.get(key);
-    if (useMemory && remembered && remembered.expiresAt > Date.now()) {
-      return { id: remembered.id, remembered: true };
+    const memory = folderIds.get(key);
+    if (useMemory && memory && memory.expiresAt > Date.now()) {
+      return { id: memory.id, remembered: true };
     }
     const id = await lookUpChildFolderId(parentId, name);
     lookedUp.set(key, id);
