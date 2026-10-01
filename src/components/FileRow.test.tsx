@@ -13,7 +13,9 @@ const image: DriveItem = { id: 'i1', name: 'lab.png', mimeType: 'image/png', siz
 const setup = (file: DriveItem) => {
   const onOpen = vi.fn<(folder: DriveItem) => void>();
   const onPreview = vi.fn<(file: DriveItem) => void>();
-  renderWithProviders(<FileRow file={file} folderOpener={{ onOpen }} onPreview={onPreview} />);
+  renderWithProviders(
+    <FileRow file={file} folderOpener={{ onOpen, opening: null }} onPreview={onPreview} />,
+  );
   return { onOpen, onPreview };
 };
 

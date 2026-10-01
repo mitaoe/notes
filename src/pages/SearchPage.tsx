@@ -1,13 +1,13 @@
 import { Box, Title } from '@mantine/core';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 
 import type { DriveItem } from '../../shared/drive.ts';
 import { fetchFolderPath, fetchSearch } from '../api/drive.ts';
 import { ErrorAlert } from '../components/ErrorAlert.tsx';
 import { FileList } from '../components/FileList.tsx';
+import type { FolderOpening } from '../components/FileRow.tsx';
 import { SearchTitle } from '../components/SearchTitle.tsx';
-import { routes } from '../config.ts';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
 
 import classes from './Page.module.css';
@@ -22,23 +22,27 @@ export function SearchPage() {
   const query = (searchParams.get('q') ?? '').trim();
   const { files, loading, failed, hasMore, loadMore } = usePagedFiles(query || null, fetchSearch);
   const openingFolder = useRef<AbortController | null>(null);
+  const [opening, setOpening] = useState<FolderOpening | null>(null);
 
   useEffect(() => {
-    const opening = openingFolder;
-    return () => opening.current?.abort();
+    const pending = openingFolder;
+    return () => pending.current?.abort();
   }, []);
 
   const openFolder = async (folder: DriveItem) => {
     openingFolder.current?.abort();
     const controller = new AbortController();
     openingFolder.current = controller;
+    setOpening({ folderId: folder.id, status: 'pending' });
     try {
       const path = await fetchFolderPath(folder.id, controller.signal);
-      await navigate(path ?? routes.notFound);
+      if (controller.signal.aborted) return;
+      if (path === null) setOpening({ folderId: folder.id, status: 'missing' });
+      else await navigate(path);
     } catch (error) {
       if (controller.signal.aborted) return;
       console.error(error);
-      await navigate(routes.notFound);
+      setOpening({ folderId: folder.id, status: 'failed' });
     }
   };
 
@@ -59,7 +63,7 @@ export function SearchPage() {
         emptyMessage={SEARCH_EMPTY}
         hasMore={hasMore}
         onLoadMore={loadMore}
-        folderOpener={{ onOpen: (folder) => void openFolder(folder) }}
+        folderOpener={{ onOpen: (folder) => void openFolder(folder), opening }}
       />
     </Box>
   );

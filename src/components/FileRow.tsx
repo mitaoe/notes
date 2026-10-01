@@ -12,10 +12,17 @@ import downloadClasses from '../styles/download.module.css';
 import classes from './FileRow.module.css';
 
 const ACTION_ICON_SIZE = 18;
+const OPENING_NOTES = {
+  pending: 'Opening…',
+  failed: 'This folder could not be opened. Please try again.',
+  missing: 'This folder is no longer available.',
+} as const;
+
+export type FolderOpening = { folderId: string; status: keyof typeof OPENING_NOTES };
 
 export type FolderOpener =
   | { href: (folder: DriveItem) => string }
-  | { onOpen: (folder: DriveItem) => void };
+  | { onOpen: (folder: DriveItem) => void; opening: FolderOpening | null };
 
 type FileRowProps = {
   file: DriveItem;
@@ -26,6 +33,8 @@ type FileRowProps = {
 export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
   const { downloading, download } = useDownload(file.id);
   const folder = isFolder(file);
+  const opening = 'opening' in folderOpener ? folderOpener.opening : null;
+  const openingStatus = opening?.folderId === file.id ? opening.status : null;
 
   return (
     <Box className={classes.row}>
@@ -46,15 +55,27 @@ export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
                   {file.name}
                 </Text>
               ) : (
-                <Text
-                  component="button"
-                  type="button"
-                  truncate
-                  className={clsx(classes.name, classes.folderName)}
-                  onClick={() => folderOpener.onOpen(file)}
-                >
-                  {file.name}
-                </Text>
+                <>
+                  <Text
+                    component="button"
+                    type="button"
+                    truncate
+                    aria-busy={openingStatus === 'pending'}
+                    className={clsx(classes.name, classes.folderName)}
+                    onClick={() => folderOpener.onOpen(file)}
+                  >
+                    {file.name}
+                  </Text>
+                  {openingStatus !== null && (
+                    <Text
+                      component="output"
+                      size="xs"
+                      c={openingStatus === 'pending' ? 'dimmed' : 'red'}
+                    >
+                      {OPENING_NOTES[openingStatus]}
+                    </Text>
+                  )}
+                </>
               )
             ) : (
               <>

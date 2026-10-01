@@ -71,7 +71,7 @@ The download button opens the endpoint in a new tab synchronously inside the cli
 
 ### Opening a folder from search results
 
-Search results come from anywhere in the Drive, so the result only knows the folder's ID. Selecting it calls `/api/path?id=...`, which walks the folder's parents up to the Drive root and returns the site URL for it.
+Search results come from anywhere in the Drive, so the result only knows the folder's ID. Selecting it calls `/api/path?id=...`, which walks the folder's parents up to the Drive root and returns the site URL for it. The row says the folder is opening while the lookup runs. When the folder can no longer be placed under the root (a 404) or the lookup fails, the row says so instead of leaving the results, and selecting it again retries.
 
 ## API
 

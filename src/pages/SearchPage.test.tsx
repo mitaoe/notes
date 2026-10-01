@@ -42,14 +42,62 @@ describe('SearchPage', () => {
     );
   });
 
-  it('falls back to the not found page when the folder cannot be resolved', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('says on the row when the folder can no longer be placed', async () => {
     stubApi(Response.json({ error: 'Folder not found' }, { status: 404 }));
     renderWithProviders(<SearchPage />, '/search?q=journals');
 
     await userEvent.click(await screen.findByRole('button', { name: '00_journals' }));
 
-    await vi.waitFor(() => expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/404'));
+    expect(await screen.findByText('This folder is no longer available.')).toBeInTheDocument();
+    expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=journals');
+  });
+
+  it('says on the row when opening the folder fails, and retries on the next click', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const answers = [
+      Response.json({ error: 'Something went wrong' }, { status: 500 }),
+      Response.json({ path: '/fy/00_journals' }),
+    ];
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async (input) => {
+        const url = input instanceof Request ? input.url : input.toString();
+        return url.startsWith('/api/path')
+          ? (answers.shift() ?? Response.error())
+          : Response.json(results);
+      }),
+    );
+    renderWithProviders(<SearchPage />, '/search?q=journals');
+    const folder = await screen.findByRole('button', { name: '00_journals' });
+
+    await userEvent.click(folder);
+    expect(
+      await screen.findByText('This folder could not be opened. Please try again.'),
+    ).toBeInTheDocument();
+    await userEvent.click(folder);
+
+    await vi.waitFor(() =>
+      expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/fy/00_journals'),
+    );
+  });
+
+  it('shows that the folder is opening', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async (input) => {
+        const url = input instanceof Request ? input.url : input.toString();
+        return url.startsWith('/api/path')
+          ? new Promise<Response>(() => {})
+          : Response.json(results);
+      }),
+    );
+    renderWithProviders(<SearchPage />, '/search?q=journals');
+    const folder = await screen.findByRole('button', { name: '00_journals' });
+
+    await userEvent.click(folder);
+
+    expect(await screen.findByText('Opening…')).toBeInTheDocument();
+    expect(folder).toHaveAttribute('aria-busy', 'true');
   });
 
   it('shows the error state when the search fails', async () => {
