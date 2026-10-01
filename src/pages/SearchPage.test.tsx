@@ -129,6 +129,7 @@ describe('SearchPage', () => {
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue(
       'a'.repeat(MAX_SEARCH_LENGTH),
     );
+    expect(document.title).toBe(`Search: ${'a'.repeat(MAX_SEARCH_LENGTH)} | MITAOE Notes`);
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
