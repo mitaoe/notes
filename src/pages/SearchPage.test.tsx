@@ -2,7 +2,7 @@ import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 
-import { FOLDER_MIME_TYPE } from '../../shared/drive.ts';
+import { FOLDER_MIME_TYPE, MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
 import { Layout } from '../components/Layout.tsx';
 import { LOCATION_TEST_ID } from '../test/CurrentLocation.tsx';
 import { renderWithProviders } from '../test/render.tsx';
@@ -115,6 +115,19 @@ describe('SearchPage', () => {
       screen.getByText('An error occurred while searching. Please try again.'),
     ).toBeInTheDocument();
     expect(screen.queryByText('Looks rather empty here')).not.toBeInTheDocument();
+  });
+
+  it('explains the length limit for a search link that is too long', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => Response.json(results));
+    vi.stubGlobal('fetch', fetchMock);
+    renderInLayout(`/search?q=${'a'.repeat(MAX_SEARCH_LENGTH + 1)}`);
+
+    expect(await screen.findByText(/Searches are limited to 200 characters/)).toBeInTheDocument();
+    expect(screen.getByText('Search failed')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue(
+      'a'.repeat(MAX_SEARCH_LENGTH),
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   it('searches again when the same search is submitted after a failure', async () => {

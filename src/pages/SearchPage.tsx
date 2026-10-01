@@ -2,7 +2,7 @@ import { Box, Title } from '@mantine/core';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 
-import type { DriveItem } from '../../shared/drive.ts';
+import { MAX_SEARCH_LENGTH, type DriveItem } from '../../shared/drive.ts';
 import { fetchFolderPath, fetchSearch } from '../api/drive.ts';
 import { ErrorAlert } from '../components/ErrorAlert.tsx';
 import { FileList } from '../components/FileList.tsx';
@@ -15,13 +15,18 @@ import { FolderPage } from './FolderPage.tsx';
 import classes from './Page.module.css';
 
 const SEARCH_ERROR = 'An error occurred while searching. Please try again.';
+const SEARCH_TOO_LONG = `Searches are limited to ${MAX_SEARCH_LENGTH} characters. Shorten the search and try again.`;
 const SEARCH_EMPTY =
   "Much like a professor's office during exam week, nothing here matches your search.";
 
 export function SearchPage() {
   const navigate = useNavigate();
   const query = useSearchQuery();
-  const { files, loading, failed, hasMore, loadMore } = usePagedFiles(query, fetchSearch);
+  const tooLong = query !== null && query.length > MAX_SEARCH_LENGTH;
+  const search = usePagedFiles(tooLong ? null : query, fetchSearch);
+  const { files, loading, hasMore, loadMore } = search;
+  const failed = search.failed || tooLong;
+  const errorMessage = tooLong ? SEARCH_TOO_LONG : SEARCH_ERROR;
   const openingFolder = useRef<AbortController | null>(null);
   const [opening, setOpening] = useState<FolderOpening | null>(null);
 
@@ -55,14 +60,14 @@ export function SearchPage() {
         <SearchTitle query={query} loading={loading} failed={failed} empty={files.length === 0} />
       </Title>
 
-      {failed && files.length === 0 && <ErrorAlert message={SEARCH_ERROR} />}
+      {failed && files.length === 0 && <ErrorAlert message={errorMessage} />}
 
       <FileList
         files={files}
         loading={loading}
         failed={failed}
         emptyMessage={SEARCH_EMPTY}
-        errorMessage={SEARCH_ERROR}
+        errorMessage={errorMessage}
         hasMore={hasMore}
         onLoadMore={loadMore}
         folderOpener={{ onOpen: (folder) => void openFolder(folder), opening }}

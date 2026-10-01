@@ -12,6 +12,7 @@ import {
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 
+import { MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
 import { routes, site } from '../config.ts';
 import { useSearchQuery } from '../hooks/useSearchQuery.ts';
 import { IconSearch } from '../icons.ts';
@@ -34,7 +35,7 @@ export function Layout({ children }: LayoutProps) {
 
   const searchQuery = useSearchQuery();
   const onSearchPage = searchQuery !== null;
-  const submittedQuery = searchQuery ?? '';
+  const submittedQuery = (searchQuery ?? '').slice(0, MAX_SEARCH_LENGTH);
   const [query, setQuery] = useState(submittedQuery);
   const [previous, setPrevious] = useState({ pathname: location.pathname, submittedQuery });
 
