@@ -51,6 +51,22 @@ describe('Layout', () => {
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
   });
 
+  it('clears the search box when a search gives way to the folder named search', async () => {
+    renderWithProviders(
+      <Layout>
+        <Link to="/search">open the search folder</Link>
+      </Layout>,
+      '/search',
+    );
+    await userEvent.type(screen.getByRole('textbox', { name: 'Search files' }), 'unit{Enter}');
+    expect(location()).toHaveTextContent('/search?q=unit');
+
+    await userEvent.click(screen.getByRole('link', { name: 'open the search folder' }));
+
+    expect(location()).toHaveTextContent(/^\/search$/);
+    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
+  });
+
   it('shows the query when a search link is opened directly', () => {
     renderLayout('/search/?q=%20unit%201%20');
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('unit 1');

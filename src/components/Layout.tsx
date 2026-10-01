@@ -37,12 +37,17 @@ export function Layout({ children }: LayoutProps) {
   const onSearchPage = searchQuery !== null;
   const submittedQuery = (searchQuery ?? '').slice(0, MAX_SEARCH_LENGTH);
   const [query, setQuery] = useState(submittedQuery);
-  const [previous, setPrevious] = useState({ pathname: location.pathname, submittedQuery });
+  const { pathname } = location;
+  const [previous, setPrevious] = useState({ pathname, onSearchPage, submittedQuery });
 
-  if (previous.pathname !== location.pathname || previous.submittedQuery !== submittedQuery) {
-    setPrevious({ pathname: location.pathname, submittedQuery });
+  if (
+    previous.pathname !== pathname ||
+    previous.onSearchPage !== onSearchPage ||
+    previous.submittedQuery !== submittedQuery
+  ) {
+    setPrevious({ pathname, onSearchPage, submittedQuery });
     if (submittedQuery && submittedQuery !== previous.submittedQuery) setQuery(submittedQuery);
-    if (previous.pathname !== location.pathname && !onSearchPage) {
+    if (!onSearchPage && (previous.pathname !== pathname || previous.onSearchPage)) {
       setQuery('');
       setMobileSearchOpened(false);
     }
