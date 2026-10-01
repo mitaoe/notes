@@ -55,13 +55,14 @@ export function SearchPage() {
         <SearchTitle query={query} loading={loading} failed={failed} empty={files.length === 0} />
       </Title>
 
-      {failed && <ErrorAlert message={SEARCH_ERROR} />}
+      {failed && files.length === 0 && <ErrorAlert message={SEARCH_ERROR} />}
 
       <FileList
         files={files}
         loading={loading}
         failed={failed}
         emptyMessage={SEARCH_EMPTY}
+        errorMessage={SEARCH_ERROR}
         hasMore={hasMore}
         onLoadMore={loadMore}
         folderOpener={{ onOpen: (folder) => void openFolder(folder), opening }}

@@ -6,6 +6,7 @@ import { useLocation } from 'react-router';
 import { PDF_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
 import { BreadcrumbNav } from './BreadcrumbNav.tsx';
 import { EmptyState } from './EmptyState.tsx';
+import { ErrorAlert } from './ErrorAlert.tsx';
 import { FilePreview } from './FilePreview.tsx';
 import { FileRow, type FolderOpener } from './FileRow.tsx';
 
@@ -17,6 +18,7 @@ type FileListProps = {
   loading: boolean;
   failed: boolean;
   emptyMessage: string;
+  errorMessage: string;
   hasMore: boolean;
   onLoadMore: () => Promise<void>;
   folderOpener: FolderOpener;
@@ -27,6 +29,7 @@ export function FileList({
   loading,
   failed,
   emptyMessage,
+  errorMessage,
   hasMore,
   onLoadMore,
   folderOpener,
@@ -72,6 +75,11 @@ export function FileList({
               />
             ))}
           </Stack>
+        )}
+        {failed && files.length > 0 && (
+          <Box mt="md">
+            <ErrorAlert message={errorMessage} />
+          </Box>
         )}
         {hasMore && (
           <Group justify="center" mt="md" className={classes.loadMoreRow}>

@@ -29,12 +29,13 @@ export function FolderPage() {
 
   return (
     <Box className={classes.page}>
-      {failed && <ErrorAlert message={FOLDER_ERROR} />}
+      {failed && files.length === 0 && <ErrorAlert message={FOLDER_ERROR} />}
       <FileList
         files={files}
         loading={loading}
         failed={failed}
         emptyMessage={FOLDER_EMPTY}
+        errorMessage={FOLDER_ERROR}
         hasMore={hasMore}
         onLoadMore={loadMore}
         folderOpener={{ href: folderHref }}

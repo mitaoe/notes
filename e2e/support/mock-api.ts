@@ -7,6 +7,7 @@ import { isFolder, type DriveItem, type DrivePage } from '../../shared/drive.ts'
 import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import {
   BROKEN_PREVIEW_NAME,
+  LOAD_MORE_FAILS_NAME,
   findById,
   findByPath,
   paginate,
@@ -62,6 +63,9 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
   list: (route, params) => {
     const names = parseFolderPath(params.get('path') ?? '/');
     if (names?.includes(FAILING_QUERY)) return json(route, { error: 'Something went wrong' }, 500);
+    if (names?.includes(LOAD_MORE_FAILS_NAME) && params.get('pageToken') !== null) {
+      return json(route, { error: 'Something went wrong' }, 500);
+    }
     const folder = names === null ? null : findByPath(names);
     if (folder === null) return json(route, { error: 'Folder not found' }, 404);
     return json(route, toPage(sortForListing(folder.children), params.get('pageToken')));

@@ -187,7 +187,7 @@ describe('SearchPage', () => {
     expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=journalsx');
   });
 
-  it('keeps the results title when loading more fails', async () => {
+  it('shows a failed Load More next to the button, under the results', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.stubGlobal(
       'fetch',
@@ -202,11 +202,15 @@ describe('SearchPage', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: 'Load More' }));
 
+    const alert = await screen.findByText('An error occurred while searching. Please try again.');
     expect(
-      await screen.findByText('An error occurred while searching. Please try again.'),
-    ).toBeInTheDocument();
+      screen.getAllByText('An error occurred while searching. Please try again.'),
+    ).toHaveLength(1);
     expect(screen.getByText('Results for')).toBeInTheDocument();
     expect(screen.queryByText('Search failed')).not.toBeInTheDocument();
-    expect(screen.getByRole('button', { name: '00_journals' })).toBeInTheDocument();
+    const folder = screen.getByRole('button', { name: '00_journals' });
+    const loadMore = screen.getByRole('button', { name: 'Load More' });
+    expect(folder.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(alert.compareDocumentPosition(loadMore) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 });

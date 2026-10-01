@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 
+import { LOAD_MORE_FAILS_NAME } from './fixtures/drive.ts';
 import { FAILING_QUERY, mockDriveApi } from './support/mock-api.ts';
 
 test.beforeEach(async ({ page }) => {
@@ -91,6 +92,16 @@ test('a folder that fails to load shows an error', async ({ page }) => {
   await expect(
     page.getByText('An error occurred while loading this folder. Please try again.'),
   ).toBeVisible();
+});
+
+test('a failed load more shows its error beside the button', async ({ page }) => {
+  await page.goto(`/sy/${LOAD_MORE_FAILS_NAME}`);
+  await page.getByRole('button', { name: 'Load More' }).click();
+
+  const alert = page.getByRole('alert');
+  await expect(alert).toContainText('An error occurred while loading this folder.');
+  await expect(alert).toBeInViewport();
+  await expect(page.getByText('unit_0.pdf')).toBeVisible();
 });
 
 test('an unknown search shows the empty state', async ({ page }) => {
