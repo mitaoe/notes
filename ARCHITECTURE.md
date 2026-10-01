@@ -77,19 +77,19 @@ Search results come from anywhere in the Drive, so the result only knows the fol
 
 Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from `api/_lib/http.ts`, which turns a thrown `HttpError` into a JSON error with the error's own cache policy and anything else into a logged 500.
 
-| Endpoint        | Parameters          | Success response           | Purpose                                     |
-| --------------- | ------------------- | -------------------------- | ------------------------------------------- |
-| `/api/list`     | `path`, `pageToken` | `DrivePage`                | One page of a folder, folders first         |
-| `/api/search`   | `q`, `pageToken`    | `DrivePage`                | Items whose names contain every search term |
-| `/api/path`     | `id`                | `FolderPath`               | The site URL of a folder                    |
-| `/api/download` | `id`                | 302 to the Drive download  | Download a file                             |
-| `/api/preview`  | `id`                | 302 to the Drive previewer | Preview a file in the modal                 |
+| Endpoint        | Parameters          | Success response           | Purpose                                   |
+| --------------- | ------------------- | -------------------------- | ----------------------------------------- |
+| `/api/list`     | `path`, `pageToken` | `DrivePage`                | One page of a folder, folders first       |
+| `/api/search`   | `q`, `pageToken`    | `DrivePage`                | Items whose names match every search term |
+| `/api/path`     | `id`                | `FolderPath`               | The site URL of a folder                  |
+| `/api/download` | `id`                | 302 to the Drive download  | Download a file                           |
+| `/api/preview`  | `id`                | 302 to the Drive previewer | Preview a file in the modal               |
 
 - **Contract.** The response shapes are valibot schemas in `shared/drive.ts`. The functions validate Google's responses against their own schemas in `api/_lib/drive.ts`, and the web app validates API responses against the shared ones in `src/api/drive.ts`. Types are inferred from the schemas, so the runtime check and the type cannot drift.
 - **Visibility.** What appears in listings and search is defined once in `api/_lib/drive.ts`: trashed items, `.password` files, shortcuts, and Google Docs, Sheets, Forms and Sites files are hidden, and none of them or any folder is ever shared.
-- **Queries.** Values interpolated into Drive `q` strings go through `quote`, which escapes backslashes and single quotes as the Drive query language requires. Search drops `!=`, double quotes and the characters `= < > / \ :` from the terms and splits on spaces, commas, pipes and brackets.
+- **Queries.** Values interpolated into Drive `q` strings go through `quote`, which escapes backslashes and single quotes as the Drive query language requires. Search drops `!=`, double quotes and the characters `= < > / \ :` from the terms and splits on whitespace, commas (including the full-width `，`), pipes, parentheses and braces. Each term becomes a `name contains` clause, which Drive matches against the start of a name.
 - **Paging.** The page size is `PAGE_SIZE` in `api/_lib/drive.ts`. A page token Drive rejects answers 400.
-- **Caching.** Each endpoint sends a `Cache-Control` from `CACHE_CONTROL` in `api/_lib/http.ts`. `s-maxage` lets the Vercel CDN cache the response and `stale-while-revalidate` lets it answer instantly while refreshing in the background. A 404 carries the same policy as the response it stands in for, so a folder created after someone requested it can take that long to appear. Invalid requests and server errors are never cached.
+- **Caching.** Each endpoint sends a `Cache-Control` from `CACHE_CONTROL` in `api/_lib/http.ts`. `s-maxage` lets the Vercel CDN cache the response and `stale-while-revalidate` lets it answer instantly while refreshing in the background. Listings and search results can be that old, so a new or renamed item takes up to `s-maxage` to appear. A 404 from `/api/list` or `/api/path` carries the same policy as the response it stands in for, so a folder created after someone requested it takes as long. Download and preview links for a missing file, invalid requests and server errors are never cached.
 - **Credentials.** `api/_lib/google.ts` exchanges the refresh token for an access token and reuses it until shortly before it expires. Concurrent requests share one refresh. The credentials come from the `VITE_GOOGLE_*` variables listed in `.env.example`. Only the functions read them, through `process.env`; the web app must never read them through `import.meta.env`, which would publish them in the bundle.
 
 ## Web app
@@ -97,7 +97,7 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 - **Routes** live in `src/App.tsx`: `/search` renders `SearchPage`, `/404` renders `NotFoundPage`, and every other path renders `FolderPage` for that folder path.
 - **Data** comes through `usePagedFiles` (`src/hooks/usePagedFiles.ts`), which loads the first page for a key, aborts and ignores stale requests when the key changes and appends pages on "Load More". A failed first page or a failed "Load More" sets `failed`, and the pages show `ErrorAlert` above whatever is already loaded. The pages pass it a loader from `src/api/drive.ts`.
 - **Search state** is the URL. `SearchPage` reads `q`, and `Layout` owns the text in the search box and navigates on submit.
-- **Components** in `src/components/` render what they are given and report user actions through callbacks. The exceptions hold state that belongs to them: `Layout` owns the header, the mobile menu and the search box, `FileList` owns the open preview, and `FileRow` and `FilePreview` start downloads through `useDownload`. The pages give `FileList` a `key` per folder or query, so that state resets on navigation.
+- **Components** in `src/components/` take their data as props and report user actions through callbacks. The state they hold is their own UI state: `Layout` owns the mobile menu and the search box, `FileList` the open preview and the "Load More" progress, `FilePreview` whether the frame loaded, `BreadcrumbNav` its scroll buttons and `SearchBar` its focus. `FileList` reads the current path for the breadcrumbs, and `FileRow` and `FilePreview` start downloads through `useDownload`. The pages give `FileList` a `key` per folder or query, so that state resets on navigation.
 
 ### Styling
 
@@ -117,8 +117,8 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 | Visual regression        | `e2e/visual.spec.ts`              | Playwright                       |
 | Navigation flows         | `e2e/navigation.spec.ts`          | Playwright                       |
 
-- The API tests replace `fetch` with an in-memory Drive (`api/_tests/fake-google.ts`), so they exercise the real query building and parsing.
-- The Playwright tests run against the production build with `/api/*` answered from a fixture tree (`e2e/fixtures/drive.ts`), so they need no credentials and always see the same data.
+- The API tests replace `fetch` with an in-memory Drive (`api/_tests/fake-google.ts`) that evaluates the `q` strings the functions build, so they exercise the real query building and parsing. Like Drive, it matches `name contains` against the start of a name; it also ignores case, which the Drive docs do not specify.
+- The Playwright tests run against the production build with `/api/*` answered from a fixture tree (`e2e/fixtures/drive.ts`), so they need no credentials and always see the same data. Its search is a plain substring match, because it only has to return stable results for the screenshots.
 - The browser runs in the official Playwright Docker image (`pnpm playwright:server`), locally and in CI, so fonts and anti-aliasing are identical everywhere and screenshots can be compared pixel for pixel.
 - The screenshots in `e2e/__screenshots__/` define how the site looks. Any pixel difference fails the suite. Regenerate them with `pnpm test:e2e --update-snapshots` only for an intended visual change, and review the image diffs in the pull request.
 
