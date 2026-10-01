@@ -51,9 +51,9 @@ describe('Layout search', () => {
     expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
   });
 
-  it('keeps the search box empty when a search link is opened directly', () => {
-    renderLayout('/search?q=unit');
-    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('');
+  it('shows the query when a search link is opened directly', () => {
+    renderLayout('/search/?q=%20unit%201%20');
+    expect(screen.getByRole('textbox', { name: 'Search files' })).toHaveValue('unit 1');
   });
 
   it('closes the empty mobile search when clicking elsewhere', async () => {

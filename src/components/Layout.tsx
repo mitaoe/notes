@@ -34,7 +34,7 @@ export function Layout({ children }: LayoutProps) {
 
   const onSearchPage = useMatch(routes.search) !== null;
   const submittedQuery = onSearchPage ? (searchParams.get('q') ?? '').trim() : '';
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState(submittedQuery);
   const [previous, setPrevious] = useState({ pathname: location.pathname, submittedQuery });
 
   if (previous.pathname !== location.pathname || previous.submittedQuery !== submittedQuery) {

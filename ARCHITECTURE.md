@@ -96,7 +96,7 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 
 - **Routes** live in `src/App.tsx`: `/search` renders `SearchPage`, `/404` renders `NotFoundPage`, and every other path renders `FolderPage` for that folder path.
 - **Data** comes through `usePagedFiles` (`src/hooks/usePagedFiles.ts`), which loads the first page for a key, aborts and ignores stale requests when the key changes and appends pages on "Load More". A failed first page or a failed "Load More" sets `failed`, and the pages show `ErrorAlert` above whatever is already loaded. The pages pass it a loader from `src/api/drive.ts`.
-- **Search state** is the URL. `SearchPage` reads `q`, and `Layout` owns the text in the search box and navigates on submit.
+- **Search state** is the URL. `SearchPage` reads `q`, and `Layout` owns the text in the search box, fills it with `q` whenever the search page opens on a new query, empties it when another page opens, and navigates on submit.
 - **Components** in `src/components/` take their data as props and report user actions through callbacks. The state they hold is their own UI state: `Layout` owns the mobile menu and the search box, `FileList` the open preview and the "Load More" progress, `FilePreview` whether the frame loaded, `BreadcrumbNav` its scroll buttons and `SearchBar` its focus. `FileList` reads the current path for the breadcrumbs, and `FileRow` and `FilePreview` start downloads through `useDownload`. The pages give `FileList` a `key` per folder or query, so that state resets on navigation.
 
 ### Styling
