@@ -191,7 +191,8 @@ const collectFolderNames = async (
 
 export const findFolderPath = async (folderId: string) => {
   const names = await collectFolderNames(folderId, await getRootFolderId(), []);
-  return names === null ? null : toFolderPath(names);
+  if (names === null || (await resolveFolderId(names)) !== folderId) return null;
+  return toFolderPath(names);
 };
 
 const isVisibleFile = (file: DriveMetadata) =>

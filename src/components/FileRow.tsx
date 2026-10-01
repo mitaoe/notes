@@ -15,7 +15,7 @@ const ACTION_ICON_SIZE = 18;
 const OPENING_NOTES = {
   pending: 'Opening…',
   failed: 'This folder could not be opened. Please try again.',
-  missing: 'This folder is no longer available.',
+  unavailable: "This folder can't be opened here.",
 } as const;
 
 export type FolderOpening = { folderId: string; status: keyof typeof OPENING_NOTES };

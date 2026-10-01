@@ -26,7 +26,7 @@ The browser never holds Google credentials. Every Drive call goes through a func
 
 ### Opening a folder
 
-Site URLs are folder names, not Drive IDs: `/fy/00_journals` is the `00_journals` folder inside `fy` at the Drive root. Each segment is one percent-encoded folder name (`shared/folder-path.ts`), so names containing `/`, `#` or quotes survive the round trip.
+Site URLs are folder names, not Drive IDs: `/fy/00_journals` is the `00_journals` folder inside `fy` at the Drive root. Each segment is one percent-encoded folder name (`shared/folder-path.ts`), so names containing `/`, `#` or quotes survive the round trip. Because the URL holds names, sibling folders with the same name share a URL, and it opens the oldest of them (lookups are ordered by `createdTime`); the others can only be reached by renaming them in Drive.
 
 ```mermaid
 sequenceDiagram
@@ -71,7 +71,7 @@ The download button opens the endpoint in a new tab synchronously inside the cli
 
 ### Opening a folder from search results
 
-Search results come from anywhere in the Drive, so the result only knows the folder's ID. Selecting it calls `/api/path?id=...`, which walks the folder's parents up to the Drive root and returns the site URL for it. The row says the folder is opening while the lookup runs. When the folder can no longer be placed under the root (a 404) or the lookup fails, the row says so instead of leaving the results, and selecting it again retries.
+Search results come from anywhere in the Drive, so the result only knows the folder's ID. Selecting it calls `/api/path?id=...`, which walks the folder's parents up to the Drive root and returns the site URL for it. The row says the folder is opening while the lookup runs. Search covers every Drive the account can read, so a result can be a folder that is not under the root at all: one in a shared drive, one shared with the account, or one moved or deleted since. `/api/path` answers 404 for those, and also for a folder whose path would open a different folder (see the next paragraph), and the row then says the folder can't be opened here. When the lookup fails, the row says so and selecting it again retries.
 
 ## API
 

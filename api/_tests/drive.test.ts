@@ -238,6 +238,13 @@ describe('findFolderPath', () => {
     expect(await findFolderPath(ROOT_ID)).toBeNull();
   });
 
+  it('returns null for a folder whose path opens an older namesake', async () => {
+    useFakeGoogle([...tree, folder('newer', '00_journals', 'fy')]);
+    const { findFolderPath } = await loadDrive();
+    expect(await findFolderPath('newer')).toBeNull();
+    expect(await findFolderPath('journals')).toBe('/fy/00_journals');
+  });
+
   it('retries the root lookup after a failure', async () => {
     const { failNext } = useFakeGoogle(tree);
     const { findFolderPath } = await loadDrive();

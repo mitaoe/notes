@@ -43,7 +43,7 @@ export function SearchPage() {
     try {
       const path = await fetchFolderPath(folder.id, controller.signal);
       if (controller.signal.aborted) return;
-      if (path === null) setOpening({ folderId: folder.id, status: 'missing' });
+      if (path === null) setOpening({ folderId: folder.id, status: 'unavailable' });
       else await navigate(path);
     } catch (error) {
       if (controller.signal.aborted) return;

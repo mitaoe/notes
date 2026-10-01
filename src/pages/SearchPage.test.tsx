@@ -48,7 +48,7 @@ describe('SearchPage', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: '00_journals' }));
 
-    expect(await screen.findByText('This folder is no longer available.')).toBeInTheDocument();
+    expect(await screen.findByText("This folder can't be opened here.")).toBeInTheDocument();
     expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/search?q=journals');
   });
 
