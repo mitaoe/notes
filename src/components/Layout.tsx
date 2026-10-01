@@ -126,19 +126,27 @@ export function Layout({ children }: LayoutProps) {
       </AppShell.Header>
 
       <AppShell.Main>
-        <Drawer
+        <Drawer.Root
           opened={mobileMenuOpened}
           onClose={() => setMobileMenuOpened(false)}
           position="right"
           size="xs"
           classNames={{ content: classes.drawerContent }}
         >
-          <Box p="md">
-            <Group mb="xl">
-              <SocialLinks size="xl" variant="light" iconSize={24} />
-            </Group>
-          </Box>
-        </Drawer>
+          <Drawer.Overlay />
+          <Drawer.Content aria-label="Menu">
+            <Drawer.Header>
+              <Drawer.CloseButton aria-label="Close menu" />
+            </Drawer.Header>
+            <Drawer.Body>
+              <Box p="md">
+                <Group mb="xl">
+                  <SocialLinks size="xl" variant="light" iconSize={24} />
+                </Group>
+              </Box>
+            </Drawer.Body>
+          </Drawer.Content>
+        </Drawer.Root>
 
         <Container size="lg">
           <Stack gap="xs" className={classes.page}>

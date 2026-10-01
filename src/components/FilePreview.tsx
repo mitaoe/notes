@@ -67,110 +67,114 @@ export function FilePreview({
   const chevronSize = compact ? 16 : 20;
 
   return (
-    <Modal
+    <Modal.Root
       opened
       onClose={onClose}
       size="xl"
       fullScreen
       padding={0}
-      withCloseButton={false}
       classNames={{ body: classes.body }}
     >
-      <Box className={classes.container}>
-        <Paper p="md" className={classes.toolbar}>
-          <Box className={classes.toolbarContent}>
-            <Button
-              variant="subtle"
-              size={compact ? 'xs' : 'sm'}
-              radius="md"
-              leftSection={<IconX size={iconSize} />}
-              aria-label="Close preview"
-              className={clsx(classes.actionButton, classes.closeButton)}
-              onClick={onClose}
-            >
-              {compact ? '' : 'Close'}
-            </Button>
-
-            <Box className={classes.titleArea}>
-              <Box className={classes.titleBar}>
-                <ActionIcon
+      <Modal.Overlay />
+      <Modal.Content aria-label={`Preview of ${file.name}`}>
+        <Modal.Body>
+          <Box className={classes.container}>
+            <Paper p="md" className={classes.toolbar}>
+              <Box className={classes.toolbarContent}>
+                <Button
                   variant="subtle"
-                  size={compact ? 'md' : 'lg'}
-                  disabled={previous === null}
-                  aria-label="Previous file"
-                  className={clsx(classes.navButton, classes.previous)}
-                  onClick={showPrevious}
+                  size={compact ? 'xs' : 'sm'}
+                  radius="md"
+                  leftSection={<IconX size={iconSize} />}
+                  aria-label="Close preview"
+                  className={clsx(classes.actionButton, classes.closeButton)}
+                  onClick={onClose}
                 >
-                  <IconChevronLeft size={chevronSize} />
-                </ActionIcon>
+                  {compact ? '' : 'Close'}
+                </Button>
 
-                <Text size={compact ? 'sm' : 'md'} fw={500} className={classes.fileName}>
-                  {file.name}
-                </Text>
+                <Box className={classes.titleArea}>
+                  <Box className={classes.titleBar}>
+                    <ActionIcon
+                      variant="subtle"
+                      size={compact ? 'md' : 'lg'}
+                      disabled={previous === null}
+                      aria-label="Previous file"
+                      className={clsx(classes.navButton, classes.previous)}
+                      onClick={showPrevious}
+                    >
+                      <IconChevronLeft size={chevronSize} />
+                    </ActionIcon>
 
-                <ActionIcon
+                    <Text size={compact ? 'sm' : 'md'} fw={500} className={classes.fileName}>
+                      {file.name}
+                    </Text>
+
+                    <ActionIcon
+                      variant="subtle"
+                      size={compact ? 'md' : 'lg'}
+                      disabled={next === null && onNextPage === null}
+                      loading={next === null && loadingNextPage}
+                      aria-label="Next file"
+                      className={clsx(classes.navButton, classes.next)}
+                      onClick={showNext}
+                    >
+                      <IconChevronRight size={chevronSize} />
+                    </ActionIcon>
+                  </Box>
+                </Box>
+
+                <Button
                   variant="subtle"
-                  size={compact ? 'md' : 'lg'}
-                  disabled={next === null && onNextPage === null}
-                  loading={next === null && loadingNextPage}
-                  aria-label="Next file"
-                  className={clsx(classes.navButton, classes.next)}
-                  onClick={showNext}
+                  size={compact ? 'xs' : 'sm'}
+                  radius="md"
+                  leftSection={<IconDownload size={iconSize} />}
+                  disabled={downloading}
+                  aria-label="Download file"
+                  className={clsx(
+                    classes.actionButton,
+                    classes.downloadButton,
+                    downloading && downloadClasses.downloading,
+                  )}
+                  onClick={download}
                 >
-                  <IconChevronRight size={chevronSize} />
-                </ActionIcon>
+                  {compact ? '' : 'Download'}
+                </Button>
               </Box>
-            </Box>
+            </Paper>
 
-            <Button
-              variant="subtle"
-              size={compact ? 'xs' : 'sm'}
-              radius="md"
-              leftSection={<IconDownload size={iconSize} />}
-              disabled={downloading}
-              aria-label="Download file"
-              className={clsx(
-                classes.actionButton,
-                classes.downloadButton,
-                downloading && downloadClasses.downloading,
+            <Box className={classes.viewer}>
+              {frameState === 'loading' && (
+                <Box className={classes.loadingOverlay}>
+                  <Text size="md" c="white" className={classes.loadingText}>
+                    Loading PDF…
+                  </Text>
+                </Box>
               )}
-              onClick={download}
-            >
-              {compact ? '' : 'Download'}
-            </Button>
-          </Box>
-        </Paper>
-
-        <Box className={classes.viewer}>
-          {frameState === 'loading' && (
-            <Box className={classes.loadingOverlay}>
-              <Text size="md" c="white" className={classes.loadingText}>
-                Loading PDF…
-              </Text>
+              {frameState === 'failed' ? (
+                <Group justify="center" h="100%">
+                  <Stack align="center" gap="xs">
+                    <Text size="xl" c="white" className={classes.unavailableTitle}>
+                      Preview not available
+                    </Text>
+                    <Text size="sm" c="white" className={classes.unavailableDetail}>
+                      This file could not be loaded
+                    </Text>
+                  </Stack>
+                </Group>
+              ) : (
+                <iframe
+                  src={previewHref(file.id)}
+                  title={file.name}
+                  sandbox={FRAME_SANDBOX}
+                  className={classes.frame}
+                  onLoad={(event) => setFrameState(frameStateAfterLoad(event))}
+                />
+              )}
             </Box>
-          )}
-          {frameState === 'failed' ? (
-            <Group justify="center" h="100%">
-              <Stack align="center" gap="xs">
-                <Text size="xl" c="white" className={classes.unavailableTitle}>
-                  Preview not available
-                </Text>
-                <Text size="sm" c="white" className={classes.unavailableDetail}>
-                  This file could not be loaded
-                </Text>
-              </Stack>
-            </Group>
-          ) : (
-            <iframe
-              src={previewHref(file.id)}
-              title={file.name}
-              sandbox={FRAME_SANDBOX}
-              className={classes.frame}
-              onLoad={(event) => setFrameState(frameStateAfterLoad(event))}
-            />
-          )}
-        </Box>
-      </Box>
-    </Modal>
+          </Box>
+        </Modal.Body>
+      </Modal.Content>
+    </Modal.Root>
   );
 }

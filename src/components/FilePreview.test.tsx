@@ -31,6 +31,7 @@ const setup = (file: DriveItem, onNextPage: (() => void) | null = null) => {
 describe('FilePreview', () => {
   it('loads the preview endpoint in a sandboxed frame', () => {
     setup(pdf('b'));
+    expect(screen.getByRole('dialog', { name: 'Preview of b.pdf' })).toBeInTheDocument();
     const frame = screen.getByTitle('b.pdf');
     expect(frame).toHaveAttribute('src', '/api/preview?id=b');
     expect(frame).toHaveAttribute('sandbox', expect.stringContaining('allow-scripts'));

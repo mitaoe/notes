@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Link } from 'react-router';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import { LOCATION_TEST_ID } from '../test/CurrentLocation.tsx';
 import { renderWithProviders } from '../test/render.tsx';
@@ -89,6 +89,16 @@ describe('Layout search', () => {
 
     expect(screen.getAllByRole('textbox', { name: 'Search files' })).toHaveLength(2);
     expect(screen.queryByRole('button', { name: 'Open search' })).not.toBeInTheDocument();
+  });
+
+  it('names the mobile menu and its close button', async () => {
+    renderLayout();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Toggle menu' }));
+    expect(await screen.findByRole('dialog', { name: 'Menu' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Close menu' }));
+
+    await vi.waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
 
   it('renders the footer links', () => {

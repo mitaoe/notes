@@ -43,6 +43,8 @@ describe('FileRow', () => {
     const { onPreview } = setup(pdf);
 
     expect(screen.getByText('1.62 MB')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Preview notes.pdf' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Download notes.pdf' })).toBeInTheDocument();
     await userEvent.click(screen.getByTitle('Preview'));
     expect(onPreview).toHaveBeenCalledWith(pdf);
     await userEvent.click(screen.getByTitle('Download'));

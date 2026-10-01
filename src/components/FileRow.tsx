@@ -97,6 +97,7 @@ export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
                 variant="subtle"
                 size="lg"
                 title="Preview"
+                aria-label={`Preview ${file.name}`}
                 className={classes.previewButton}
                 onClick={() => onPreview(file)}
               >
@@ -107,6 +108,7 @@ export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
               variant="subtle"
               size="lg"
               title="Download"
+              aria-label={`Download ${file.name}`}
               disabled={downloading}
               className={clsx(classes.downloadButton, downloading && downloadClasses.downloading)}
               onClick={download}

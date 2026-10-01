@@ -82,7 +82,7 @@ One component per file. A file exports the things it is named after, plus the ty
 - Style with a CSS module next to the component and combine classes with `clsx`. Mantine style props (`mb`, `p`, `gap`) are fine for spacing. Use Mantine CSS variables (`var(--mantine-color-dark-7)`, `alpha(var(--mantine-color-red-8), 0.15)`) instead of copying colours, and do not restate what Mantine or the browser already applies.
 - Import icons from `src/icons.ts`, adding a line there for a new one.
 - When you use a Mantine component for the first time, add its stylesheet to `src/styles/mantine.css` in Mantine's bundle order. `vite/mantine-css.test.ts` names any stylesheet that is missing and fails on the wrong order.
-- Use real elements: links (`Link`, `Anchor`) for navigation and buttons for actions. Every icon-only control gets an accessible name through `aria-label` or `title`.
+- Use real elements: links (`Link`, `Anchor`) for navigation and buttons for actions. Every icon-only control gets an accessible name through `aria-label` or `title`, and every dialog gets one too (`aria-label` on `Drawer.Content` or `Modal.Content` when it has no visible title). A control repeated on every row names its row, as in `Download notes.pdf`.
 
 ## API conventions
 
