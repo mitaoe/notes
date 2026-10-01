@@ -2,6 +2,7 @@ import { vi } from 'vitest';
 
 import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../../shared/drive.ts';
 import { DRIVE_URL, TOKEN_URL } from '../_lib/google.ts';
+import { startsNameOrWord } from './name-match.ts';
 
 type FakeFile = {
   id: string;
@@ -44,16 +45,7 @@ const CLAUSE = new RegExp(
   'y',
 );
 
-const WORD_START = /(?<![\p{L}\p{N}])[\p{L}\p{N}]/gu;
-
 const unescape = (value: string) => value.replace(/\\(.)/g, '$1');
-
-const startsNameOrWord = (name: string, term: string) => {
-  const lowerName = name.toLowerCase();
-  const lowerTerm = term.toLowerCase();
-  const starts = [0, ...Array.from(lowerName.matchAll(WORD_START), (match) => match.index)];
-  return starts.some((start) => lowerName.startsWith(lowerTerm, start));
-};
 
 type Predicate = (file: FakeFile) => boolean;
 

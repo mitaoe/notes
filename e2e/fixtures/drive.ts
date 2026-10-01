@@ -1,6 +1,5 @@
-import { FOLDER_MIME_TYPE, PDF_MIME_TYPE } from '../../shared/drive.ts';
-
-const WORD_START = /(?<![\p{L}\p{N}])[\p{L}\p{N}]/gu;
+import { startsNameOrWord } from '../../api/_tests/name-match.ts';
+import { FOLDER_MIME_TYPE, PDF_MIME_TYPE, isFolder } from '../../shared/drive.ts';
 
 export type FixtureNode = {
   id: string;
@@ -102,9 +101,7 @@ export const findById = (id: string): FixtureNode | null =>
 export const findByPath = (names: readonly string[]): FixtureNode | null => {
   let node: FixtureNode | null = root;
   for (const name of names) {
-    node =
-      node.children.find((child) => child.name === name && child.mimeType === FOLDER_MIME_TYPE) ??
-      null;
+    node = node.children.find((child) => child.name === name && isFolder(child)) ?? null;
     if (!node) return null;
   }
   return node;
@@ -112,22 +109,15 @@ export const findByPath = (names: readonly string[]): FixtureNode | null => {
 
 export const sortForListing = (nodes: FixtureNode[]) =>
   nodes.toSorted((a, b) => {
-    const aFolder = a.mimeType === FOLDER_MIME_TYPE ? 0 : 1;
-    const bFolder = b.mimeType === FOLDER_MIME_TYPE ? 0 : 1;
+    const aFolder = isFolder(a) ? 0 : 1;
+    const bFolder = isFolder(b) ? 0 : 1;
     return aFolder - bFolder || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
   });
 
-const startsNameOrWord = (name: string, term: string) =>
-  [0, ...Array.from(name.matchAll(WORD_START), (match) => match.index)].some((start) =>
-    name.startsWith(term, start),
-  );
-
 export const searchNodes = (query: string) => {
-  const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const terms = query.split(/\s+/).filter(Boolean);
   return sortForListing(
-    allNodes().filter((node) =>
-      terms.every((term) => startsNameOrWord(node.name.toLowerCase(), term)),
-    ),
+    allNodes().filter((node) => terms.every((term) => startsNameOrWord(node.name, term))),
   );
 };
 
