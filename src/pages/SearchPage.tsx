@@ -9,6 +9,7 @@ import { FileList } from '../components/FileList.tsx';
 import type { FolderOpening } from '../components/FileRow.tsx';
 import { SearchTitle } from '../components/SearchTitle.tsx';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
+import { usePageTitle } from '../hooks/usePageTitle.ts';
 import { useSearchQuery } from '../hooks/useSearchQuery.ts';
 import { FolderPage } from './FolderPage.tsx';
 
@@ -29,6 +30,7 @@ export function SearchPage() {
   const errorMessage = tooLong ? SEARCH_TOO_LONG : SEARCH_ERROR;
   const openingFolder = useRef<AbortController | null>(null);
   const [opening, setOpening] = useState<FolderOpening | null>(null);
+  usePageTitle(`Search: ${query}`, query !== null);
 
   useEffect(() => {
     const pending = openingFolder;

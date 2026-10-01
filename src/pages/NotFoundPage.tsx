@@ -9,6 +9,7 @@ import classes from './NotFoundPage.module.css';
 export function NotFoundPage() {
   return (
     <Container size="md" className={classes.page}>
+      <meta name="robots" content="noindex" />
       <Title order={1} size="3rem" mb="md">
         404
       </Title>

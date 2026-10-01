@@ -35,14 +35,16 @@ describe('SearchPage', () => {
     stubApi(Response.json({ path: '/fy/00_journals' }));
     renderWithProviders(<SearchPage />, '/search?q=journals');
 
-    await userEvent.click(await screen.findByRole('button', { name: '00_journals' }));
+    const folder = await screen.findByRole('button', { name: '00_journals' });
+    expect(document.title).toBe('Search: journals | MITAoE Notes');
+    await userEvent.click(folder);
 
     await vi.waitFor(() =>
       expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/fy/00_journals'),
     );
   });
 
-  it('says on the row when the folder can no longer be placed', async () => {
+  it("says on the row when the folder can't be opened here", async () => {
     stubApi(Response.json({ error: 'Folder not found' }, { status: 404 }));
     renderWithProviders(<SearchPage />, '/search?q=journals');
 
