@@ -101,7 +101,6 @@
 }
 
 .fileName {
-  display: block;
   flex: 1;
   padding: 0 4px;
   overflow: hidden;
@@ -153,5 +152,4 @@
   width: 100%;
   height: 100%;
   border: none;
-  background: transparent;
 }
