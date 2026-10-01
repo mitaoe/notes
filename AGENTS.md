@@ -86,7 +86,7 @@ One component per file. A file exports the things it is named after, plus the ty
 
 ## API conventions
 
-- One endpoint per file, exporting `GET = handleGet(async (params) => ...)`.
+- One endpoint per file, exporting a `GET` built on `handleGet`: `GET = handleGet(async (params) => ...)`, or a helper on top of it such as `handleFileLink` for endpoints that share one shape.
 - Read parameters with the helpers in `api/_lib/http.ts`. Signal client errors by throwing `HttpError`, passing a cache policy when the answer depends only on the URL (a 404 for a missing folder); let anything unexpected propagate so it is logged and answered with a 500.
 - Every response sets a policy from `CACHE_CONTROL`. Anything that depends only on the URL should be cacheable at the CDN.
 - Drive queries are built in `api/_lib/drive.ts`, and every value placed in a query goes through `quote`.
