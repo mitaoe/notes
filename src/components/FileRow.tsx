@@ -2,7 +2,7 @@ import { ActionIcon, Box, Text } from '@mantine/core';
 import { clsx } from 'clsx';
 import { Link } from 'react-router';
 
-import { PDF_MIME_TYPE, isFolder, type DriveItem } from '../../shared/drive.ts';
+import { isFolder, isPdf, type DriveItem } from '../../shared/drive.ts';
 import { useDownload } from '../hooks/useDownload.ts';
 import { IconDownload, IconEye } from '../icons.ts';
 import { formatFileSize } from '../lib/format.ts';
@@ -92,7 +92,7 @@ export function FileRow({ file, folderOpener, onPreview }: FileRowProps) {
 
         {!folder && (
           <Box className={classes.actions}>
-            {file.mimeType === PDF_MIME_TYPE && (
+            {isPdf(file) && (
               <ActionIcon
                 variant="subtle"
                 size="lg"

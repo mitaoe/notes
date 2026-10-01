@@ -43,8 +43,8 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   const current = loaded !== null && loaded.key === key ? loaded : null;
   const nextPageToken = current?.nextPageToken ?? null;
 
-  const loadMore = useCallback(async () => {
-    if (key === null || nextPageToken === null) return;
+  const loadMore = useCallback(async (): Promise<DriveItem[]> => {
+    if (key === null || nextPageToken === null) return [];
     const update = (change: (previous: LoadedPages) => LoadedPages) =>
       setLoaded((previous) =>
         previous !== null && previous.key === key ? change(previous) : previous,
@@ -57,9 +57,11 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
         nextPageToken: page.nextPageToken,
         failed: false,
       }));
+      return page.files;
     } catch (error) {
       console.error(error);
       update((previous) => ({ ...previous, failed: true }));
+      return [];
     }
   }, [key, nextPageToken, loadPage]);
 

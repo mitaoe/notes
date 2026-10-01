@@ -46,8 +46,9 @@ describe('usePagedFiles', () => {
     const { result } = renderHook(() => usePagedFiles('a', load));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
 
-    await act(() => result.current.loadMore());
+    const added = await act(() => result.current.loadMore());
 
+    expect(added.map((file) => file.id)).toEqual(['a2']);
     expect(result.current.files.map((file) => file.id)).toEqual(['a1', 'a2']);
     expect(result.current.hasMore).toBe(false);
   });
@@ -104,8 +105,9 @@ describe('usePagedFiles', () => {
     const { result } = renderHook(() => usePagedFiles('c', load));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
 
-    await act(() => result.current.loadMore());
+    const added = await act(() => result.current.loadMore());
 
+    expect(added).toEqual([]);
     expect(result.current.files.map((file) => file.id)).toEqual(['c1']);
     expect(result.current.failed).toBe(true);
   });

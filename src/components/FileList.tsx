@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 import { useState } from 'react';
 import { useLocation } from 'react-router';
 
-import { PDF_MIME_TYPE, type DriveItem } from '../../shared/drive.ts';
+import { isPdf, type DriveItem } from '../../shared/drive.ts';
 import { BreadcrumbNav } from './BreadcrumbNav.tsx';
 import { EmptyState } from './EmptyState.tsx';
 import { ErrorAlert } from './ErrorAlert.tsx';
@@ -20,7 +20,7 @@ type FileListProps = {
   emptyMessage: string;
   errorMessage: string;
   hasMore: boolean;
-  onLoadMore: () => Promise<void>;
+  onLoadMore: () => Promise<DriveItem[]>;
   folderOpener: FolderOpener;
 };
 
@@ -39,13 +39,18 @@ export function FileList({
   const [loadingMore, setLoadingMore] = useState(false);
 
   const loadMore = async () => {
-    if (loadingMore) return;
+    if (loadingMore) return [];
     setLoadingMore(true);
     try {
-      await onLoadMore();
+      return await onLoadMore();
     } finally {
       setLoadingMore(false);
     }
+  };
+
+  const previewFromNextPage = async (from: DriveItem) => {
+    const nextPdf = (await loadMore()).find(isPdf);
+    if (nextPdf) setPreviewFile((current) => (current?.id === from.id ? nextPdf : current));
   };
 
   if (loading) {
@@ -100,8 +105,10 @@ export function FileList({
         <FilePreview
           key={previewFile.id}
           file={previewFile}
-          files={files.filter((file) => file.mimeType === PDF_MIME_TYPE)}
+          files={files.filter(isPdf)}
           onSelect={setPreviewFile}
+          onNextPage={hasMore ? () => void previewFromNextPage(previewFile) : null}
+          loadingNextPage={loadingMore}
           onClose={() => setPreviewFile(null)}
         />
       )}

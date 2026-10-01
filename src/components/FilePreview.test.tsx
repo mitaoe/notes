@@ -14,9 +14,17 @@ const pdf = (id: string): DriveItem => ({
 });
 const files = [pdf('a'), pdf('b'), pdf('c')];
 
-const setup = (file: DriveItem) => {
+const setup = (file: DriveItem, onNextPage: (() => void) | null = null) => {
   const handlers = { onSelect: vi.fn<(file: DriveItem) => void>(), onClose: vi.fn<() => void>() };
-  renderWithProviders(<FilePreview file={file} files={files} {...handlers} />);
+  renderWithProviders(
+    <FilePreview
+      file={file}
+      files={files}
+      onNextPage={onNextPage}
+      loadingNextPage={false}
+      {...handlers}
+    />,
+  );
   return handlers;
 };
 
@@ -43,6 +51,22 @@ describe('FilePreview', () => {
     const { onSelect } = setup(pdf('a'));
     expect(screen.getByRole('button', { name: 'Previous file' })).toBeDisabled();
     await userEvent.keyboard('{ArrowLeft}');
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('disables next on the last PDF when there are no more pages', () => {
+    setup(pdf('c'));
+    expect(screen.getByRole('button', { name: 'Next file' })).toBeDisabled();
+  });
+
+  it('asks for the next page from the last loaded PDF', async () => {
+    const onNextPage = vi.fn<() => void>();
+    const { onSelect } = setup(pdf('c'), onNextPage);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Next file' }));
+    await userEvent.keyboard('{ArrowRight}');
+
+    expect(onNextPage).toHaveBeenCalledTimes(2);
     expect(onSelect).not.toHaveBeenCalled();
   });
 

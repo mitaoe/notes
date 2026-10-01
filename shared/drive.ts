@@ -31,3 +31,5 @@ type ApiError = v.InferOutput<typeof ApiErrorSchema>;
 export type ApiBody = DrivePage | FolderPath | ApiError;
 
 export const isFolder = (item: Pick<DriveItem, 'mimeType'>) => item.mimeType === FOLDER_MIME_TYPE;
+
+export const isPdf = (item: Pick<DriveItem, 'mimeType'>) => item.mimeType === PDF_MIME_TYPE;

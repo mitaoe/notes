@@ -31,10 +31,19 @@ type FilePreviewProps = {
   file: DriveItem;
   files: DriveItem[];
   onSelect: (file: DriveItem) => void;
+  onNextPage: (() => void) | null;
+  loadingNextPage: boolean;
   onClose: () => void;
 };
 
-export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps) {
+export function FilePreview({
+  file,
+  files,
+  onSelect,
+  onNextPage,
+  loadingNextPage,
+  onClose,
+}: FilePreviewProps) {
   const compact = useMediaQuery(COMPACT_QUERY, false, { getInitialValueInEffect: false });
   const [frameState, setFrameState] = useState<FrameState>('loading');
   const { downloading, download } = useDownload(file.id);
@@ -44,7 +53,10 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
   const next = index >= 0 ? (files[index + 1] ?? null) : null;
 
   const showPrevious = () => previous && onSelect(previous);
-  const showNext = () => next && onSelect(next);
+  const showNext = () => {
+    if (next) onSelect(next);
+    else if (!loadingNextPage) onNextPage?.();
+  };
 
   useHotkeys([
     ['ArrowRight', showNext],
@@ -99,7 +111,8 @@ export function FilePreview({ file, files, onSelect, onClose }: FilePreviewProps
                 <ActionIcon
                   variant="subtle"
                   size={compact ? 'md' : 'lg'}
-                  disabled={next === null}
+                  disabled={next === null && onNextPage === null}
+                  loading={next === null && loadingNextPage}
                   aria-label="Next file"
                   className={clsx(classes.navButton, classes.next)}
                   onClick={showNext}
