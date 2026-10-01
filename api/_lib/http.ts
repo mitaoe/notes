@@ -2,7 +2,7 @@ import type { ApiBody } from '../../shared/drive.ts';
 import { StatusError } from '../../shared/status-error.ts';
 
 export const CACHE_CONTROL = {
-  listing: 'public, max-age=0, s-maxage=300, stale-while-revalidate=86400',
+  listing: 'public, max-age=0, s-maxage=300, stale-while-revalidate=3600',
   folderPath: 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400',
   fileLink: 'public, max-age=0, s-maxage=86400',
   none: 'no-store',

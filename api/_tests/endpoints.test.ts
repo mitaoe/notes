@@ -25,6 +25,7 @@ describe('GET /api/list', () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toContain('s-maxage=300');
+    expect(response.headers.get('cache-control')).toContain('stale-while-revalidate=3600');
     expect(await response.json()).toEqual({
       files: [{ id: 'am', name: 'am_journal.pdf', mimeType: PDF_MIME_TYPE, size: 2048 }],
       nextPageToken: null,
