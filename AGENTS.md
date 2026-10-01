@@ -63,7 +63,7 @@ Every `.ts` file directly in `api/` whose name does not start with `_` becomes a
 | Unit test        | next to the code, `.test.ts(x)`  | `FileRow.test.tsx`               |
 | End-to-end test  | `e2e/<area>.spec.ts`             | `e2e/navigation.spec.ts`         |
 
-One component per file. A file exports the things it is named after.
+One component per file. A file exports the things it is named after, plus the types callers need to pass them (`FolderOpener` next to `FileRow`, `PageLoader` next to `usePagedFiles`).
 
 ## Code conventions
 
