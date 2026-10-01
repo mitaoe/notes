@@ -3,6 +3,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { BrowserRouter, Route, Routes } from 'react-router';
 
 import { Layout } from './components/Layout.tsx';
+import { routes } from './config.ts';
 import { FolderPage } from './pages/FolderPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
 import { SearchPage } from './pages/SearchPage.tsx';
@@ -14,8 +15,8 @@ export function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/404" element={<NotFoundPage />} />
+            <Route path={routes.search} element={<SearchPage />} />
+            <Route path={routes.notFound} element={<NotFoundPage />} />
             <Route path="*" element={<FolderPage />} />
           </Routes>
         </Layout>

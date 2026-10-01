@@ -6,3 +6,8 @@ export const site = {
   githubUrl: 'https://github.com/mitaoe/notes',
   contactUrl: 'https://telegram.dog/ImmaKakarot',
 } as const;
+
+export const routes = {
+  search: '/search',
+  notFound: '/404',
+} as const;

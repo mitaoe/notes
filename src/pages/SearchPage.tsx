@@ -7,6 +7,7 @@ import { fetchFolderPath, fetchSearch } from '../api/drive.ts';
 import { ErrorAlert } from '../components/ErrorAlert.tsx';
 import { FileList } from '../components/FileList.tsx';
 import { SearchTitle } from '../components/SearchTitle.tsx';
+import { routes } from '../config.ts';
 import { usePagedFiles } from '../hooks/usePagedFiles.ts';
 
 import classes from './Page.module.css';
@@ -35,7 +36,7 @@ export function SearchPage() {
     } catch (error) {
       if (controller.signal.aborted) return;
       console.error(error);
-      await navigate('/404');
+      await navigate(routes.notFound);
     }
   };
 

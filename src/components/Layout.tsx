@@ -10,9 +10,9 @@ import {
   Stack,
 } from '@mantine/core';
 import { useState, type ReactNode } from 'react';
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
+import { Link, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router';
 
-import { site } from '../config.ts';
+import { routes, site } from '../config.ts';
 import { IconSearch } from '../icons.ts';
 import { Footer } from './Footer.tsx';
 import { SearchBar } from './SearchBar.tsx';
@@ -23,8 +23,6 @@ import classes from './Layout.module.css';
 const HEADER_HEIGHT = 60;
 const LOGO_SIZE = 35;
 
-const isSearchPath = (pathname: string) => pathname.startsWith('/search');
-
 type LayoutProps = { children: ReactNode };
 
 export function Layout({ children }: LayoutProps) {
@@ -34,15 +32,15 @@ export function Layout({ children }: LayoutProps) {
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const [mobileSearchOpened, setMobileSearchOpened] = useState(false);
 
-  const submittedQuery =
-    location.pathname === '/search' ? (searchParams.get('q') ?? '').trim() : '';
+  const onSearchPage = useMatch(routes.search) !== null;
+  const submittedQuery = onSearchPage ? (searchParams.get('q') ?? '').trim() : '';
   const [query, setQuery] = useState('');
   const [previous, setPrevious] = useState({ pathname: location.pathname, submittedQuery });
 
   if (previous.pathname !== location.pathname || previous.submittedQuery !== submittedQuery) {
     setPrevious({ pathname: location.pathname, submittedQuery });
     if (submittedQuery && submittedQuery !== previous.submittedQuery) setQuery(submittedQuery);
-    if (previous.pathname !== location.pathname && !isSearchPath(location.pathname)) {
+    if (previous.pathname !== location.pathname && !onSearchPage) {
       setQuery('');
       setMobileSearchOpened(false);
     }
@@ -50,16 +48,16 @@ export function Layout({ children }: LayoutProps) {
 
   const search = () => {
     const trimmed = query.trim();
-    if (trimmed) void navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+    if (trimmed) void navigate(`${routes.search}?q=${encodeURIComponent(trimmed)}`);
   };
 
   const clear = () => {
     setQuery('');
-    if (location.pathname === '/search') void navigate('/');
+    if (onSearchPage) void navigate('/');
   };
 
   const closeMobileSearch = () => {
-    if (!isSearchPath(location.pathname) && !query.trim()) setMobileSearchOpened(false);
+    if (!onSearchPage && !query.trim()) setMobileSearchOpened(false);
   };
 
   return (
