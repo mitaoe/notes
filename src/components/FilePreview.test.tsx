@@ -14,7 +14,7 @@ const pdf = (id: string): DriveItem => ({
 });
 const files = [pdf('a'), pdf('b'), pdf('c')];
 
-const setup = (file: DriveItem, onNextPage: (() => void) | null = null) => {
+const setup = (file: DriveItem, onNextPage: (() => void) | null = null, nextPageFailed = false) => {
   const handlers = { onSelect: vi.fn<(file: DriveItem) => void>(), onClose: vi.fn<() => void>() };
   renderWithProviders(
     <FilePreview
@@ -22,6 +22,7 @@ const setup = (file: DriveItem, onNextPage: (() => void) | null = null) => {
       files={files}
       onNextPage={onNextPage}
       loadingNextPage={false}
+      nextPageFailed={nextPageFailed}
       {...handlers}
     />,
   );
@@ -69,6 +70,13 @@ describe('FilePreview', () => {
 
     expect(onNextPage).toHaveBeenCalledTimes(2);
     expect(onSelect).not.toHaveBeenCalled();
+  });
+
+  it('says when the next page could not be loaded', () => {
+    setup(pdf('c'), vi.fn<() => void>(), true);
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      "Couldn't load more files. Please try again.",
+    );
   });
 
   it('closes with the button and Escape', async () => {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { isPdf, type DriveItem } from '../../shared/drive.ts';
+import type { PageFilter } from '../hooks/usePagedFiles.ts';
 import { BreadcrumbNav } from './BreadcrumbNav.tsx';
 import { EmptyState } from './EmptyState.tsx';
 import { ErrorAlert } from './ErrorAlert.tsx';
@@ -20,7 +21,7 @@ type FileListProps = {
   emptyMessage: string;
   errorMessage: string;
   hasMore: boolean;
-  onLoadMore: () => Promise<DriveItem[]>;
+  onLoadMore: (until?: PageFilter) => Promise<DriveItem[] | null>;
   folderOpener: FolderOpener;
 };
 
@@ -37,19 +38,31 @@ export function FileList({
   const { pathname, search } = useLocation();
   const [previewFile, setPreviewFile] = useState<DriveItem | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [nextPageFailed, setNextPageFailed] = useState(false);
 
-  const loadMore = async () => {
+  const loadMore = async (until?: PageFilter) => {
     if (loadingMore) return [];
     setLoadingMore(true);
     try {
-      return await onLoadMore();
+      return await onLoadMore(until);
     } finally {
       setLoadingMore(false);
     }
   };
 
+  const showPreview = (file: DriveItem | null) => {
+    setNextPageFailed(false);
+    setPreviewFile(file);
+  };
+
   const previewFromNextPage = async (from: DriveItem) => {
-    const nextPdf = (await loadMore()).find(isPdf);
+    setNextPageFailed(false);
+    const added = await loadMore((page) => page.some(isPdf));
+    if (added === null) {
+      setNextPageFailed(true);
+      return;
+    }
+    const nextPdf = added.find(isPdf);
     if (nextPdf) setPreviewFile((current) => (current?.id === from.id ? nextPdf : current));
   };
 
@@ -76,7 +89,7 @@ export function FileList({
                 key={file.id}
                 file={file}
                 folderOpener={folderOpener}
-                onPreview={setPreviewFile}
+                onPreview={showPreview}
               />
             ))}
           </Stack>
@@ -106,10 +119,11 @@ export function FileList({
           key={previewFile.id}
           file={previewFile}
           files={files.filter(isPdf)}
-          onSelect={setPreviewFile}
+          onSelect={showPreview}
           onNextPage={hasMore ? () => void previewFromNextPage(previewFile) : null}
           loadingNextPage={loadingMore}
-          onClose={() => setPreviewFile(null)}
+          nextPageFailed={nextPageFailed}
+          onClose={() => showPreview(null)}
         />
       )}
     </>

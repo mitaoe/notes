@@ -2,6 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 import type { DriveItem, DrivePage } from '../../shared/drive.ts';
 
+export type PageFilter = (files: DriveItem[]) => boolean;
+
+const ANY_PAGE: PageFilter = () => true;
+
 export type PageLoader = (
   key: string,
   pageToken: string | null,
@@ -43,27 +47,36 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   const current = loaded !== null && loaded.key === key ? loaded : null;
   const nextPageToken = current?.nextPageToken ?? null;
 
-  const loadMore = useCallback(async (): Promise<DriveItem[]> => {
-    if (key === null || nextPageToken === null) return [];
-    const update = (change: (previous: LoadedPages) => LoadedPages) =>
-      setLoaded((previous) =>
-        previous !== null && previous.key === key ? change(previous) : previous,
-      );
-    try {
-      const page = (await loadPage(key, nextPageToken, null)) ?? NO_PAGE;
-      update((previous) => ({
-        ...previous,
-        files: [...previous.files, ...page.files],
-        nextPageToken: page.nextPageToken,
-        failed: false,
-      }));
-      return page.files;
-    } catch (error) {
-      console.error(error);
-      update((previous) => ({ ...previous, failed: true }));
-      return [];
-    }
-  }, [key, nextPageToken, loadPage]);
+  const loadMore = useCallback(
+    async (until: PageFilter = ANY_PAGE): Promise<DriveItem[] | null> => {
+      if (key === null || nextPageToken === null) return [];
+      const update = (change: (previous: LoadedPages) => LoadedPages) =>
+        setLoaded((previous) =>
+          previous !== null && previous.key === key ? change(previous) : previous,
+        );
+      const loadFrom = async (pageToken: string, added: DriveItem[]): Promise<DriveItem[]> => {
+        const page = (await loadPage(key, pageToken, null)) ?? NO_PAGE;
+        update((previous) => ({
+          ...previous,
+          files: [...previous.files, ...page.files],
+          nextPageToken: page.nextPageToken,
+          failed: false,
+        }));
+        const files = [...added, ...page.files];
+        return until(page.files) || page.nextPageToken === null
+          ? files
+          : loadFrom(page.nextPageToken, files);
+      };
+      try {
+        return await loadFrom(nextPageToken, []);
+      } catch (error) {
+        console.error(error);
+        update((previous) => ({ ...previous, failed: true }));
+        return null;
+      }
+    },
+    [key, nextPageToken, loadPage],
+  );
 
   return {
     files: current?.files ?? [],

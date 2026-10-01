@@ -48,6 +48,48 @@ describe('FolderPage', () => {
     expect(screen.getByRole('button', { name: 'Next file' })).toBeDisabled();
   });
 
+  it('skips pages without PDFs when moving to the next PDF', async () => {
+    const image = { id: 'photo', name: 'photo.png', mimeType: 'image/png', size: 1 };
+    const pages: Record<string, unknown> = {
+      first: { files: [pdf('first')], nextPageToken: 'images' },
+      images: { files: [image], nextPageToken: 'last' },
+      last: { files: [pdf('last')], nextPageToken: null },
+    };
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async (input) => {
+        const url = new URL(input instanceof Request ? input.url : input.toString(), 'http://x');
+        return Response.json(pages[url.searchParams.get('pageToken') ?? 'first']);
+      }),
+    );
+    renderWithProviders(<FolderPage />, '/fy');
+
+    await userEvent.click(await screen.findByTitle('Preview'));
+    await userEvent.click(screen.getByRole('button', { name: 'Next file' }));
+
+    expect(await screen.findByTitle('last.pdf')).toBeInTheDocument();
+  });
+
+  it('says in the preview when the next page fails to load', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async (input) =>
+        (input instanceof Request ? input.url : input.toString()).includes('pageToken')
+          ? Response.json({ error: 'Something went wrong' }, { status: 500 })
+          : Response.json({ files: [pdf('first')], nextPageToken: 'next' }),
+      ),
+    );
+    renderWithProviders(<FolderPage />, '/fy');
+
+    await userEvent.click(await screen.findByTitle('Preview'));
+    await userEvent.click(screen.getByRole('button', { name: 'Next file' }));
+
+    expect(
+      await screen.findByText("Couldn't load more files. Please try again."),
+    ).toBeInTheDocument();
+  });
+
   it('loads the folder again from its breadcrumb after a failure', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     vi.stubGlobal(

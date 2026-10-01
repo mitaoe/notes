@@ -7,11 +7,13 @@ import { FILE_LINK_ERROR_TITLE, type DriveItem } from '../../shared/drive.ts';
 import { previewHref } from '../api/drive.ts';
 import { useDownload } from '../hooks/useDownload.ts';
 import { IconChevronLeft, IconChevronRight, IconDownload, IconX } from '../icons.ts';
+import { ErrorAlert } from './ErrorAlert.tsx';
 
 import downloadClasses from '../styles/download.module.css';
 import classes from './FilePreview.module.css';
 
 const COMPACT_QUERY = '(max-width: 600px)';
+const NEXT_PAGE_FAILED = "Couldn't load more files. Please try again.";
 const FRAME_SANDBOX = [
   'allow-scripts',
   'allow-same-origin',
@@ -33,6 +35,7 @@ type FilePreviewProps = {
   onSelect: (file: DriveItem) => void;
   onNextPage: (() => void) | null;
   loadingNextPage: boolean;
+  nextPageFailed: boolean;
   onClose: () => void;
 };
 
@@ -42,6 +45,7 @@ export function FilePreview({
   onSelect,
   onNextPage,
   loadingNextPage,
+  nextPageFailed,
   onClose,
 }: FilePreviewProps) {
   const compact = useMediaQuery(COMPACT_QUERY, false, { getInitialValueInEffect: false });
@@ -144,6 +148,11 @@ export function FilePreview({
             </Paper>
 
             <Box className={classes.viewer}>
+              {nextPageFailed && (
+                <Box className={classes.nextPageFailed}>
+                  <ErrorAlert message={NEXT_PAGE_FAILED} />
+                </Box>
+              )}
               {frameState === 'loading' && (
                 <Box className={classes.loadingOverlay}>
                   <Text size="md" c="white" className={classes.loadingText}>

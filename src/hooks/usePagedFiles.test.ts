@@ -20,6 +20,9 @@ const pages: Record<string, DrivePage | null> = {
   'b:first': pageB,
   'c:first': { files: [item('c1')], nextPageToken: 'c:missing' },
   'gone:first': null,
+  'd:first': { files: [item('d1')], nextPageToken: 'd:second' },
+  'd:second': { files: [item('d2')], nextPageToken: 'd:third' },
+  'd:third': { files: [item('d3')], nextPageToken: null },
 };
 
 const loader = () =>
@@ -48,8 +51,22 @@ describe('usePagedFiles', () => {
 
     const added = await act(() => result.current.loadMore());
 
-    expect(added.map((file) => file.id)).toEqual(['a2']);
+    expect(added?.map((file) => file.id)).toEqual(['a2']);
     expect(result.current.files.map((file) => file.id)).toEqual(['a1', 'a2']);
+    expect(result.current.hasMore).toBe(false);
+  });
+
+  it('keeps loading pages until one passes the filter', async () => {
+    const load = loader();
+    const { result } = renderHook(() => usePagedFiles('d', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    const added = await act(() =>
+      result.current.loadMore((files) => files.some((file) => file.id === 'd3')),
+    );
+
+    expect(added?.map((file) => file.id)).toEqual(['d2', 'd3']);
+    expect(result.current.files.map((file) => file.id)).toEqual(['d1', 'd2', 'd3']);
     expect(result.current.hasMore).toBe(false);
   });
 
@@ -107,7 +124,7 @@ describe('usePagedFiles', () => {
 
     const added = await act(() => result.current.loadMore());
 
-    expect(added).toEqual([]);
+    expect(added).toBeNull();
     expect(result.current.files.map((file) => file.id)).toEqual(['c1']);
     expect(result.current.failed).toBe(true);
   });
