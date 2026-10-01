@@ -141,7 +141,7 @@ export function Layout({ children }: LayoutProps) {
 
         <Container size="lg">
           <Stack gap="xs" className={classes.page}>
-            <Box>{children}</Box>
+            <Box key={location.key}>{children}</Box>
             <Footer />
           </Stack>
         </Container>
