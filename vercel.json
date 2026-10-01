@@ -10,5 +10,5 @@
       "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }]
     }
   ],
-  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+  "rewrites": [{ "source": "/((?!api/|assets/).*)", "destination": "/index.html" }]
 }
