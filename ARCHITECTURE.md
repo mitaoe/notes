@@ -130,7 +130,7 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 - **Format** is oxfmt, which also sorts imports.
 - **pnpm** stays on the latest release of major 11. pnpm 12 writes `pnpm-lock.yaml` as two YAML documents, and GitHub's dependency graph, which Dependabot security alerts are built on, reads only the first one, so it sees no dependencies ([dependabot-core#15904](https://github.com/dependabot/dependabot-core/issues/15904)). The only workaround, `pmOnFail: ignore`, also turns off pnpm's check of the `packageManager` version.
 - **`@types/node`** stays on the major of the Node.js runtime pinned in `engines`, and Dependabot is told not to raise it.
-- **Mantine** packages are pinned to one exact version because `@mantine/core` declares an exact peer dependency on `@mantine/hooks`.
+- **Mantine** packages are pinned to one exact version because `@mantine/core` declares an exact peer dependency on `@mantine/hooks`. Dependabot puts every `@mantine/*` update, majors included, in one `mantine` group, listed first because a dependency joins the first group it matches, so the packages always move together.
 
 ## Deployment
 
