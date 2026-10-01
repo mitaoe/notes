@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import type { DriveItem, DrivePage } from '../../shared/drive.ts';
+import { RejectedPageTokenError } from '../api/drive.ts';
 
-export type PageFilter = (files: DriveItem[]) => boolean;
+export type LoadGoal = (files: DriveItem[]) => boolean;
 
-const ANY_PAGE: PageFilter = () => true;
+const ANY_PAGE: LoadGoal = () => true;
 
 export type PageLoader = (
   key: string,
@@ -45,41 +46,50 @@ export const usePagedFiles = (key: string | null, loadPage: PageLoader) => {
   }, [key, loadPage]);
 
   const current = loaded !== null && loaded.key === key ? loaded : null;
+  const files = current?.files ?? NO_PAGE.files;
   const nextPageToken = current?.nextPageToken ?? null;
 
   const loadMore = useCallback(
-    async (until: PageFilter = ANY_PAGE): Promise<DriveItem[] | null> => {
-      if (key === null || nextPageToken === null) return [];
+    async (goal: LoadGoal | null): Promise<DriveItem[] | null> => {
+      if (key === null || nextPageToken === null) return files;
+      const reached = goal ?? ANY_PAGE;
       const update = (change: (previous: LoadedPages) => LoadedPages) =>
         setLoaded((previous) =>
           previous !== null && previous.key === key ? change(previous) : previous,
         );
-      const loadFrom = async (pageToken: string, added: DriveItem[]): Promise<DriveItem[]> => {
-        const page = (await loadPage(key, pageToken, null)) ?? NO_PAGE;
-        update((previous) => ({
-          ...previous,
-          files: [...previous.files, ...page.files],
-          nextPageToken: page.nextPageToken,
-          failed: false,
-        }));
-        const files = [...added, ...page.files];
-        return until(page.files) || page.nextPageToken === null
-          ? files
-          : loadFrom(page.nextPageToken, files);
+      const loadFrom = async (
+        pageToken: string | null,
+        listed: DriveItem[],
+        done: LoadGoal,
+      ): Promise<DriveItem[]> => {
+        const page = await loadPage(key, pageToken, null);
+        if (page === null && pageToken === null) {
+          update((previous) => ({ ...previous, files: [], nextPageToken: null, missing: true }));
+          return [];
+        }
+        const { files: pageFiles, nextPageToken: next } = page ?? NO_PAGE;
+        const all = [...listed, ...pageFiles];
+        update((previous) => ({ ...previous, files: all, nextPageToken: next, failed: false }));
+        return done(all) || next === null ? all : loadFrom(next, all, done);
       };
       try {
-        return await loadFrom(nextPageToken, []);
+        try {
+          return await loadFrom(nextPageToken, files, reached);
+        } catch (error) {
+          if (!(error instanceof RejectedPageTokenError)) throw error;
+          return await loadFrom(null, [], (all) => all.length > files.length && reached(all));
+        }
       } catch (error) {
         console.error(error);
         update((previous) => ({ ...previous, failed: true }));
         return null;
       }
     },
-    [key, nextPageToken, loadPage],
+    [key, files, nextPageToken, loadPage],
   );
 
   return {
-    files: current?.files ?? [],
+    files,
     loading: key !== null && current === null,
     failed: current?.failed ?? false,
     missing: current?.missing ?? false,

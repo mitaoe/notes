@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { PDF_MIME_TYPE } from '../../shared/drive.ts';
 import {
   ApiRequestError,
+  RejectedPageTokenError,
   downloadHref,
   fetchFolder,
   fetchFolderPath,
@@ -53,6 +54,19 @@ describe('fetchFolder', () => {
   it('throws on server errors', async () => {
     stubFetch({ error: 'Something went wrong' }, 500);
     await expect(fetchFolder('/', null, null)).rejects.toBeInstanceOf(ApiRequestError);
+  });
+
+  it('reports a page token the API rejects', async () => {
+    stubFetch({ error: 'pageToken is invalid' }, 400);
+    await expect(fetchFolder('/', 'stale', null)).rejects.toBeInstanceOf(RejectedPageTokenError);
+    await expect(fetchSearch('notes', 'stale', null)).rejects.toBeInstanceOf(
+      RejectedPageTokenError,
+    );
+  });
+
+  it('reports a rejected first page as a request error', async () => {
+    stubFetch({ error: 'q is required' }, 400);
+    await expect(fetchSearch('', null, null)).rejects.toBeInstanceOf(ApiRequestError);
   });
 
   it('rejects responses that do not match the contract', async () => {

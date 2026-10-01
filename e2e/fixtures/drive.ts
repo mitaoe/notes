@@ -44,7 +44,11 @@ const subjects = [
 
 export const BROKEN_PREVIEW_NAME = 'broken_preview.pdf';
 export const LOAD_MORE_FAILS_NAME = 'load_more_fails';
-const LOAD_MORE_FAILS_SIZE = 11;
+export const STALE_TOKEN_NAME = 'stale_token';
+const TWO_PAGE_SIZE = 11;
+
+const units = () =>
+  Array.from({ length: TWO_PAGE_SIZE }, (_, index) => pdf(`unit_${index}.pdf`, 1024));
 
 const subjectContents: Record<string, Spec[]> = {
   '00_journals': [
@@ -67,10 +71,8 @@ const tree: Spec = folder('root', [
   ),
   folder('sy', [
     folder("o'reilly & co #1", [pdf('chapter_1.pdf', 2048)]),
-    folder(
-      LOAD_MORE_FAILS_NAME,
-      Array.from({ length: LOAD_MORE_FAILS_SIZE }, (_, index) => pdf(`unit_${index}.pdf`, 1024)),
-    ),
+    folder(LOAD_MORE_FAILS_NAME, units()),
+    folder(STALE_TOKEN_NAME, units()),
   ]),
   folder('ty'),
   pdf('syllabus.pdf', 524288),

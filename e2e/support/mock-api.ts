@@ -13,6 +13,7 @@ import { parseFolderPath, toFolderPath } from '../../shared/folder-path.ts';
 import {
   BROKEN_PREVIEW_NAME,
   LOAD_MORE_FAILS_NAME,
+  STALE_TOKEN_NAME,
   findById,
   findByPath,
   paginate,
@@ -64,12 +65,21 @@ const findFile = (params: URLSearchParams) => {
   return file === null || isFolder(file) ? null : file;
 };
 
-const handlers: Record<string, (route: Route, params: URLSearchParams) => Promise<void>> = {
-  list: (route, params) => {
+type MockState = { staleTokenRejected: boolean };
+
+type Handler = (route: Route, params: URLSearchParams, state: MockState) => Promise<void>;
+
+const handlers: Record<string, Handler> = {
+  list: (route, params, state) => {
     const names = parseFolderPath(params.get('path') ?? '/');
+    const paging = params.get('pageToken') !== null;
     if (names?.includes(FAILING_NAME)) return json(route, { error: 'Something went wrong' }, 500);
-    if (names?.includes(LOAD_MORE_FAILS_NAME) && params.get('pageToken') !== null) {
+    if (names?.includes(LOAD_MORE_FAILS_NAME) && paging) {
       return json(route, { error: 'Something went wrong' }, 500);
+    }
+    if (names?.includes(STALE_TOKEN_NAME) && paging && !state.staleTokenRejected) {
+      state.staleTokenRejected = true;
+      return json(route, { error: 'pageToken is invalid' }, 400);
     }
     const folder = names === null ? null : findByPath(names);
     if (folder === null) return json(route, { error: 'Folder not found' }, 404);
@@ -102,10 +112,13 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
 
 export const mockDriveApi = async (page: Page) => {
   const context = page.context();
+  const state: MockState = { staleTokenRejected: false };
   await context.route('**/api/*', (route) => {
     const url = new URL(route.request().url());
     const handler = handlers[url.pathname.replace('/api/', '')];
-    return handler ? handler(route, url.searchParams) : json(route, { error: 'Not found' }, 404);
+    return handler
+      ? handler(route, url.searchParams, state)
+      : json(route, { error: 'Not found' }, 404);
   });
   await context.route('https://img.icons8.com/**', (route) =>
     route.fulfill({ contentType: 'image/x-icon', body: logo }),

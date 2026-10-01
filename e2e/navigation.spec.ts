@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { LOAD_MORE_FAILS_NAME } from './fixtures/drive.ts';
+import { LOAD_MORE_FAILS_NAME, STALE_TOKEN_NAME } from './fixtures/drive.ts';
 import { FAILING_NAME, mockDriveApi } from './support/mock-api.ts';
 
 test.beforeEach(async ({ page }) => {
@@ -102,6 +102,16 @@ test('a failed load more shows its error beside the button', async ({ page }) =>
   await expect(alert).toContainText('An error occurred while loading this folder.');
   await expect(alert).toBeInViewport();
   await expect(page.getByText('unit_0.pdf')).toBeVisible();
+});
+
+test('load more starts again from the first page when the token is rejected', async ({ page }) => {
+  await page.goto(`/sy/${STALE_TOKEN_NAME}`);
+  await expect(page.getByTitle('Preview')).toHaveCount(10);
+
+  await page.getByRole('button', { name: 'Load More' }).click();
+
+  await expect(page.getByTitle('Preview')).toHaveCount(11);
+  await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
 test('a failed next page shows its error over the preview', async ({ page }) => {

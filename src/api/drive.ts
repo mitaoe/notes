@@ -5,6 +5,8 @@ import { StatusError } from '../../shared/status-error.ts';
 
 export class ApiRequestError extends StatusError {}
 
+export class RejectedPageTokenError extends Error {}
+
 const request = async <TSchema extends v.GenericSchema>(
   path: string,
   params: Record<string, string | null>,
@@ -30,11 +32,30 @@ const nullIfNotFound = async <T>(response: Promise<T>) => {
   }
 };
 
+const rejectingPageToken = async <T>(pageToken: string | null, response: Promise<T>) => {
+  try {
+    return await response;
+  } catch (error) {
+    if (pageToken !== null && error instanceof ApiRequestError && error.status === 400) {
+      throw new RejectedPageTokenError('The page token was rejected', { cause: error });
+    }
+    throw error;
+  }
+};
+
 export const fetchFolder = (path: string, pageToken: string | null, signal: AbortSignal | null) =>
-  nullIfNotFound(request('/api/list', { path, pageToken }, signal, DrivePageSchema));
+  nullIfNotFound(
+    rejectingPageToken(
+      pageToken,
+      request('/api/list', { path, pageToken }, signal, DrivePageSchema),
+    ),
+  );
 
 export const fetchSearch = (query: string, pageToken: string | null, signal: AbortSignal | null) =>
-  request('/api/search', { q: query, pageToken }, signal, DrivePageSchema);
+  rejectingPageToken(
+    pageToken,
+    request('/api/search', { q: query, pageToken }, signal, DrivePageSchema),
+  );
 
 export const downloadHref = (fileId: string) =>
   `/api/download?${new URLSearchParams({ id: fileId })}`;

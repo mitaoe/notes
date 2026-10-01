@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { PDF_MIME_TYPE, type DriveItem, type DrivePage } from '../../shared/drive.ts';
+import { RejectedPageTokenError } from '../api/drive.ts';
 import { usePagedFiles, type PageLoader } from './usePagedFiles.ts';
 
 const item = (id: string): DriveItem => ({
@@ -32,6 +33,22 @@ const loader = () =>
     return page;
   });
 
+const ids = (files: DriveItem[] | null | undefined) => files?.map((file) => file.id);
+
+const refreshedLoader = (refreshed: DrivePage | null) => {
+  let firstPages = 0;
+  return vi.fn<PageLoader>(async (_key, pageToken) => {
+    if (pageToken === 'stale') throw new RejectedPageTokenError('rejected');
+    if (pageToken === null) {
+      firstPages += 1;
+      return firstPages === 1 ? { files: [item('s1')], nextPageToken: 'stale' } : refreshed;
+    }
+    const page = pages[pageToken];
+    if (page === undefined) throw new Error(`no page ${pageToken}`);
+    return page;
+  });
+};
+
 describe('usePagedFiles', () => {
   it('loads the first page and reports progress', async () => {
     const load = loader();
@@ -49,23 +66,23 @@ describe('usePagedFiles', () => {
     const { result } = renderHook(() => usePagedFiles('a', load));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
 
-    const added = await act(() => result.current.loadMore());
+    const loaded = await act(() => result.current.loadMore(null));
 
-    expect(added?.map((file) => file.id)).toEqual(['a2']);
-    expect(result.current.files.map((file) => file.id)).toEqual(['a1', 'a2']);
+    expect(ids(loaded)).toEqual(['a1', 'a2']);
+    expect(ids(result.current.files)).toEqual(['a1', 'a2']);
     expect(result.current.hasMore).toBe(false);
   });
 
-  it('keeps loading pages until one passes the filter', async () => {
+  it('keeps loading pages until the goal is reached', async () => {
     const load = loader();
     const { result } = renderHook(() => usePagedFiles('d', load));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
 
-    const added = await act(() =>
+    const loaded = await act(() =>
       result.current.loadMore((files) => files.some((file) => file.id === 'd3')),
     );
 
-    expect(added?.map((file) => file.id)).toEqual(['d2', 'd3']);
+    expect(ids(loaded)).toEqual(['d1', 'd2', 'd3']);
     expect(result.current.files.map((file) => file.id)).toEqual(['d1', 'd2', 'd3']);
     expect(result.current.hasMore).toBe(false);
   });
@@ -122,10 +139,59 @@ describe('usePagedFiles', () => {
     const { result } = renderHook(() => usePagedFiles('c', load));
     await waitFor(() => expect(result.current.hasMore).toBe(true));
 
-    const added = await act(() => result.current.loadMore());
+    const loaded = await act(() => result.current.loadMore(null));
 
-    expect(added).toBeNull();
+    expect(loaded).toBeNull();
     expect(result.current.files.map((file) => file.id)).toEqual(['c1']);
+    expect(result.current.failed).toBe(true);
+  });
+
+  it('starts again from the first page when the page token is rejected', async () => {
+    const load = refreshedLoader({ files: [item('s1')], nextPageToken: 'd:second' });
+    const { result } = renderHook(() => usePagedFiles('s', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    const loaded = await act(() => result.current.loadMore(null));
+
+    expect(ids(loaded)).toEqual(['s1', 'd2']);
+    expect(ids(result.current.files)).toEqual(['s1', 'd2']);
+    expect(result.current.failed).toBe(false);
+    expect(result.current.hasMore).toBe(true);
+  });
+
+  it('keeps loading after a restart until the goal is reached', async () => {
+    const load = refreshedLoader({ files: [item('s1')], nextPageToken: 'd:second' });
+    const { result } = renderHook(() => usePagedFiles('s', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    const loaded = await act(() =>
+      result.current.loadMore((files) => files.some((file) => file.id === 'd3')),
+    );
+
+    expect(ids(loaded)).toEqual(['s1', 'd2', 'd3']);
+    expect(result.current.hasMore).toBe(false);
+  });
+
+  it('reports the folder as missing when it is gone on a restart', async () => {
+    const load = refreshedLoader(null);
+    const { result } = renderHook(() => usePagedFiles('s', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    await act(() => result.current.loadMore(null));
+
+    expect(result.current).toMatchObject({ missing: true, failed: false, files: [] });
+  });
+
+  it('reports failure when the token is rejected again after a restart', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const load = refreshedLoader({ files: [item('s1')], nextPageToken: 'stale' });
+    const { result } = renderHook(() => usePagedFiles('s', load));
+    await waitFor(() => expect(result.current.hasMore).toBe(true));
+
+    const loaded = await act(() => result.current.loadMore(null));
+
+    expect(loaded).toBeNull();
+    expect(ids(result.current.files)).toEqual(['s1']);
     expect(result.current.failed).toBe(true);
   });
 

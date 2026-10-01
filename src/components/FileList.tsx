@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useLocation } from 'react-router';
 
 import { isPdf, type DriveItem } from '../../shared/drive.ts';
-import type { PageFilter } from '../hooks/usePagedFiles.ts';
+import type { LoadGoal } from '../hooks/usePagedFiles.ts';
 import { BreadcrumbNav } from './BreadcrumbNav.tsx';
 import { EmptyState } from './EmptyState.tsx';
 import { ErrorAlert } from './ErrorAlert.tsx';
@@ -14,6 +14,12 @@ import { FileRow, type FolderOpener } from './FileRow.tsx';
 import buttonClasses from '../styles/buttons.module.css';
 import classes from './FileList.module.css';
 
+const pdfAfter = (files: DriveItem[], from: DriveItem) => {
+  const pdfs = files.filter(isPdf);
+  const index = pdfs.findIndex((file) => file.id === from.id);
+  return index === -1 ? null : (pdfs[index + 1] ?? null);
+};
+
 type FileListProps = {
   files: DriveItem[];
   loading: boolean;
@@ -21,7 +27,7 @@ type FileListProps = {
   emptyMessage: string;
   errorMessage: string;
   hasMore: boolean;
-  onLoadMore: (until?: PageFilter) => Promise<DriveItem[] | null>;
+  onLoadMore: (goal: LoadGoal | null) => Promise<DriveItem[] | null>;
   folderOpener: FolderOpener;
 };
 
@@ -40,11 +46,11 @@ export function FileList({
   const [loadingMore, setLoadingMore] = useState(false);
   const [nextPageFailed, setNextPageFailed] = useState(false);
 
-  const loadMore = async (until?: PageFilter) => {
-    if (loadingMore) return [];
+  const loadMore = async (goal: LoadGoal | null) => {
+    if (loadingMore) return files;
     setLoadingMore(true);
     try {
-      return await onLoadMore(until);
+      return await onLoadMore(goal);
     } finally {
       setLoadingMore(false);
     }
@@ -57,12 +63,12 @@ export function FileList({
 
   const previewFromNextPage = async (from: DriveItem) => {
     setNextPageFailed(false);
-    const added = await loadMore((page) => page.some(isPdf));
-    if (added === null) {
+    const loaded = await loadMore((listed) => pdfAfter(listed, from) !== null);
+    if (loaded === null) {
       setNextPageFailed(true);
       return;
     }
-    const nextPdf = added.find(isPdf);
+    const nextPdf = pdfAfter(loaded, from);
     if (nextPdf) setPreviewFile((current) => (current?.id === from.id ? nextPdf : current));
   };
 
@@ -106,7 +112,7 @@ export function FileList({
               loading={loadingMore}
               loaderProps={{ size: 'xs', type: 'dots' }}
               className={clsx(buttonClasses.primary, classes.loadMore)}
-              onClick={() => void loadMore()}
+              onClick={() => void loadMore(null)}
             >
               Load More
             </Button>
