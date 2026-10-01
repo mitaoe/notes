@@ -1,12 +1,13 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
+import { HOST_MACHINE } from './e2e/support/browser-server.ts';
 import { serveApi } from './vite/serve-api.ts';
 
 export default defineConfig({
   plugins: [react(), serveApi()],
   preview: {
-    allowedHosts: ['hostmachine'],
+    allowedHosts: [HOST_MACHINE],
   },
   test: {
     restoreMocks: true,

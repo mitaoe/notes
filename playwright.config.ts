@@ -1,5 +1,7 @@
 import { defineConfig } from '@playwright/test';
 
+import { BROWSER_SERVER_PORT, HOST_MACHINE } from './e2e/support/browser-server.ts';
+
 const PREVIEW_PORT = 4173;
 
 export default defineConfig({
@@ -12,8 +14,8 @@ export default defineConfig({
     toHaveScreenshot: { animations: 'disabled', caret: 'hide', maxDiffPixels: 0 },
   },
   use: {
-    baseURL: `http://hostmachine:${PREVIEW_PORT}`,
-    connectOptions: { wsEndpoint: 'ws://127.0.0.1:3000/' },
+    baseURL: `http://${HOST_MACHINE}:${PREVIEW_PORT}`,
+    connectOptions: { wsEndpoint: `ws://127.0.0.1:${BROWSER_SERVER_PORT}/` },
     trace: 'retain-on-failure',
   },
   projects: [

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 
 import * as v from 'valibot';
 
-const PORT = 3000;
+import { BROWSER_SERVER_PORT, HOST_MACHINE } from '../e2e/support/browser-server.ts';
 
 const { version } = v.parse(
   v.object({ version: v.string() }),
@@ -19,8 +19,8 @@ const result = spawnSync(
     '--rm',
     '--init',
     '--publish',
-    `${PORT}:${PORT}`,
-    '--add-host=hostmachine:host-gateway',
+    `${BROWSER_SERVER_PORT}:${BROWSER_SERVER_PORT}`,
+    `--add-host=${HOST_MACHINE}:host-gateway`,
     '--workdir',
     '/home/pwuser',
     '--user',
@@ -31,7 +31,7 @@ const result = spawnSync(
     `playwright@${version}`,
     'run-server',
     '--port',
-    String(PORT),
+    String(BROWSER_SERVER_PORT),
     '--host',
     '0.0.0.0',
   ],

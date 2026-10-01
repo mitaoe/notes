@@ -42,7 +42,7 @@ src/                 The web app
 e2e/                 Playwright tests
   __screenshots__/   Visual baselines, the reference for how the site looks
   fixtures/          The fake Drive the tests browse
-  support/           The /api mock built on the fixtures
+  support/           The /api mock built on the fixtures, and the browser server address
 public/              Files served as-is
 scripts/             Node scripts used by package.json
 vite/                Vite plugins and tests for the build tooling

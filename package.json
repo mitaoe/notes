@@ -13,7 +13,8 @@
     "test:e2e": "playwright test",
     "playwright:server": "node scripts/playwright-server.ts",
     "format": "oxfmt",
-    "format:check": "oxfmt --check"
+    "format:check": "oxfmt --check",
+    "playwright:wait": "node scripts/wait-for-playwright-server.ts"
   },
   "dependencies": {
     "@mantine/core": "9.6.3",
