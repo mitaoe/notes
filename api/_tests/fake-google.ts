@@ -50,7 +50,7 @@ type Predicate = (file: FakeFile) => boolean;
 const compare = (field: 'name' | 'mimeType', operator: string, value: string): Predicate => {
   if (operator === '=') return (file) => file[field] === value;
   if (operator === '!=') return (file) => file[field] !== value;
-  return (file) => file[field].toLowerCase().includes(value.toLowerCase());
+  return (file) => file[field].toLowerCase().startsWith(value.toLowerCase());
 };
 
 const parseQuery = (q: string): Predicate[] => {

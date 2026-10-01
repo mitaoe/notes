@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
+import { FOLDER_MIME_TYPE, MAX_SEARCH_LENGTH } from '../../shared/drive.ts';
 import { folder, pdf, useFakeGoogle } from './fake-google.ts';
 
 const tree = [
@@ -99,16 +99,13 @@ describe('GET /api/search', () => {
     useFakeGoogle(tree);
     const { GET } = await import('../search.ts');
 
-    const response = await GET(get('/api/search?q=journal'));
+    const response = await GET(get('/api/search?q=00_jour'));
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toContain('s-maxage=300');
-    const body: unknown = await response.json();
-    expect(body).toMatchObject({
-      files: expect.arrayContaining([
-        expect.objectContaining({ id: 'journals' }),
-        expect.objectContaining({ id: 'am' }),
-      ]),
+    expect(await response.json()).toEqual({
+      files: [{ id: 'journals', name: '00_journals', mimeType: FOLDER_MIME_TYPE, size: null }],
+      nextPageToken: null,
     });
   });
 });

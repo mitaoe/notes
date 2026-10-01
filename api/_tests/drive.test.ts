@@ -7,6 +7,11 @@ import { ROOT_ID, TOKEN_LIFETIME_S, folder, pdf, useFakeGoogle } from './fake-go
 
 const loadDrive = () => import('../_lib/drive.ts');
 
+const searchIds = async (query: string) => {
+  const { searchFiles } = await loadDrive();
+  return (await searchFiles(query, null)).files.map((file) => file.id);
+};
+
 const tree = [
   folder('fy', 'fy'),
   folder('journals', '00_journals', 'fy'),
@@ -176,13 +181,17 @@ describe('access token', () => {
 });
 
 describe('searchFiles', () => {
-  it('matches names case-insensitively and hides what listings hide', async () => {
+  it('returns the items whose names start with the terms', async () => {
     useFakeGoogle(tree);
-    const { searchFiles } = await loadDrive();
+    expect(await searchIds('00_jour')).toEqual(['journals']);
+    expect(await searchIds('Shared')).toEqual(['shared']);
+  });
 
-    const page = await searchFiles('JOURNAL', null);
-
-    expect(page.files.map((file) => file.id).toSorted()).toEqual(['am', 'journals', 'shared']);
+  it('hides what listings hide', async () => {
+    useFakeGoogle(tree);
+    expect(await searchIds('journal')).toEqual([]);
+    expect(await searchIds('binned')).toEqual([]);
+    expect(await searchIds('.password')).toEqual([]);
   });
 
   it('skips the Drive call when there are no terms', async () => {
