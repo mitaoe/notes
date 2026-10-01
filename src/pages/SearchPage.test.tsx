@@ -28,7 +28,9 @@ describe('SearchPage', () => {
 
     await userEvent.click(await screen.findByRole('button', { name: '00_journals' }));
 
-    expect(await screen.findByTestId(LOCATION_TEST_ID)).toHaveTextContent('/fy/00_journals');
+    await vi.waitFor(() =>
+      expect(screen.getByTestId(LOCATION_TEST_ID)).toHaveTextContent('/fy/00_journals'),
+    );
   });
 
   it('falls back to the not found page when the folder cannot be resolved', async () => {
