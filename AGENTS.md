@@ -69,7 +69,7 @@ One component per file. A file exports the things it is named after, plus the ty
 
 - TypeScript everywhere. No `any`, no non-null assertions and no `as` casts on untrusted data; oxlint enforces the first two.
 - Validate data at every boundary with valibot: Google responses in `api/_lib/`, API responses in `src/api/`. Infer types from the schemas instead of declaring them twice.
-- Use `null` for "no value" in our own types. `undefined` only appears where an external API produces it.
+- Use `null` for "no value" in our own types. `undefined` only appears where an external API produces it, so props and parameters are not optional (`?`). A parameter may have a default when the default is a real value, as in `HttpError`'s `cacheControl`.
 - Named exports only, enforced by oxlint. Tool configs that must default-export are listed as exceptions in `.oxlintrc.json`.
 - Relative imports include the file extension (`./drive.ts`, `./FileRow.tsx`). oxfmt sorts and groups imports.
 - No comments in source code. Names carry the meaning; the reasoning behind a constraint belongs in ARCHITECTURE.md.
