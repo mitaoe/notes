@@ -31,6 +31,11 @@ const tree = [
   folder('outside', 'outside', 'someone-elses-drive'),
 ];
 
+const folderLookups = (requests: { url: URL }[]) =>
+  requests
+    .filter((request) => request.url.searchParams.get('fields') === 'files(id)')
+    .map((request) => /name = '([^']*)'/.exec(request.url.searchParams.get('q') ?? '')?.[1]);
+
 const tokenRequests = (requests: { url: URL }[]) =>
   requests.filter((request) => request.url.href === TOKEN_URL);
 
@@ -217,6 +222,21 @@ describe('listFolder', () => {
     const { listFolder } = await loadDrive();
 
     expect(await listFolder(['ty'], null)).toEqual({ files: [], nextPageToken: null });
+  });
+
+  it('looks a path up only once when nothing was remembered', async () => {
+    const { requests } = useFakeGoogle([
+      ...tree,
+      folder('ty', 'ty'),
+      folder('newer', '00_journals', 'fy'),
+    ]);
+    const { findFolderPath, listFolder } = await loadDrive();
+
+    expect(await findFolderPath('newer')).toBeNull();
+    expect(await listFolder(['ty'], null)).toEqual({ files: [], nextPageToken: null });
+    expect(await listFolder(['zz', 'nope'], null)).toBeNull();
+
+    expect(folderLookups(requests)).toEqual(['fy', '00_journals', 'ty', 'zz']);
   });
 
   it('reuses the access token and resolved folder ids', async () => {

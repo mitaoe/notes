@@ -112,10 +112,18 @@ const listFiles = async (q: string, pageToken: string | null): Promise<DrivePage
 
 const folderIds = new Map<string, { id: string; expiresAt: number }>();
 
-const findChildFolderId = async (parentId: string, name: string, useCache: boolean) => {
+type FolderResolution = { id: string | null; remembered: boolean };
+
+const findChildFolderId = async (
+  parentId: string,
+  name: string,
+  useCache: boolean,
+): Promise<FolderResolution> => {
   const key = `${parentId}/${name}`;
   const cached = folderIds.get(key);
-  if (useCache && cached && cached.expiresAt > Date.now()) return cached.id;
+  if (useCache && cached && cached.expiresAt > Date.now()) {
+    return { id: cached.id, remembered: true };
+  }
 
   const result = await driveGet(
     '/files',
@@ -131,21 +139,30 @@ const findChildFolderId = async (parentId: string, name: string, useCache: boole
   const id = result.files[0]?.id ?? null;
   if (id === null) folderIds.delete(key);
   else folderIds.set(key, { id, expiresAt: Date.now() + FOLDER_ID_TTL_MS });
-  return id;
+  return { id, remembered: false };
 };
 
 const resolveFolderId = (names: readonly string[], useCache: boolean) =>
-  names.reduce<Promise<string | null>>(async (parentId, name) => {
-    const resolvedParentId = await parentId;
-    return resolvedParentId === null ? null : findChildFolderId(resolvedParentId, name, useCache);
-  }, Promise.resolve(ROOT_FOLDER_ID));
+  names.reduce<Promise<FolderResolution>>(
+    async (parent, name) => {
+      const resolved = await parent;
+      if (resolved.id === null) return resolved;
+      const child = await findChildFolderId(resolved.id, name, useCache);
+      return { id: child.id, remembered: resolved.remembered || child.remembered };
+    },
+    Promise.resolve({ id: ROOT_FOLDER_ID, remembered: false }),
+  );
+
+const confirmedFolderId = async (names: readonly string[], resolution: FolderResolution) =>
+  resolution.remembered ? (await resolveFolderId(names, false)).id : resolution.id;
 
 export const listFolder = async (names: readonly string[], pageToken: string | null) => {
-  const folderId = (await resolveFolderId(names, true)) ?? (await resolveFolderId(names, false));
+  const resolution = await resolveFolderId(names, true);
+  const folderId = resolution.id ?? (await confirmedFolderId(names, resolution));
   if (folderId === null) return null;
   const page = await listFiles(folderContentsQuery(folderId), pageToken);
-  if (page.files.length > 0 || names.length === 0) return page;
-  const currentId = await resolveFolderId(names, false);
+  if (page.files.length > 0 || resolution.id === null) return page;
+  const currentId = await confirmedFolderId(names, resolution);
   if (currentId === folderId) return page;
   if (currentId === null) return null;
   if (pageToken !== null) throw rejectedPageToken();
@@ -202,9 +219,9 @@ const collectFolderNames = async (
 export const findFolderPath = async (folderId: string) => {
   const names = await collectFolderNames(folderId, await getRootFolderId(), []);
   if (names === null || !isAddressable(names)) return null;
+  const resolution = await resolveFolderId(names, true);
   const leadsHere =
-    (await resolveFolderId(names, true)) === folderId ||
-    (await resolveFolderId(names, false)) === folderId;
+    resolution.id === folderId || (await confirmedFolderId(names, resolution)) === folderId;
   return leadsHere ? toFolderPath(names) : null;
 };
 
