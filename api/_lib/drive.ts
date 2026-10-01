@@ -64,7 +64,7 @@ const VISIBLE_ITEMS = [
   ...HIDDEN_MIME_TYPES.map((mimeType) => `mimeType != ${quote(mimeType)}`),
 ].join(' and ');
 
-export const folderContentsQuery = (folderId: string) =>
+const folderContentsQuery = (folderId: string) =>
   `${quote(folderId)} in parents and ${VISIBLE_ITEMS}`;
 
 export const searchQuery = (text: string) => {

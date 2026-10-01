@@ -81,9 +81,9 @@ const build = (spec: Spec, parentId: string | null, path: string): FixtureNode =
   return node;
 };
 
-export const root = build(tree, null, '');
+const root = build(tree, null, '');
 
-export const allNodes = (node: FixtureNode = root): FixtureNode[] =>
+const allNodes = (node: FixtureNode = root): FixtureNode[] =>
   node.children.flatMap((child) => [child, ...allNodes(child)]);
 
 export const findById = (id: string): FixtureNode | null =>

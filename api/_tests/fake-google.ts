@@ -3,7 +3,7 @@ import { vi } from 'vitest';
 import { FOLDER_MIME_TYPE } from '../../shared/drive.ts';
 import { DRIVE_URL, TOKEN_URL } from '../_lib/google.ts';
 
-export type FakeFile = {
+type FakeFile = {
   id: string;
   name: string;
   mimeType: string;
@@ -53,7 +53,7 @@ const compare = (field: 'name' | 'mimeType', operator: string, value: string): P
   return (file) => file[field].toLowerCase().includes(value.toLowerCase());
 };
 
-export const parseQuery = (q: string): Predicate[] => {
+const parseQuery = (q: string): Predicate[] => {
   const predicates: Predicate[] = [];
   CLAUSE.lastIndex = 0;
   while (CLAUSE.lastIndex < q.length) {

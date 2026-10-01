@@ -26,8 +26,8 @@ const ApiErrorSchema = v.object({
 
 export type DriveItem = v.InferOutput<typeof DriveItemSchema>;
 export type DrivePage = v.InferOutput<typeof DrivePageSchema>;
-export type FolderPath = v.InferOutput<typeof FolderPathSchema>;
-export type ApiError = v.InferOutput<typeof ApiErrorSchema>;
+type FolderPath = v.InferOutput<typeof FolderPathSchema>;
+type ApiError = v.InferOutput<typeof ApiErrorSchema>;
 export type ApiBody = DrivePage | FolderPath | ApiError;
 
 export const isFolder = (item: Pick<DriveItem, 'mimeType'>) => item.mimeType === FOLDER_MIME_TYPE;

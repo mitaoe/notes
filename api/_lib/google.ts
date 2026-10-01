@@ -44,7 +44,7 @@ const requestToken = async (): Promise<AccessToken> => {
   };
 };
 
-export const getAccessToken = async () => {
+const getAccessToken = async () => {
   if (token && token.expiresAt > Date.now()) return token.value;
   pendingToken ??= requestToken().finally(() => {
     pendingToken = null;
