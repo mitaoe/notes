@@ -114,7 +114,7 @@ test('load more starts again from the first page when the token is rejected', as
   await expect(page.getByRole('alert')).toHaveCount(0);
 });
 
-test('a failed next page shows its error over the preview', async ({ page }) => {
+test('a failed next page shows a dismissible error over the preview', async ({ page }) => {
   await page.goto(`/sy/${LOAD_MORE_FAILS_NAME}`);
   await page.getByTitle('Preview').last().click();
   await page.getByRole('button', { name: 'Next file' }).click();
@@ -128,6 +128,10 @@ test('a failed next page shows its error over the preview', async ({ page }) => 
     );
   });
   expect(onTop).toBe(true);
+
+  await alert.getByRole('button', { name: 'Dismiss error' }).click();
+  await expect(alert).toBeHidden();
+  await expect(page.getByRole('dialog')).toBeVisible();
 });
 
 test('an unknown search shows the empty state', async ({ page }) => {

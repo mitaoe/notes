@@ -102,7 +102,7 @@ export function FileList({
         )}
         {failed && files.length > 0 && (
           <Box mt="md">
-            <ErrorAlert message={errorMessage} />
+            <ErrorAlert message={errorMessage} onClose={null} />
           </Box>
         )}
         {hasMore && (
@@ -129,6 +129,7 @@ export function FileList({
           onNextPage={hasMore ? () => void previewFromNextPage(previewFile) : null}
           loadingNextPage={loadingMore}
           nextPageFailed={nextPageFailed}
+          onDismissNextPageError={() => setNextPageFailed(false)}
           onClose={() => showPreview(null)}
         />
       )}

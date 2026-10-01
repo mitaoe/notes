@@ -15,7 +15,11 @@ const pdf = (id: string): DriveItem => ({
 const files = [pdf('a'), pdf('b'), pdf('c')];
 
 const setup = (file: DriveItem, onNextPage: (() => void) | null = null, nextPageFailed = false) => {
-  const handlers = { onSelect: vi.fn<(file: DriveItem) => void>(), onClose: vi.fn<() => void>() };
+  const handlers = {
+    onSelect: vi.fn<(file: DriveItem) => void>(),
+    onDismissNextPageError: vi.fn<() => void>(),
+    onClose: vi.fn<() => void>(),
+  };
   renderWithProviders(
     <FilePreview
       file={file}
@@ -72,11 +76,16 @@ describe('FilePreview', () => {
     expect(onSelect).not.toHaveBeenCalled();
   });
 
-  it('says when the next page could not be loaded', () => {
-    setup(pdf('c'), vi.fn<() => void>(), true);
+  it('says when the next page could not be loaded, until dismissed', async () => {
+    const { onDismissNextPageError, onClose } = setup(pdf('c'), vi.fn<() => void>(), true);
     expect(screen.getByRole('alert')).toHaveTextContent(
       "Couldn't load more files. Please try again.",
     );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Dismiss error' }));
+
+    expect(onDismissNextPageError).toHaveBeenCalledOnce();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('closes with the button and Escape', async () => {

@@ -36,6 +36,7 @@ type FilePreviewProps = {
   onNextPage: (() => void) | null;
   loadingNextPage: boolean;
   nextPageFailed: boolean;
+  onDismissNextPageError: () => void;
   onClose: () => void;
 };
 
@@ -46,6 +47,7 @@ export function FilePreview({
   onNextPage,
   loadingNextPage,
   nextPageFailed,
+  onDismissNextPageError,
   onClose,
 }: FilePreviewProps) {
   const compact = useMediaQuery(COMPACT_QUERY, false, { getInitialValueInEffect: false });
@@ -150,7 +152,7 @@ export function FilePreview({
             <Box className={classes.viewer}>
               {nextPageFailed && (
                 <Box className={classes.nextPageFailed}>
-                  <ErrorAlert message={NEXT_PAGE_FAILED} />
+                  <ErrorAlert message={NEXT_PAGE_FAILED} onClose={onDismissNextPageError} />
                 </Box>
               )}
               {frameState === 'loading' && (

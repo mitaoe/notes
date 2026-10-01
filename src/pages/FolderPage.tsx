@@ -32,7 +32,7 @@ export function FolderPage() {
 
   return (
     <Box className={pageClasses.page}>
-      {failed && files.length === 0 && <ErrorAlert message={FOLDER_ERROR} />}
+      {failed && files.length === 0 && <ErrorAlert message={FOLDER_ERROR} onClose={null} />}
       <FileList
         files={files}
         loading={loading}

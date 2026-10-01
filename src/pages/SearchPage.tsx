@@ -60,7 +60,7 @@ export function SearchPage() {
     <Box className={pageClasses.page}>
       <SearchTitle query={query} loading={loading} failed={failed} empty={files.length === 0} />
 
-      {failed && files.length === 0 && <ErrorAlert message={errorMessage} />}
+      {failed && files.length === 0 && <ErrorAlert message={errorMessage} onClose={null} />}
 
       <FileList
         files={files}
