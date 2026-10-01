@@ -11,6 +11,7 @@ type FakeFile = {
   size?: string;
   trashed?: boolean;
   permissionIds?: string[];
+  canShare?: boolean;
 };
 
 export const ROOT_ID = 'real-root-id';
@@ -122,14 +123,22 @@ export const useFakeGoogle = (files: FakeFile[]) => {
     }
     if (path === '/files/root') return respond({ id: ROOT_ID });
 
-    if (/^\/files\/[^/]+\/permissions$/.test(path) && method === 'POST') {
-      return respond({ id: 'anyoneWithLink' });
+    const findFile = (encodedId: string | undefined) =>
+      files.find((candidate) => candidate.id === decodeURIComponent(encodedId ?? ''));
+
+    const sharing = path.match(/^\/files\/([^/]+)\/permissions$/);
+    if (sharing && method === 'POST') {
+      return findFile(sharing[1])?.canShare === false
+        ? respond({ error: 'insufficientFilePermissions' }, 403)
+        : respond({ id: 'anyoneWithLink' });
     }
 
     const single = path.match(/^\/files\/([^/]+)$/);
     if (single) {
-      const file = files.find((candidate) => candidate.id === decodeURIComponent(single[1] ?? ''));
-      return file ? respond({ trashed: false, ...file }) : respond({ error: 'not found' }, 404);
+      const file = findFile(single[1]);
+      return file
+        ? respond({ trashed: false, capabilities: { canShare: file.canShare ?? true }, ...file })
+        : respond({ error: 'not found' }, 404);
     }
 
     const predicates = parseQuery(url.searchParams.get('q') ?? '');

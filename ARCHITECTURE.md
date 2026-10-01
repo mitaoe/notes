@@ -58,14 +58,14 @@ sequenceDiagram
   participant G as drive.google.com
   B->>F: GET /api/download?id=FILE
   F->>D: read the file's metadata
-  opt not yet link-shared
+  opt not yet link-shared, and the account can share it
     F->>D: add an "anyone with the link" reader permission
   end
   F-->>B: 302 to the Drive download or preview URL
   B->>G: follow the redirect
 ```
 
-Drive only serves a file anonymously once it is public, so the function grants the link permission the first time a file is requested and skips the write for files that are already public. Only files that listings and search can show are shared (see Visibility below), and that includes files search finds outside the root folder, since search results offer them for download. The redirect is cached at the CDN, so repeat downloads do not reach the function.
+Drive only serves a file anonymously once it is public, so the function grants the link permission the first time a file is requested and skips the write for files that are already public. Only files that listings and search can show are shared (see Visibility below), and that includes files search finds outside the root folder, since search results offer them for download. Search also finds files that others shared with the account as a viewer, which the account cannot share (`capabilities.canShare` is false). The function redirects to those without writing, and Drive decides whether the visitor may open them. The redirect is cached at the CDN, so repeat downloads do not reach the function.
 
 The download button opens the endpoint in a new tab synchronously inside the click handler, which keeps it clear of popup blockers. The preview modal points an `iframe` at `/api/preview`. When the endpoint answers with a JSON error instead of redirecting, the frame's document is our own `application/json` response, and the modal shows "Preview not available" in place of the frame.
 

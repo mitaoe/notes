@@ -19,7 +19,8 @@ const HIDDEN_MIME_TYPES = [
 const LIST_FIELDS = 'nextPageToken, files(id, name, mimeType, size)';
 const ID_LIST_FIELDS = 'files(id)';
 const ID_FIELDS = 'id';
-const METADATA_FIELDS = 'id, name, mimeType, trashed, parents, permissionIds';
+const METADATA_FIELDS =
+  'id, name, mimeType, trashed, parents, permissionIds, capabilities/canShare';
 const LIST_ORDER = 'folder,name,modifiedTime desc';
 const FOLDER_LOOKUP_ORDER = 'createdTime';
 const PUBLIC_PERMISSION_IDS = new Set(['anyoneWithLink', 'anyone']);
@@ -45,6 +46,7 @@ const DriveMetadataSchema = v.object({
   trashed: v.boolean(),
   parents: v.optional(v.array(v.string())),
   permissionIds: v.optional(v.array(v.string())),
+  capabilities: v.object({ canShare: v.boolean() }),
 });
 
 const DriveIdSchema = v.object({ id: v.string() });
@@ -204,7 +206,7 @@ const isPublic = (file: DriveMetadata) =>
 export const shareFile = async (fileId: string) => {
   const file = await getMetadata(fileId);
   if (file === null || !isVisibleFile(file)) return false;
-  if (!isPublic(file)) {
+  if (!isPublic(file) && file.capabilities.canShare) {
     await drivePost(
       `/files/${encodeURIComponent(fileId)}/permissions`,
       { supportsAllDrives: true },

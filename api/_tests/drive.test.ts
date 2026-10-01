@@ -19,6 +19,7 @@ const tree = [
   pdf('am', 'am_journal.pdf', 'journals'),
   pdf('shared', 'Shared_Journal.pdf', 'journals', { permissionIds: ['anyoneWithLink'] }),
   pdf('public', 'public.pdf', 'journals', { permissionIds: ['anyone'] }),
+  pdf('viewer', 'viewer.pdf', 'journals', { canShare: false }),
   pdf('binned', 'binned_journal.pdf', 'journals', { trashed: true }),
   {
     id: 'doc',
@@ -79,7 +80,12 @@ describe('listFolder', () => {
 
     const page = await listFolder(['fy', '00_journals'], null);
 
-    expect(page?.files.map((file) => file.id).toSorted()).toEqual(['am', 'public', 'shared']);
+    expect(page?.files.map((file) => file.id).toSorted()).toEqual([
+      'am',
+      'public',
+      'shared',
+      'viewer',
+    ]);
     const listing = requests.at(-1)?.url;
     expect(listing?.searchParams.get('pageSize')).toBe(String(PAGE_SIZE));
     expect(listing?.searchParams.get('orderBy')).toBe('folder,name,modifiedTime desc');
@@ -264,6 +270,14 @@ describe('shareFile', () => {
     expect(
       requests.some((request) => request.method === 'POST' && request.url.href !== TOKEN_URL),
     ).toBe(false);
+  });
+
+  it('links a file the account can only view without writing a permission', async () => {
+    const { requests } = useFakeGoogle(tree);
+    const { shareFile } = await loadDrive();
+
+    expect(await shareFile('viewer')).toBe(true);
+    expect(requests.some((request) => request.url.pathname.endsWith('/permissions'))).toBe(false);
   });
 
   it.each(['journals', 'binned', 'doc', 'secret', 'missing'])('refuses to share %s', async (id) => {
