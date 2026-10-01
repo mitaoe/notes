@@ -12,7 +12,6 @@ import downloadClasses from '../styles/download.module.css';
 import classes from './FilePreview.module.css';
 
 const COMPACT_QUERY = '(max-width: 600px)';
-const API_ERROR_CONTENT_TYPE = 'application/json';
 const FRAME_SANDBOX = [
   'allow-scripts',
   'allow-same-origin',
@@ -26,7 +25,7 @@ const FRAME_SANDBOX = [
 type FrameState = 'loading' | 'loaded' | 'failed';
 
 const frameStateAfterLoad = (event: SyntheticEvent<HTMLIFrameElement>): FrameState =>
-  event.currentTarget.contentDocument?.contentType === API_ERROR_CONTENT_TYPE ? 'failed' : 'loaded';
+  event.currentTarget.contentDocument === null ? 'loaded' : 'failed';
 
 type FilePreviewProps = {
   file: DriveItem;

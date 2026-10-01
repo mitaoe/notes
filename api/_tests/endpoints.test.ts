@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { FOLDER_MIME_TYPE, MAX_SEARCH_LENGTH, PDF_MIME_TYPE } from '../../shared/drive.ts';
+import { CACHE_CONTROL } from '../_lib/http.ts';
 import { folder, pdf, useFakeGoogle } from './fake-google.ts';
 
 const tree = [
@@ -135,18 +136,41 @@ describe.each([
     ).toBe(true);
   });
 
-  it('answers 404 for folders and unknown files', async () => {
+  it.each(['journals', 'missing'])('answers %s with a cacheable 404 page', async (id) => {
     useFakeGoogle(tree);
     const { GET } = await load();
-    expect((await GET(get(`/api/${name}?id=journals`))).status).toBe(404);
-    expect((await GET(get(`/api/${name}?id=missing`))).status).toBe(404);
+
+    const response = await GET(get(`/api/${name}?id=${id}`));
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('content-type')).toBe('text/html; charset=utf-8');
+    expect(response.headers.get('cache-control')).toBe(CACHE_CONTROL.listing);
+    expect(await response.text()).toContain('This file is no longer available.');
   });
 
-  it('requires a valid id', async () => {
+  it.each(['', '?id=a/b'])('answers "%s" with an uncached 400 page', async (query) => {
     useFakeGoogle(tree);
     const { GET } = await load();
-    expect((await GET(get(`/api/${name}`))).status).toBe(400);
-    expect((await GET(get(`/api/${name}?id=a/b`))).status).toBe(400);
+
+    const response = await GET(get(`/api/${name}${query}`));
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get('cache-control')).toBe(CACHE_CONTROL.none);
+    expect(await response.text()).toContain('This link is not valid.');
+  });
+
+  it('answers a Drive failure with an uncached error page that runs no scripts', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { failNext } = useFakeGoogle(tree);
+    const { GET } = await load();
+    failNext('/files/am', 500);
+
+    const response = await GET(get(`/api/${name}?id=am`));
+
+    expect(response.status).toBe(500);
+    expect(response.headers.get('cache-control')).toBe(CACHE_CONTROL.none);
+    expect(response.headers.get('content-security-policy')).toContain("default-src 'none'");
+    expect(await response.text()).toContain('Something went wrong. Please try again.');
   });
 });
 

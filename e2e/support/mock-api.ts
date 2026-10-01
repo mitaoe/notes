@@ -48,6 +48,11 @@ const pathOf = (node: FixtureNode) => {
 const PREVIEW_PAGE =
   '<!doctype html><title>preview</title><body style="margin:0;background:#fff"></body>';
 
+const FILE_ERROR_PAGE = '<!doctype html><title>File unavailable</title><h1>File unavailable</h1>';
+
+const fileError = (route: Route, status: number) =>
+  route.fulfill({ status, contentType: 'text/html', body: FILE_ERROR_PAGE });
+
 const findFile = (params: URLSearchParams) => {
   const file = findById(params.get('id') ?? '');
   return file === null || isFolder(file) ? null : file;
@@ -75,15 +80,13 @@ const handlers: Record<string, (route: Route, params: URLSearchParams) => Promis
   },
   download: (route, params) => {
     const file = findFile(params);
-    if (file === null) return json(route, { error: 'File not found' }, 404);
+    if (file === null) return fileError(route, 404);
     return route.fulfill({ status: 302, headers: { Location: downloadUrl(file.id) } });
   },
   preview: (route, params) => {
     const file = findFile(params);
-    if (file === null) return json(route, { error: 'File not found' }, 404);
-    if (file.name === BROKEN_PREVIEW_NAME) {
-      return json(route, { error: 'Something went wrong' }, 500);
-    }
+    if (file === null) return fileError(route, 404);
+    if (file.name === BROKEN_PREVIEW_NAME) return fileError(route, 500);
     return route.fulfill({ status: 302, headers: { Location: previewUrl(file.id) } });
   },
 };

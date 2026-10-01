@@ -42,15 +42,19 @@ export const driveIdParam = (params: URLSearchParams) => {
   return id;
 };
 
+export type ErrorResponder = (error: HttpError) => Response;
+
+const jsonError: ErrorResponder = (error) =>
+  json({ error: error.message }, error.status, error.cacheControl);
+
 export const handleGet =
-  (handler: (params: URLSearchParams) => Promise<Response>) => async (request: Request) => {
+  (handler: (params: URLSearchParams) => Promise<Response>, respondWithError = jsonError) =>
+  async (request: Request) => {
     try {
       return await handler(new URL(request.url).searchParams);
     } catch (error) {
-      if (error instanceof HttpError) {
-        return json({ error: error.message }, error.status, error.cacheControl);
-      }
+      if (error instanceof HttpError) return respondWithError(error);
       console.error(error);
-      return json({ error: 'Something went wrong' }, 500, CACHE_CONTROL.none);
+      return respondWithError(new HttpError(500, 'Something went wrong'));
     }
   };
