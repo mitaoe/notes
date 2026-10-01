@@ -10,7 +10,7 @@ export function SearchTitle({ query, loading, failed, empty }: SearchTitleProps)
       </Text>
     );
   }
-  if (failed) {
+  if (failed && empty) {
     return (
       <Text span fw={400} c="red">
         Search failed

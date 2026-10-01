@@ -58,4 +58,27 @@ describe('SearchPage', () => {
       screen.getByText('An error occurred while searching. Please try again.'),
     ).toBeInTheDocument();
   });
+
+  it('keeps the results title when loading more fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.stubGlobal(
+      'fetch',
+      vi.fn<typeof fetch>(async (input) => {
+        const url = input instanceof Request ? input.url : input.toString();
+        return url.includes('pageToken')
+          ? Response.json({ error: 'Something went wrong' }, { status: 500 })
+          : Response.json({ ...results, nextPageToken: 'next' });
+      }),
+    );
+    renderWithProviders(<SearchPage />, '/search?q=journals');
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Load More' }));
+
+    expect(
+      await screen.findByText('An error occurred while searching. Please try again.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Results for')).toBeInTheDocument();
+    expect(screen.queryByText('Search failed')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '00_journals' })).toBeInTheDocument();
+  });
 });
