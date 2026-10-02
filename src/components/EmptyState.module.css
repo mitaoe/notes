@@ -1,0 +1,20 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  padding: var(--mantine-spacing-xl);
+  border: 1px solid var(--mantine-color-dark-5);
+  border-radius: var(--mantine-radius-sm);
+  background-color: var(--mantine-color-dark-7);
+
+  @media (max-width: 768px) {
+    min-height: 250px;
+    padding: var(--mantine-spacing-md);
+  }
+}
+
+.icon {
+  background-color: alpha(var(--mantine-color-blue-9), 0.15);
+  color: var(--mantine-color-blue-4);
+}

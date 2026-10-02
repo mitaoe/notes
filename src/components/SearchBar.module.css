@@ -1,0 +1,54 @@
+.form {
+  display: flex;
+}
+
+.root {
+  position: relative;
+  width: 300px;
+}
+
+.rootMobile {
+  width: 200px;
+}
+
+.input {
+  padding-left: 42px;
+  transition: all 0.3s ease-in-out;
+
+  &:focus {
+    border-color: var(--mantine-color-blue-5);
+  }
+}
+
+.inputFocused {
+  padding-left: 16px;
+}
+
+.searchIcon {
+  opacity: 0.6;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+  pointer-events: auto;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.searchIconFocused {
+  opacity: 1;
+  transform: translateX(236px);
+}
+
+.searchIconFocusedMobile {
+  transform: translateX(138px);
+}
+
+.clearIcon {
+  transition: all 0.3s ease-in-out;
+  color: alpha(var(--mantine-color-red-9), 0.85);
+
+  &:hover {
+    background-color: alpha(var(--mantine-color-red-9), 0.15);
+  }
+}

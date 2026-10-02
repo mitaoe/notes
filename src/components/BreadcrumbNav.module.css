@@ -1,0 +1,81 @@
+.paper {
+  position: relative;
+  background-color: var(--mantine-color-dark-6);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.scrollButton {
+  position: absolute;
+  z-index: 2;
+  height: 100%;
+  border-radius: 0;
+}
+
+.scrollLeft {
+  left: 0;
+  background: linear-gradient(to right, alpha(var(--mantine-color-dark-6), 0.9), transparent);
+
+  &:hover {
+    background: linear-gradient(to right, var(--mantine-color-dark-6), transparent);
+  }
+}
+
+.scrollRight {
+  right: 0;
+  background: linear-gradient(to left, alpha(var(--mantine-color-dark-6), 0.9), transparent);
+
+  &:hover {
+    background: linear-gradient(to left, var(--mantine-color-dark-6), transparent);
+  }
+}
+
+.viewport {
+  position: relative;
+  width: 100%;
+  margin: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  scroll-behavior: smooth;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.breadcrumbs {
+  flex-wrap: nowrap;
+  min-width: min-content;
+  padding: 2px 0;
+}
+
+.separator {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--mantine-color-gray-5);
+  pointer-events: none;
+}
+
+.crumb {
+  display: inline-block;
+  padding: 2px 4px;
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-blue-4);
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.current {
+  background-color: alpha(var(--mantine-color-blue-9), 0.15);
+}
+
+@media (max-width: 480px) {
+  .long {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

@@ -1,0 +1,39 @@
+.main {
+  background-color: var(--mantine-color-dark-8);
+}
+
+.header {
+  border-bottom: 1px solid var(--mantine-color-dark-5);
+  background-color: var(--mantine-color-dark-7);
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo {
+  border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+  .desktopOnly {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobileOnly {
+    display: none;
+  }
+}
+
+.drawerContent {
+  background: var(--mantine-color-dark-7);
+}
+
+.page {
+  min-height: calc(100dvh - var(--app-shell-header-offset, 0rem) - 2 * var(--app-shell-padding));
+  justify-content: space-between;
+}

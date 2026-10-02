@@ -1,0 +1,9 @@
+.title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--mantine-color-dark-0);
+}

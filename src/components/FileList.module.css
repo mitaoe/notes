@@ -1,0 +1,11 @@
+.loading {
+  min-height: 200px;
+}
+
+.loadMoreRow {
+  min-height: 36px;
+}
+
+.loadMore {
+  min-width: 140px;
+}

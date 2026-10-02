@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "react", "import", "jsx-a11y", "vitest"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "error",
+    "perf": "error"
+  },
+  "options": {
+    "typeAware": true,
+    "typeCheck": true,
+    "denyWarnings": true,
+    "reportUnusedDisableDirectives": "error"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "import/no-unassigned-import": [
+      "error",
+      { "allow": ["**/*.css", "@testing-library/jest-dom/vitest"] }
+    ],
+    "import/no-default-export": "error",
+    "typescript/no-explicit-any": "error",
+    "typescript/no-non-null-assertion": "error",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/only-export-components": ["error", { "allowConstantExport": true }]
+  },
+  "overrides": [
+    {
+      "files": ["vite.config.ts", "playwright.config.ts", "src/tabler-icons.d.ts"],
+      "rules": { "import/no-default-export": "off" }
+    },
+    {
+      "files": ["src/components/FilePreview.tsx"],
+      "rules": { "react/iframe-missing-sandbox": "off" }
+    }
+  ],
+  "ignorePatterns": ["dist", "playwright-report", "test-results"]
+}

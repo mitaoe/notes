@@ -1,0 +1,9 @@
+.primary {
+  background-color: var(--mantine-color-blue-6);
+  color: var(--mantine-color-white);
+  font-weight: 500;
+
+  &:hover {
+    background-color: var(--mantine-color-blue-7);
+  }
+}
