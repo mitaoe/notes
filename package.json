@@ -17,8 +17,8 @@
     "playwright:wait": "node scripts/wait-for-playwright-server.ts"
   },
   "dependencies": {
-    "@mantine/core": "9.6.3",
-    "@mantine/hooks": "9.6.3",
+    "@mantine/core": "9.7.2",
+    "@mantine/hooks": "9.7.2",
     "@tabler/icons-react": "^3.49.0",
     "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
