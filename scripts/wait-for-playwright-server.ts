@@ -2,7 +2,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 import { BROWSER_SERVER_URL } from '../e2e/support/browser-server.ts';
 
-const WAIT_LIMIT_MS = 180_000;
+const WAIT_LIMIT_MS = 900_000;
 const RETRY_DELAY_MS = 2_000;
 
 const isUp = () =>
