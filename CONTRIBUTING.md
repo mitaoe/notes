@@ -23,11 +23,13 @@ pnpm install
 cp .env.example .env
 ```
 
-Fill in `.env` with a Google OAuth client and refresh token that can read the Drive, then:
+Fill in `.env` with your own Google OAuth client and a refresh token for your Google account, then:
 
 ```bash
 pnpm dev            # http://localhost:5173, the app and the API functions together
 ```
+
+The site then lists that account's My Drive, and search covers every Drive the account can read. Browsing and search need only Drive read access. Downloading or previewing a file also shares it with anyone who has the link, as the live site does, which needs the full `https://www.googleapis.com/auth/drive` scope; use an account whose files you are happy to share that way.
 
 The checks below run against an in-memory Drive and a mocked API, so they need no credentials.
 
@@ -43,8 +45,11 @@ pnpm build
 
 ```bash
 pnpm playwright:server   # in a second terminal, starts the Playwright browser in Docker
+pnpm playwright:wait     # waits until that browser accepts connections
 pnpm test:e2e            # builds the app and runs the visual and navigation tests
 ```
+
+The first `pnpm playwright:server` downloads the Playwright Docker image, so it can take several minutes before `pnpm playwright:wait` returns.
 
 All of them must pass with no warnings. CI runs them on every pull request to `main`, in two jobs, Checks and End-to-end, and both are required to merge.
 
@@ -52,13 +57,14 @@ The visual baselines in `e2e/__screenshots__` are the reference for how the site
 
 ## Issues
 
-Open an issue before you start work, describing the problem or the feature. Changes to the UI are agreed in the issue first; the current UI is the reference.
+Open an issue before you start work, one for each concern, describing the problem or the feature. Changes to the UI are agreed in the issue first; the current UI is the reference.
 
 ## Pull requests
 
-- Fork the repository, branch from `main` and keep each pull request to one change.
+- Fork the repository and branch from `main`. Keep a pull request focused; it may resolve several related issues.
 - Titles follow Conventional Commits with a scope, for example `fix(files): stop list wrapper creating a scrollbar`.
-- Branch names, commit messages and the description follow [Git and pull requests](AGENTS.md#git-and-pull-requests) in AGENTS.md. Link the issue with `Closes #N` in the description.
-- A UI change updates the visual baselines with `pnpm test:e2e --update-snapshots`, so the changed images in the pull request show the before and after. Say in the description which ones changed and why.
+- Branch names, commit messages and the description follow [Git and pull requests](AGENTS.md#git-and-pull-requests) in AGENTS.md.
+- A UI change updates the visual baselines with `pnpm test:e2e --update-snapshots`, so the changed images in the pull request show the before and after. Say under What this changes which ones changed and why.
 - CI on a pull request from anyone who is not a collaborator on the repository waits until a maintainer approves the run.
-- A maintainer reviews the pull request and squash-merges it once Checks and End-to-end pass, so it lands on `main` as one commit.
+- A maintainer reviews the pull request and squash-merges it once Checks and End-to-end pass. Squash is the only merge method the repository and its ruleset allow, with the title as the commit subject on `main` and a blank body.
+- Issues and pull requests with no activity for 7 days are labelled `stale` and closed 30 days later; a comment removes the label at the next run. Items labelled `pinned`, `security`, `help wanted` or `good first issue` are never marked, and neither are pull requests labelled `dependencies`, which Dependabot adds to its own.
