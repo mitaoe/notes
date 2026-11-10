@@ -1,6 +1,6 @@
-# Contributing guide
+# Conventions
 
-This file defines how the repository is organised and the conventions every change follows, for people and for coding agents alike. Read [ARCHITECTURE.md](ARCHITECTURE.md) first for how the pieces fit together.
+This file defines how the repository is organised and the conventions every change follows, for people and for coding agents alike. Read [ARCHITECTURE.md](ARCHITECTURE.md) first for how the pieces fit together, and [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution process, from setup to a merged pull request.
 
 ## Before you finish a change
 
@@ -97,7 +97,7 @@ One component per file. A file exports the things it is named after, plus the ty
 - Unit-test behaviour, not implementation: inputs and outputs of helpers, what a component renders and what it calls back with.
 - API tests use the in-memory Drive in `api/_tests/fake-google.ts`. Component tests render through `renderWithProviders` in `src/test/render.tsx`. Mocks are typed (`vi.fn<Signature>()`).
 - End-to-end tests only use the mocked API from `e2e/support/mock-api.ts` and the data in `e2e/fixtures/drive.ts`. Add fixture data rather than special-casing a test.
-- The visual baselines are the specification of the UI. A change that is not meant to alter the UI must pass them untouched. When a change is meant to alter it, update them with `pnpm test:e2e --update-snapshots`, look at every changed image, and say so in the pull request.
+- The visual baselines are the specification of the UI. A change that is not meant to alter the UI must pass them untouched. When a change is meant to alter it, update them with `pnpm test:e2e --update-snapshots`, look at every changed image, and say so under What this changes.
 - Tests that only make sense on one viewport are tagged `@desktop-only` or `@mobile-only`, and the Playwright projects filter on those tags.
 
 ## Dependencies
@@ -108,7 +108,8 @@ One component per file. A file exports the things it is named after, plus the ty
 
 ## Git and pull requests
 
-- Branch names are `<type>/<short-slug>`, for example `fix/search-paging`.
+- Each concern has its own issue, opened before the work starts. A pull request may resolve several related issues. When one change is split over several pull requests, only the last one uses `Closes`; the earlier ones say `Part of #N`.
+- Branch names are `<username>/<short-slug>`, for example `adityakotkar47/search-paging`.
 - Commits follow Conventional Commits: `type(scope): description`, imperative, at most 50 characters, subject only. Types: `feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`.
-- Pull requests are squash-merged, so the branch's final state is what has to pass the checks above. Keep commits small and focused anyway, so the review can follow them one at a time.
-- Pull request titles use the same prefix with a readable summary. The description has a Description section with the context and a list of the changes, then Behaviour changes, Verification and References where they apply.
+- Pull requests are squash-merged with the title as the commit subject and no body, so the branch's final state is what has to pass the checks above and the title follows the commit rules. Keep commits small and focused anyway, so the review can follow them one at a time.
+- Pull request titles use the same prefix with a readable summary. The description has four sections, in order: Overview, What this changes, Not addressed here and Verification, followed by one `Closes #N` line for each issue it resolves.
