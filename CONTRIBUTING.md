@@ -61,19 +61,25 @@ Open an issue before you start work, one for each concern, describing the proble
 
 ## Pull requests
 
-Start each change on a branch from the latest `main`:
+Start each change on a new branch from the latest `main`:
 
 ```bash
 git fetch upstream
-git switch -c <your-username>/<short-slug> upstream/main
+git switch -c <username>/<short-slug> upstream/main
 ```
 
-A branch created from `upstream/main` tracks upstream, so push it to your fork the first time with `git push -u origin HEAD`. To pick up newer changes on `main`, run `git fetch upstream` and `git rebase upstream/main`, then `git push --force-with-lease`, rather than merging `main` in.
+The new branch starts out tracking `upstream/main`, so a plain `git push` does not reach your fork. After your first commit, publish the branch to your fork:
+
+```bash
+git push -u origin HEAD
+```
+
+From then on, `git push` updates the branch and its pull request. To pick up newer changes on `main`, run `git fetch upstream` and `git rebase upstream/main`, then `git push --force-with-lease`, rather than merging `main` in.
 
 - Keep a pull request to one concern; it resolves several issues only when they are the same change.
-- Titles follow Conventional Commits with a scope, for example `fix(files): stop list wrapper creating a scrollbar`.
+- Titles follow [Conventional Commits](https://www.conventionalcommits.org/) with a scope, for example `fix(files): stop list wrapper creating a scrollbar`.
 - Branch names, commit messages and the description follow [Git and pull requests](AGENTS.md#git-and-pull-requests) in AGENTS.md. The description has four sections, in order: Overview, which ends with one `Closes #N` line for each issue it resolves, What this changes, Not addressed here and Verification.
 - A UI change updates the visual baselines with `pnpm test:e2e --update-snapshots`, so the changed images in the pull request show the before and after. Say under What this changes which ones changed and why.
 - CI on a pull request from anyone outside the mitaoe organisation who is not a collaborator on the repository waits until a maintainer approves it.
-- A maintainer reviews the pull request and squash-merges it once Checks and End-to-end pass. Squash is the only merge method the repository and its `main` ruleset allow, with the pull request title as the commit subject and a blank body.
+- A maintainer reviews the pull request and squash-merges it once Checks and End-to-end pass. Squash is the only merge method the repository and its `main` ruleset allow. The pull request title becomes the commit subject on `main` and the commit body is left blank, so the title has to describe everything the pull request does.
 - Issues and pull requests with no activity for 7 days are labelled `stale` and closed 30 days later; a comment removes the label at the next run. Items labelled `pinned`, `security`, `help wanted` or `good first issue` are never marked or closed, and neither are pull requests labelled `dependencies`, which Dependabot adds to its own. If one of these labels is added to an item that is already `stale`, the `stale` label stays until it is removed by hand.
