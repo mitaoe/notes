@@ -6,8 +6,6 @@ afterEach(() => {
   cleanup();
 });
 
-const getComputedStyle = window.getComputedStyle.bind(window);
-window.getComputedStyle = (element) => getComputedStyle(element);
 window.HTMLElement.prototype.scrollIntoView = () => {};
 
 Object.defineProperty(window, 'matchMedia', {
