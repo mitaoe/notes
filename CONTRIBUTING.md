@@ -11,7 +11,7 @@ Thanks for helping students find their notes. This covers running the site local
 
 ## Setup
 
-Requires Node.js 24 and pnpm 11, as pinned in `package.json`, and Docker for the end-to-end tests.
+Requires Node.js 26 and pnpm 11, as pinned in `package.json`, and Docker for the end-to-end tests.
 
 Fork [mitaoe/notes](https://github.com/mitaoe/notes) on GitHub, then:
 
