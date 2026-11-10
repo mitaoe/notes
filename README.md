@@ -71,3 +71,4 @@ Run `pnpm playwright:server` in a separate terminal before `pnpm test:e2e`.
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) explains how the app, the API and the Drive fit together.
 - [AGENTS.md](AGENTS.md) defines the folder structure, file naming and conventions for contributors and coding agents.
+- [CONTRIBUTING.md](CONTRIBUTING.md) covers setting up, the checks and how an issue becomes a merged pull request.
