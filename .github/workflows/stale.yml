@@ -1,0 +1,31 @@
+name: Stale
+
+on:
+  schedule:
+    - cron: '0 0 * * 1,4'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: Stale
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Mark and close stale issues and pull requests
+        uses: actions/stale@v11
+        with:
+          days-before-stale: 7
+          days-before-close: 30
+          stale-issue-message: 'This issue is stale because it has been open 7 days with no activity. Remove stale label or comment or this will be closed in 30 days.'
+          close-issue-message: 'This issue was closed because it has been stalled for 30 days with no activity.'
+          stale-pr-message: 'This PR is stale because it has been open 7 days with no activity. Remove stale label or comment or this will be closed in 30 days.'
+          close-pr-message: 'This PR was closed because it has been stalled for 30 days with no activity.'
+          stale-issue-label: stale
+          stale-pr-label: stale
+          exempt-issue-labels: pinned,security,help wanted,good first issue
+          exempt-pr-labels: pinned,security,help wanted,good first issue,dependencies
+          operations-per-run: 100
