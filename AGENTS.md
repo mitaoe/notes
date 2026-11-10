@@ -108,8 +108,8 @@ One component per file. A file exports the things it is named after, plus the ty
 
 ## Git and pull requests
 
-- Each concern has its own issue, opened before the work starts. A pull request may resolve several related issues. When one change is split over several pull requests, only the last one uses `Closes`; the earlier ones say `Part of #N`.
+- Each concern has its own issue, opened before the work starts. A pull request resolves several issues only when they are the same change. When one change is split over several pull requests, only the last one uses `Closes`; the earlier ones say `Part of #N`.
 - Branch names are `<username>/<short-slug>`, for example `adityakotkar47/search-paging`.
 - Commits follow Conventional Commits: `type(scope): description`, imperative, at most 50 characters, subject only. Types: `feat`, `fix`, `perf`, `refactor`, `style`, `test`, `docs`, `build`, `ci`, `chore`.
-- Pull requests are squash-merged with the title as the commit subject and no body, so the branch's final state is what has to pass the checks above and the title follows the commit rules. Keep commits small and focused anyway, so the review can follow them one at a time.
-- Pull request titles use the same prefix with a readable summary. The description has four sections, in order: Overview, What this changes, Not addressed here and Verification, followed by one `Closes #N` line for each issue it resolves.
+- Pull requests are squash-merged with the title as the commit subject and no body, so the branch's final state is what has to pass the checks above and the title follows the commit rules. Dependabot's pull requests are the exception: they keep the titles it generates, which can be longer than 50 characters. Keep commits small and focused anyway, so the review can follow them one at a time.
+- Pull request titles use the same prefix with a readable summary. The description has four sections, in order: Overview, which ends with one `Closes #N` line for each issue it resolves, What this changes, Not addressed here and Verification.
