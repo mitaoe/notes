@@ -29,7 +29,7 @@ Fill in `.env` with your own Google OAuth client and a refresh token for your Go
 pnpm dev            # http://localhost:5173, the app and the API functions together
 ```
 
-The site then lists that account's My Drive, and search covers every Drive the account can read. Browsing and search need only Drive read access. Downloading or previewing a file also shares it with anyone who has the link, as the live site does, which needs the full `https://www.googleapis.com/auth/drive` scope; use an account whose files you are happy to share that way.
+The site then lists that account's My Drive, and search covers every Drive the account can read. Browsing and search need only Drive read access. Downloading or previewing a file that is not already public makes it viewable by anyone with the link, as the live site does, but only when the account can share it (`capabilities.canShare`). That needs the full `https://www.googleapis.com/auth/drive` scope, so use an account whose files you are happy to share that way.
 
 The checks below run against an in-memory Drive and a mocked API, so they need no credentials.
 
@@ -61,10 +61,19 @@ Open an issue before you start work, one for each concern, describing the proble
 
 ## Pull requests
 
-- Fork the repository and branch from `main`. Keep a pull request focused; it may resolve several related issues.
+Start each change on a branch from the latest `main`:
+
+```bash
+git fetch upstream
+git switch -c <your-username>/<short-slug> upstream/main
+```
+
+A branch created from `upstream/main` tracks upstream, so push it to your fork the first time with `git push -u origin HEAD`. To pick up newer changes on `main`, run `git fetch upstream` and `git rebase upstream/main`, then `git push --force-with-lease`, rather than merging `main` in.
+
+- Keep a pull request to one concern; it resolves several issues only when they are the same change.
 - Titles follow Conventional Commits with a scope, for example `fix(files): stop list wrapper creating a scrollbar`.
-- Branch names, commit messages and the description follow [Git and pull requests](AGENTS.md#git-and-pull-requests) in AGENTS.md.
+- Branch names, commit messages and the description follow [Git and pull requests](AGENTS.md#git-and-pull-requests) in AGENTS.md. The description has four sections, in order: Overview, which ends with one `Closes #N` line for each issue it resolves, What this changes, Not addressed here and Verification.
 - A UI change updates the visual baselines with `pnpm test:e2e --update-snapshots`, so the changed images in the pull request show the before and after. Say under What this changes which ones changed and why.
-- CI on a pull request from anyone who is not a collaborator on the repository waits until a maintainer approves the run.
-- A maintainer reviews the pull request and squash-merges it once Checks and End-to-end pass. Squash is the only merge method the repository and its ruleset allow, with the title as the commit subject on `main` and a blank body.
-- Issues and pull requests with no activity for 7 days are labelled `stale` and closed 30 days later; a comment removes the label at the next run. Items labelled `pinned`, `security`, `help wanted` or `good first issue` are never marked, and neither are pull requests labelled `dependencies`, which Dependabot adds to its own.
+- CI on a pull request from anyone outside the mitaoe organisation who is not a collaborator on the repository waits until a maintainer approves it.
+- A maintainer reviews the pull request and squash-merges it once Checks and End-to-end pass. Squash is the only merge method the repository and its `main` ruleset allow, with the pull request title as the commit subject and a blank body.
+- Issues and pull requests with no activity for 7 days are labelled `stale` and closed 30 days later; a comment removes the label at the next run. Items labelled `pinned`, `security`, `help wanted` or `good first issue` are never marked or closed, and neither are pull requests labelled `dependencies`, which Dependabot adds to its own; a `stale` label already on an item stays until it is removed by hand.
