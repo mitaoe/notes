@@ -27,7 +27,7 @@
   },
   "overrides": [
     {
-      "files": ["vite.config.ts", "playwright.config.ts", "src/tabler-icons.d.ts"],
+      "files": ["vite.config.ts", "playwright.config.ts"],
       "rules": { "import/no-default-export": "off" }
     },
     {
