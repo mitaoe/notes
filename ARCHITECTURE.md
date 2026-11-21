@@ -103,6 +103,7 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 ### Styling
 
 - Mantine provides the components and the theme (`src/theme.ts`). Everything else is a CSS module next to its component.
+- The theme sets `cursorType: 'pointer'`, so Mantine's buttons, icon buttons and links show the pointer cursor; Mantine's own default is the arrow. `e2e/theme.spec.ts` checks the cursor in the browser, since the screenshots do not capture it.
 - `src/styles/mantine.css` imports only the Mantine stylesheets the app uses, in the order Mantine's own bundle uses. `vite/mantine-css.test.ts` recomputes the required list from the components imported in `src/` and their internal dependencies, and fails when one is missing, unused or out of order.
 - `AppShell.Main` already fills the screen (`100dvh`), so `Layout` adds no height of its own there. Its page column is at least the screen height minus the header and the main area's top and bottom padding, which puts the footer at the bottom of a short page without making it scroll.
 - Colours come from the theme through Mantine CSS variables, with `alpha()` from postcss-preset-mantine for translucent ones.
@@ -118,6 +119,7 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 | Tooling guards           | `vite/*.test.ts`                  | Vitest, `node` project           |
 | Visual regression        | `e2e/visual.spec.ts`              | Playwright                       |
 | Navigation flows         | `e2e/navigation.spec.ts`          | Playwright                       |
+| Theme in the browser     | `e2e/theme.spec.ts`               | Playwright                       |
 
 - The API tests replace `fetch` with an in-memory Drive (`api/_tests/fake-google.ts`) that evaluates the `q` strings the functions build, so they exercise the real query building and parsing. Like Drive, it matches `name contains` against the start of the name or of any word in it, and it ignores case; the Drive docs show the word matching by example and do not specify case or where words split. The real Drive splits at `_` (see Queries above), and the fake splits on anything that is not a letter or digit.
 - The Playwright tests run against the production build with `/api/*` answered from a fixture tree (`e2e/fixtures/drive.ts`), so they need no credentials and always see the same data. Its search matches each whitespace-separated term against the start of a word, like the API fake. The download and preview mocks answer directly instead of redirecting to Drive: in this setup the browser follows a redirect from a mocked response without passing the target through the routes again, so it would load the real drive.google.com.
