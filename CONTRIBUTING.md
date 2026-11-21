@@ -46,7 +46,7 @@ pnpm build
 ```bash
 pnpm playwright:server   # in a second terminal, starts the Playwright browser in Docker
 pnpm playwright:wait     # waits until that browser accepts connections
-pnpm test:e2e            # builds the app and runs the visual and navigation tests
+pnpm test:e2e            # builds the app and runs the end-to-end tests
 ```
 
 The first `pnpm playwright:server` downloads the Playwright Docker image, so it can take several minutes before `pnpm playwright:wait` returns.

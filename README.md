@@ -63,7 +63,7 @@ pnpm dev
 | `pnpm test`              | Runs the unit and component tests with Vitest                    |
 | `pnpm playwright:server` | Starts the Playwright browser in Docker for the end-to-end tests |
 | `pnpm playwright:wait`   | Waits until that browser accepts connections (used by CI)        |
-| `pnpm test:e2e`          | Runs the visual and navigation tests against that browser        |
+| `pnpm test:e2e`          | Runs the end-to-end tests against that browser                   |
 
 Run `pnpm playwright:server` in a separate terminal before `pnpm test:e2e`.
 

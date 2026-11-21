@@ -33,4 +33,5 @@ export const theme = createTheme({
   colors: { dark, blue },
   fontFamily: FONT_FAMILY,
   headings: { fontFamily: FONT_FAMILY },
+  cursorType: 'pointer',
 });
