@@ -108,7 +108,7 @@ Every endpoint is a `GET` handler in `api/<name>.ts` built with `handleGet` from
 - `AppShell.Main` already fills the screen (`100dvh`), so `Layout` adds no height of its own there. Its page column is at least the screen height minus the header and the main area's top and bottom padding, which puts the footer at the bottom of a short page without making it scroll.
 - Colours come from the theme through Mantine CSS variables, with `alpha()` from postcss-preset-mantine for translucent ones.
 - `src/main.tsx` imports the Mantine styles before anything else. CSS modules override Mantine's classes at equal specificity only because they come later in the bundle.
-- Icons are re-exported from `src/icons.ts`, one module per icon, because importing from the `@tabler/icons-react` entry point makes the dev server send every icon to the browser.
+- Icons are re-exported from `src/icons.ts`, one module per icon through tabler's typed per-icon entry point `@tabler/icons-react/icons/<Icon>`, because importing from the `@tabler/icons-react` entry point makes the dev server send every icon to the browser.
 
 ## Testing
 
