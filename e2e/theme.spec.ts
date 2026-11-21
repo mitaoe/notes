@@ -14,3 +14,11 @@ test('buttons, icon buttons and links show the pointer cursor', async ({ page })
   await expect(page.getByRole('link', { name: 'fy', exact: true })).toHaveCSS('cursor', 'pointer');
   await expect(page.getByTitle('Download').first()).toHaveCSS('cursor', 'pointer');
 });
+
+test('the search icon shows the pointer cursor', { tag: '@desktop-only' }, async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Search', exact: true })).toHaveCSS(
+    'cursor',
+    'pointer',
+  );
+});

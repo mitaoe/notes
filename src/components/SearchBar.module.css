@@ -27,7 +27,6 @@
 .searchIcon {
   opacity: 0.6;
   transition: all 0.3s ease-in-out;
-  cursor: pointer;
   pointer-events: auto;
 
   &:hover {
